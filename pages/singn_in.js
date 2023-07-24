@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, StyleSheet } from 'react-native';
+import { View, TextInput, Button, StyleSheet, Image } from 'react-native';
 
 const SignInForm = () => {
   const [formData, setFormData] = useState({
@@ -18,6 +18,9 @@ const SignInForm = () => {
 
   return (
     <View style={styles.container}>
+      <View style={styles.imageContainer}>
+        <Image style={styles.image} source={require("../assets/KTSLogo.png")} />
+      </View>
       <TextInput
         style={styles.input}
         placeholder="Email"
@@ -43,6 +46,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 20,
   },
+  image:{
+    width:150,
+    height:150
+},
   input: {
     width: '100%',
     height: 40,
