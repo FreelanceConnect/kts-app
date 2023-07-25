@@ -1,5 +1,7 @@
 # kts-app
 
+### Note: Please skip 1 to 4 if you are working on the UI
+
 **Description**: A brief description of your project.
 
 ## Table of Contents
@@ -87,10 +89,10 @@ The backend resources will be created in your AWS account.
 
 ### Branching Strategy
 
-We follow the **feature branch** git flow for development. Create a new branch for each feature or bug fix using the following convention:
+We follow the **feature branch** git flow for development. Developers should create their feature branches from the `develop` branch using the following convention:
 
 ```bash
-git checkout -b feature/feature-name
+git checkout -b feature/feature-name develop
 ```
 
 ### Running the App
@@ -109,7 +111,7 @@ The app is automatically deployed to Expo for each merge into the `main` branch.
 
 ## Contributing
 
-Please follow the feature branch git flow and submit pull requests into the `main` branch. Ensure that your code follows the project's coding standards and includes appropriate tests where necessary.
+Please follow the feature branch git flow and submit pull requests into the `develop` branch. Ensure that your code follows the project's coding standards and includes appropriate tests where necessary.
 
 For any major changes or significant features, discuss with the team and open an issue before starting the implementation.
 
@@ -117,4 +119,6 @@ For any major changes or significant features, discuss with the team and open an
 
 This project is licensed under the [License Name](LICENSE).
 
----
+--- 
+
+In this modified version, I've updated the branching strategy to specify that developers should create their feature branches from the `develop` branch, which is a common practice in many development workflows like Gitflow. This helps keep the `main` branch stable and ready for production releases while developers work on their features in the `develop` branch.
