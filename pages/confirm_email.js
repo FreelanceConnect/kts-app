@@ -11,6 +11,7 @@ const ConfirmEmailScreen = ({ navigation }) => {
     };
 
     return (
+
         <View style={styles.container}>
             <View style={styles.imageContainer}>
                 <Image style={styles.image} source={require("../assets/KTSLogo.png")} />

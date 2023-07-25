@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Image } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Image, KeyboardAvoidingView, ScrollView} from 'react-native';
+
+import { Auth } from 'aws-amplify';
 
 const SignUpScreen = ({ navigation }) => {
     const [formData, setFormData] = useState({
@@ -16,10 +18,30 @@ const SignUpScreen = ({ navigation }) => {
         setFormData({ ...formData, [name]: value });
     };
 
-    const handleSignUp = () => {
+    const handleSignUp = async () => {
         // Perform signup logic here with the formData object
-        console.log(formData);
-        navigation.navigate("confirm_email")
+        const {firstName,lastName, phoneNumber, email, confirmEmail, password, confirmPassword } = formData;
+        Username=email;
+        try {
+            const { user } = await Auth.signUp({
+            Username,
+              password,
+              attributes: {
+                firstName,
+                lastName,          // optional
+                phoneNumber,   // optional - E.164 number convention
+                // other custom attributes 
+              },
+              autoSignIn: { // optional - enables auto sign in after user is confirmed
+                enabled: true,
+              }
+            });
+            console.log(user);
+            console.log(formData);
+            navigation.navigate("confirm_email")
+          } catch (error) {
+            console.log('error signing up:', error);
+          }
     };
 
     const navigate = () => {
@@ -28,7 +50,13 @@ const SignUpScreen = ({ navigation }) => {
 
 
     return (
-        <View style={styles.container}>
+
+    <KeyboardAvoidingView
+        behavior="padding"
+        style={{flex: 1}}>
+
+
+        <ScrollView style={styles.scrollView}>
 
            
                 <View style={styles.imageContainer}>
@@ -86,15 +114,14 @@ const SignUpScreen = ({ navigation }) => {
             <Button title="Sign Up" onPress={handleSignUp} />
             </View>
             <Text style={styles.text}>already have an account? <Text onPress={navigate} style={styles.textChild}>Sign In</Text></Text>
-        </View>
+        </ScrollView>
+     </KeyboardAvoidingView>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
-    
-       paddingHorizontal:20
-        
+       paddingHorizontal: 10
     },
     imageContainer:{
         display: 'flex',
@@ -117,7 +144,11 @@ const styles = StyleSheet.create({
     },
     textChild: {
         color: "skyblue"
-    }
+    },
+    scrollView: {
+        marginHorizontal: 20,
+        marginVertical: 150,
+      },
 });
 
 export default SignUpScreen;

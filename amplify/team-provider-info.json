@@ -10,6 +10,11 @@
       "StackName": "amplify-ktsapp-dev-115134",
       "StackId": "arn:aws:cloudformation:us-east-1:804464305247:stack/amplify-ktsapp-dev-115134/e77fb560-2946-11ee-8994-0aa20b2f190d",
       "AmplifyAppId": "d1cj6l4r8czdyh"
+    },
+    "categories": {
+      "auth": {
+        "ktsapp98be1a8e": {}
+      }
     }
   }
 }
