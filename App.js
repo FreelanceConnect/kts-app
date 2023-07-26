@@ -5,15 +5,12 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 
 
-// import { Amplify,  Auth } from 'aws-amplify';
-// import awsExports from './src/aws-exports';
-// Amplify.configure(awsExports);
+import { Amplify,  Auth } from 'aws-amplify';
+import awsExports from './src/aws-exports';
+Amplify.configure(awsExports);
 
-// Auth.configure(awsExports);
-
-import SignIn from './pages/singn_in';
-import SignUp from './pages/sign_up';
-import ConfirmEmailScreen from './pages/confirm_email';
+Auth.configure(awsExports);
+import AuthScreens from './pages/Welcome';
 
 
 export default function App() {
@@ -21,9 +18,9 @@ export default function App() {
   return (
   <NavigationContainer>
     <Stack.Navigator>
-      <Stack.Screen name="sign_Up" component={SignUp} />
-      <Stack.Screen  name="Sign_In" component={SignIn} /> 
-      <Stack.Screen name="confirm_email" component={ConfirmEmailScreen} />
+      <Stack.Screen name="Kids Transportation Service" component={AuthScreens} />
+      {/* <Stack.Screen  name="Sign_In" component={SignIn} /> 
+      <Stack.Screen name="confirm_email" component={ConfirmEmailScreen} /> */}
     </Stack.Navigator>
   </NavigationContainer>
   );
