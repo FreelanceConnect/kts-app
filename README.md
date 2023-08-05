@@ -122,3 +122,7 @@ This project is licensed under the [License Name](LICENSE).
 --- 
 
 In this modified version, I've updated the branching strategy to specify that developers should create their feature branches from the `develop` branch, which is a common practice in many development workflows like Gitflow. This helps keep the `main` branch stable and ready for production releases while developers work on their features in the `develop` branch.
+
+
+You have enabled SMS based auth workflow. Verify your SNS account mode in the SNS console: https://console.aws.amazon.com/sns/v3/home#/mobile/text-messaging
+If your account is in "Sandbox" mode, you can only send SMS messages to verified recipient phone numbers.

@@ -1,12 +1,10 @@
 {
   "version": "1",
   "cognitoConfig": {
-    "identityPoolName": "ktsapp98be1a8e_identitypool_98be1a8e",
-    "allowUnauthenticatedIdentities": false,
-    "resourceNameTruncated": "ktsapp98be1a8e",
-    "userPoolName": "ktsapp98be1a8e_userpool_98be1a8e",
+    "resourceNameTruncated": "ktsapp8bc2274a",
+    "userPoolName": "ktsapp8bc2274a_userpool_8bc2274a",
     "autoVerifiedAttributes": [
-      "email"
+      "phone_number"
     ],
     "mfaConfiguration": "OFF",
     "mfaTypes": [
@@ -20,29 +18,33 @@
     "passwordPolicyMinLength": 8,
     "passwordPolicyCharacters": [],
     "requiredAttributes": [
-      "email"
+      "phone_number"
     ],
     "aliasAttributes": [],
     "userpoolClientGenerateSecret": false,
-    "userpoolClientRefreshTokenValidity": 30,
+    "userpoolClientRefreshTokenValidity": "150",
     "userpoolClientWriteAttributes": [
       "email"
     ],
     "userpoolClientReadAttributes": [
       "email"
     ],
-    "userpoolClientLambdaRole": "ktsapp98be1a8e_userpoolclient_lambda_role",
+    "userpoolClientLambdaRole": "ktsapp8bc2274a_userpoolclient_lambda_role",
     "userpoolClientSetAttributes": false,
-    "sharedId": "98be1a8e",
-    "resourceName": "ktsapp98be1a8e",
-    "authSelections": "identityPoolAndUserPool",
-    "useDefault": "default",
+    "sharedId": "8bc2274a",
+    "resourceName": "ktsapp8bc2274a8bc2274a",
+    "authSelections": "userPoolOnly",
+    "useDefault": "manual",
     "usernameAttributes": [
-      "email"
+      "phone_number"
     ],
+    "userPoolGroups": false,
+    "adminQueries": false,
+    "triggers": {},
+    "hostedUI": false,
     "userPoolGroupList": [],
     "serviceName": "Cognito",
     "usernameCaseSensitive": false,
     "useEnabledMfas": true
   }
-}  
+}
