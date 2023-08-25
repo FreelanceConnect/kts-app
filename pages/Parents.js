@@ -2,22 +2,20 @@ import React, {useState} from 'react';
 import { Button, StyleSheet, Text, View, TextInput, Image, ScrollView } from 'react-native';
 
 import { Amplify, API } from 'aws-amplify';
-import {Picker} from '@react-native-picker/picker';
+
+import MyAppLogo from '../components/Logo';
 import {
   Authenticator,
   useAuthenticator,
   useTheme,
 } from '@aws-amplify/ui-react-native';
 
-import Parents from './Parents'
-import MyAppLogo from '../components/Logo';
-
 function SignOutButton() {
   const { signOut } = useAuthenticator();
   return <Button onPress={signOut} title="Sign Out" />;
 }
 
-function App({ navigation }) {
+function Parents({ navigation }) {
   const {
     tokens: { colors },
   } = useTheme();
@@ -70,24 +68,63 @@ function App({ navigation }) {
   };
 
   return (
-    <Authenticator.Provider>
-      <Authenticator
-        // will wrap every subcomponent
-        Container={(props) => (
-          // reuse default `Container` and apply custom background
-          <Authenticator.Container
-            {...props}
-          />
-        )}
-        // will render on every subcomponent
-        Header={MyAppLogo}
-      >
+    <ScrollView>
+    <View style={styles.container}>
 
-      <Parents />
+    <View style={styles.imageContainer}>
+      <Image style={styles.image} source={require("../assets/KTSLogo.png")} />
+    </View>
 
+      <Text style={styles.textField}>Please enter your information here</Text>
+      <Text style={styles.label}>Name</Text>
+      <TextInput
+        style={styles.input}
+        onChangeText={(value) => handleChange('name', value)}
+        value={formData.name}
+        placeholder="Enter Your name"
+      />
+      <Text style={styles.label}>Email</Text>
+      <TextInput
+        style={styles.input}
+        onChangeText={(value) => handleChange('email', value)}
+        value={formData.email}
+        placeholder="Enter Your Email"
+      />
+      <Text style={styles.label}>Address</Text>
+      <TextInput
+        style={styles.input}
+        onChangeText={(value) => handleChange('address', value)}
+        value={formData.address}
+        placeholder="Enter Your Address"
+      />
+      <Text style={styles.label}>City</Text>
+      <TextInput
+        style={styles.input}
+        onChangeText={(value) => handleChange('city', value)}
+        value={formData.city}
+        placeholder="Enter Your City"
+      />
+      <Text style={styles.label}>Region</Text>
+      <TextInput
+        style={styles.input}
+        onChangeText={(value) => handleChange('region', value)}
+        value={formData.region}
+        placeholder="Enter Your Region"
+      />
+     <Text style={styles.label}>Country</Text>
+      <TextInput
+        style={styles.input}
+        onChangeText={(value) => handleChange('country', value)}
+        value={formData.country}
+        placeholder="Enter Your Country"
+      />
 
-      </Authenticator>
-    </Authenticator.Provider>
+      <Button title="Submit" onPress={handleSubmit} />
+        <View style={style.container}>
+          <SignOutButton />
+        </View>
+    </View>
+    </ScrollView>
   );
 }
 
@@ -131,4 +168,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default App;
+export default Parents;

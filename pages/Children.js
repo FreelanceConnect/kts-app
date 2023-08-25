@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Button, StyleSheet, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Button, StyleSheet, Image, ScrollView } from 'react-native';
 
 const Children = () => {
   const [inputFields, setInputFields] = useState([{ id: 1, value: '' }]);
   const [transportPlan, setTransportPlan] = useState('');
+  const [additionalFields, setAdditionalFields] = useState({
+    homeAddress: '',
+    school: ''
+  });
 
   const handleInputChange = (id, text) => {
     const updatedFields = inputFields.map(field => {
@@ -32,17 +36,27 @@ const Children = () => {
     setTransportPlan(text);
   };
 
+  const handleAdditionalFieldChange = (fieldName, text) => {
+    setAdditionalFields(prevState => ({
+      ...prevState,
+      [fieldName]: text
+    }));
+  };
+
   const handleSubmit = () => {
     // Perform form submission logic here
     console.log('Submitted Input Fields:', inputFields);
     console.log('Selected Transport Plan:', transportPlan);
+    console.log('Home Address:', additionalFields.homeAddress);
+    console.log('School:', additionalFields.school);
   };
 
   return (
+  <ScrollView>
     <View style={styles.container}>
-        <View style={styles.imageContainer}>
-      <Image style={styles.image} source={require("../assets/KTSLogo.png")} />
-    </View>
+      <View style={styles.imageContainer}>
+        <Image style={styles.image} source={require("../assets/KTSLogo.png")} />
+      </View>
 
       <Text style={styles.textField}>Please enter your information here</Text>
       {inputFields.map(field => (
@@ -71,8 +85,23 @@ const Children = () => {
         placeholder="Enter transport plan"
       />
 
+      <TextInput
+        style={styles.additionalFieldInput}
+        onChangeText={(text) => handleAdditionalFieldChange('homeAddress', text)}
+        value={additionalFields.homeAddress}
+        placeholder="Enter home address"
+      />
+
+      <TextInput
+        style={styles.additionalFieldInput}
+        onChangeText={(text) => handleAdditionalFieldChange('school', text)}
+        value={additionalFields.school}
+        placeholder="Enter school"
+      />
+
       <Button title="Submit" onPress={handleSubmit} />
     </View>
+  </ScrollView>
   );
 };
 
@@ -119,15 +148,21 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     paddingHorizontal: 10,
   },
-    imageContainer:{
+  additionalFieldInput: {
+    height: 40,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    marginBottom: 10,
+    paddingHorizontal: 10,
+  },
+  imageContainer: {
     display: 'flex',
     justifyContent: 'center',
-    alignItems:'center'
-    },
-    image:{
-    width:150,
-    height:150
-    },
+    alignItems: 'center'
+  },
+  image: {
+    width: 150,
+    height: 150    },
 });
 
 export default Children;

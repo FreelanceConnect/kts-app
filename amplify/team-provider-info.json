@@ -9,11 +9,29 @@
       "UnauthRoleName": "amplify-ktsapp-dev-115134-unauthRole",
       "StackName": "amplify-ktsapp-dev-115134",
       "StackId": "arn:aws:cloudformation:us-east-1:804464305247:stack/amplify-ktsapp-dev-115134/e77fb560-2946-11ee-8994-0aa20b2f190d",
-      "AmplifyAppId": "d1cj6l4r8czdyh"
+      "AmplifyAppId": "d1cj6l4r8czdyh",
+      "APIGatewayAuthURL": "https://s3.amazonaws.com/amplify-ktsapp-dev-115134-deployment/amplify-cfn-templates/api/APIGatewayAuthStack.json"
     },
     "categories": {
       "auth": {
         "ktsapp8bc2274a8bc2274a": {}
+      },
+      "function": {
+        "ktsapp37bd30f2": {
+          "deploymentBucketName": "amplify-ktsapp-dev-115134-deployment",
+          "s3Key": "amplify-builds/ktsapp37bd30f2-45576a5a7a584b454c54-build.zip"
+        },
+        "students": {
+          "deploymentBucketName": "amplify-ktsapp-dev-115134-deployment",
+          "s3Key": "amplify-builds/students-3649456d79616a337376-build.zip"
+        }
+      },
+      "storage": {
+        "dynamo3a282170": {},
+        "students": {}
+      },
+      "api": {
+        "parents": {}
       }
     }
   }

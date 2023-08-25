@@ -1,4 +1,28 @@
 {
+  "api": {
+    "parents": {
+      "dependsOn": [
+        {
+          "attributes": [
+            "Name",
+            "Arn"
+          ],
+          "category": "function",
+          "resourceName": "ktsapp37bd30f2"
+        },
+        {
+          "attributes": [
+            "Name",
+            "Arn"
+          ],
+          "category": "function",
+          "resourceName": "students"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "API Gateway"
+    }
+  },
   "auth": {
     "ktsapp8bc2274a8bc2274a": {
       "customAuth": false,
@@ -25,6 +49,90 @@
       },
       "providerPlugin": "awscloudformation",
       "service": "Cognito"
+    }
+  },
+  "function": {
+    "ktsapp37bd30f2": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributeEnvMap": {
+            "Arn": "TABLE_ARN",
+            "Name": "TABLE_NAME"
+          },
+          "attributes": [
+            "Name",
+            "Arn"
+          ],
+          "category": "storage",
+          "resourceName": "dynamo3a282170"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "students": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributeEnvMap": {
+            "Arn": "TABLE_ARN",
+            "Name": "TABLE_NAME"
+          },
+          "attributes": [
+            "Name",
+            "Arn"
+          ],
+          "category": "storage",
+          "resourceName": "students"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    }
+  },
+  "parameters": {
+    "AMPLIFY_function_ktsapp37bd30f2_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "ktsapp37bd30f2"
+        }
+      ]
+    },
+    "AMPLIFY_function_ktsapp37bd30f2_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "ktsapp37bd30f2"
+        }
+      ]
+    },
+    "AMPLIFY_function_students_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "students"
+        }
+      ]
+    },
+    "AMPLIFY_function_students_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "students"
+        }
+      ]
+    }
+  },
+  "storage": {
+    "dynamo3a282170": {
+      "providerPlugin": "awscloudformation",
+      "service": "DynamoDB"
+    },
+    "students": {
+      "providerPlugin": "awscloudformation",
+      "service": "DynamoDB"
     }
   }
 }

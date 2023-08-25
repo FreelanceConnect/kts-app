@@ -1,6 +1,8 @@
 {
   "version": "1",
   "cognitoConfig": {
+    "identityPoolName": "ktsapp8bc2274a8bc2274a_identitypool_e6651d49",
+    "allowUnauthenticatedIdentities": false,
     "resourceNameTruncated": "ktsapp8bc2274a",
     "userPoolName": "ktsapp8bc2274a_userpool_8bc2274a",
     "autoVerifiedAttributes": [
@@ -33,7 +35,7 @@
     "userpoolClientSetAttributes": false,
     "sharedId": "8bc2274a",
     "resourceName": "ktsapp8bc2274a8bc2274a",
-    "authSelections": "userPoolOnly",
+    "authSelections": "identityPoolAndUserPool",
     "useDefault": "manual",
     "usernameAttributes": [
       "phone_number"
@@ -45,6 +47,20 @@
     "userPoolGroupList": [],
     "serviceName": "Cognito",
     "usernameCaseSensitive": false,
-    "useEnabledMfas": true
+    "useEnabledMfas": true,
+    "authRoleArn": {
+      "Fn::GetAtt": [
+        "AuthRole",
+        "Arn"
+      ]
+    },
+    "unauthRoleArn": {
+      "Fn::GetAtt": [
+        "UnauthRole",
+        "Arn"
+      ]
+    },
+    "breakCircularDependency": true,
+    "dependsOn": []
   }
 }

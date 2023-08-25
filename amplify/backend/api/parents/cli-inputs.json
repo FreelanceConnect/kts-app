@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "paths": {
+    "/parents": {
+      "name": "/parents",
+      "lambdaFunction": "ktsapp37bd30f2",
+      "permissions": {
+        "setting": "private",
+        "auth": [
+          "create",
+          "read",
+          "update",
+          "delete"
+        ]
+      }
+    },
+    "/students": {
+      "name": "/students",
+      "lambdaFunction": "students",
+      "permissions": {
+        "setting": "private",
+        "auth": [
+          "create",
+          "read",
+          "update",
+          "delete"
+        ]
+      }
+    }
+  }
+}
