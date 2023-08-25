@@ -1,7 +1,7 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import { Button, StyleSheet, Text, View, TextInput, Image, ScrollView } from 'react-native';
 
-import { Amplify, API } from 'aws-amplify';
+import { Amplify, API, Auth } from 'aws-amplify';
 import {Picker} from '@react-native-picker/picker';
 import {
   Authenticator,
@@ -18,12 +18,40 @@ function SignOutButton() {
 }
 
 function App({ navigation }) {
-  const {
-    tokens: { colors },
-  } = useTheme();
+  const [username, setUsername] = useState('');
+  const [parentExist, setParentExist] = useState(false);
   const apiName = 'parents'; // replace this with your api name.
   const path = '/parents';
   const [selectedLanguage, setSelectedLanguage] = useState();
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const user = await Auth.currentUserInfo();
+        setUsername(user.attributes.phone_number);
+
+                      // Send the request to the Lambda function
+            API.get(apiName, path, { queryStringParameters: {parent_id: "KTS-C0002"} })
+            .then(response => {
+              // Handle the response from the Lambda function
+              console.log('Response:', response);
+              // Process the response data as needed
+            })
+            .catch(error => {
+              // Handle any errors
+              console.error('Error:', error);
+            });
+
+      } catch (error) {
+        console.log('Error fetching user data:', error);
+      }
+    };
+
+    fetchUserData();
+  },[]);
+
+  const {
+    tokens: { colors },
+  } = useTheme();
 
   const [formData, setFormData] = useState({
     name: '',
@@ -82,10 +110,8 @@ function App({ navigation }) {
         // will render on every subcomponent
         Header={MyAppLogo}
       >
-
-      <Parents />
-
-
+      <Text> {username}</Text>
+      <Parents/>
       </Authenticator>
     </Authenticator.Provider>
   );
