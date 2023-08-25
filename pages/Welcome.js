@@ -22,24 +22,39 @@ function App({ navigation }) {
   const [parentExist, setParentExist] = useState(false);
   const apiName = 'parents'; // replace this with your api name.
   const path = '/parents';
+  const myInit = {
+  headers: {}, // OPTIONAL
+  response: false, // OPTIONAL (return the entire Axios response object instead of only response.data)
+  queryStringParameters: {
+    parent_id: 'KTS-C0002', // OPTIONAL
+  }
+};
   const [selectedLanguage, setSelectedLanguage] = useState();
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         const user = await Auth.currentUserInfo();
-        setUsername(user.attributes.phone_number);
 
-                      // Send the request to the Lambda function
-            API.get(apiName, path, { queryStringParameters: {parent_id: "KTS-C0002"} })
-            .then(response => {
-              // Handle the response from the Lambda function
-              console.log('Response:', response);
-              // Process the response data as needed
-            })
-            .catch(error => {
-              // Handle any errors
-              console.error('Error:', error);
-            });
+        setUsername(user.attributes.phone_number);
+        console.log(user.attributes.phone_number)
+
+        // Remove the leading "+" sign and any non-numeric characters
+        const cleanedNumber = user.attributes.phone_number.replace(/\D/g, '');
+
+        // Get the first part of the cleaned number
+        const firstPart = cleanedNumber.substring(0, 3);
+
+        // Construct the ID using the specified format
+        const userID = `KTS-P-${cleanedNumber}`;
+        console.log(userID);
+
+         API.get(apiName, path, myInit)
+          .then((response) => {
+            // Add your code here
+          })
+          .catch((error) => {
+            console.log(error);
+          });
 
       } catch (error) {
         console.log('Error fetching user data:', error);
@@ -110,7 +125,6 @@ function App({ navigation }) {
         // will render on every subcomponent
         Header={MyAppLogo}
       >
-      <Text> {username}</Text>
       <Parents/>
       </Authenticator>
     </Authenticator.Provider>
