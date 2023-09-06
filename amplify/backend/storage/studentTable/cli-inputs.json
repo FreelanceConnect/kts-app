@@ -1,8 +1,8 @@
 {
-  "resourceName": "students",
-  "tableName": "students",
+  "resourceName": "studentTable",
+  "tableName": "studentTable",
   "partitionKey": {
-    "fieldName": "students_id",
+    "fieldName": "student_id",
     "fieldType": "string"
   },
   "sortKey": {

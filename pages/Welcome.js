@@ -3,6 +3,7 @@ import { Button, StyleSheet, Text, View, TextInput, Image, ScrollView } from 're
 
 import { Amplify, API, Auth } from 'aws-amplify';
 import {Picker} from '@react-native-picker/picker';
+import { useAppContext } from '../src/AppContext';
 import {
   Authenticator,
   useAuthenticator,
@@ -18,99 +19,35 @@ function SignOutButton() {
 }
 
 function App({ navigation }) {
-  const [username, setUsername] = useState('');
-  const [parentExist, setParentExist] = useState(false);
-  const apiName = 'parents'; // replace this with your api name.
-  const path = '/parents';
-  const myInit = {
-  headers: {}, // OPTIONAL
-  response: false, // OPTIONAL (return the entire Axios response object instead of only response.data)
-  queryStringParameters: {
-    parent_id: 'KTS-C0002', // OPTIONAL
-  }
-};
-  const [selectedLanguage, setSelectedLanguage] = useState();
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const user = await Auth.currentUserInfo();
+      const [username, setUsername] = useState('');
+      const [parentExist, setParentExist] = useState(false);
+      const [selectedLanguage, setSelectedLanguage] = useState();
+      const [parentId, setParentId] = useState();
 
-        setUsername(user.attributes.phone_number);
-        console.log(user.attributes.phone_number)
+      const { data, setData } = useAppContext();
 
-        // Remove the leading "+" sign and any non-numeric characters
-        const cleanedNumber = user.attributes.phone_number.replace(/\D/g, '');
+    useEffect(() => {
+      const fetchUserData = async () => {
+        try {
+            const user = await Auth.currentUserInfo();
+            setUsername(user.attributes.phone_number);
+            // Remove the leading "+" sign and any non-numeric characters
+            const cleanedNumber = user.attributes.phone_number.replace(/\D/g, '');
+            // Get the first part of the cleaned number
+            const firstPart = cleanedNumber.substring(0, 3);
+            const userID = `KTS-P-${cleanedNumber}`;
+            setParentId(userID);
+          } catch (error) {
+            console.log('Error fetching user data:', error);
+          }
+         };
 
-        // Get the first part of the cleaned number
-        const firstPart = cleanedNumber.substring(0, 3);
+        fetchUserData();
+      },[]);
 
-        // Construct the ID using the specified format
-        const userID = `KTS-P-${cleanedNumber}`;
-        console.log(userID);
-
-         API.get(apiName, path, myInit)
-          .then((response) => {
-            // Add your code here
-          })
-          .catch((error) => {
-            console.log(error);
-          });
-
-      } catch (error) {
-        console.log('Error fetching user data:', error);
-      }
-    };
-
-    fetchUserData();
-  },[]);
-
-  const {
-    tokens: { colors },
-  } = useTheme();
-
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    address: '',
-    city: '',
-    region: '',
-    country: ''
-  });
-
-  const handleChange = (field, value) => {
-    setFormData({...formData, [field]: value});
-  };
-
-  const handleSubmit = () => {
-    // Perform form submission logic here
-    // https://uybltsr7wg.execute-api.us-east-1.amazonaws.com/dev/parents
-    let parent_id = 'KTS-C0002'
-    const {name, email, address, city, region, country} = formData;
-    const myInit = {
-      body: {
-        parent_id: parent_id,
-        name: name,
-        email: email,
-        address: address,
-        city: city,
-        region: region,
-        country: country,
-
-      }, // replace this with attributes you need
-      headers: {} // OPTIONAL
-    };
-
-    API.post(apiName, path, myInit)
-      .then((response) => {
-        // Add your code here
-        console.log("POST on DB")
-        navigation.navigate("children")
-      })
-      .catch((error) => {
-        console.log(error.response);
-      });
-    console.log(formData);
-  };
+      const {
+        tokens: { colors },
+      } = useTheme();
 
   return (
     <Authenticator.Provider>
@@ -125,7 +62,7 @@ function App({ navigation }) {
         // will render on every subcomponent
         Header={MyAppLogo}
       >
-      <Parents/>
+      <Parents userId={parentId}/>
       </Authenticator>
     </Authenticator.Provider>
   );
@@ -150,7 +87,6 @@ const styles = StyleSheet.create({
   input: {
     height: 40,
     borderColor: '#ccc',
-    borderRadius: '2',
     borderWidth: 2,
     marginBottom: 10,
     paddingHorizontal: 10,

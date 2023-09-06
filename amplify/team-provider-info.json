@@ -1,37 +1,37 @@
 {
   "dev": {
     "awscloudformation": {
-      "AuthRoleName": "amplify-ktsapp-dev-115134-authRole",
-      "UnauthRoleArn": "arn:aws:iam::804464305247:role/amplify-ktsapp-dev-115134-unauthRole",
-      "AuthRoleArn": "arn:aws:iam::804464305247:role/amplify-ktsapp-dev-115134-authRole",
+      "AuthRoleName": "amplify-ktsapps-dev-192318-authRole",
+      "UnauthRoleArn": "arn:aws:iam::804464305247:role/amplify-ktsapps-dev-192318-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::804464305247:role/amplify-ktsapps-dev-192318-authRole",
       "Region": "us-east-1",
-      "DeploymentBucketName": "amplify-ktsapp-dev-115134-deployment",
-      "UnauthRoleName": "amplify-ktsapp-dev-115134-unauthRole",
-      "StackName": "amplify-ktsapp-dev-115134",
-      "StackId": "arn:aws:cloudformation:us-east-1:804464305247:stack/amplify-ktsapp-dev-115134/e77fb560-2946-11ee-8994-0aa20b2f190d",
-      "AmplifyAppId": "d1cj6l4r8czdyh",
-      "APIGatewayAuthURL": "https://s3.amazonaws.com/amplify-ktsapp-dev-115134-deployment/amplify-cfn-templates/api/APIGatewayAuthStack.json"
+      "DeploymentBucketName": "amplify-ktsapps-dev-192318-deployment",
+      "UnauthRoleName": "amplify-ktsapps-dev-192318-unauthRole",
+      "StackName": "amplify-ktsapps-dev-192318",
+      "StackId": "arn:aws:cloudformation:us-east-1:804464305247:stack/amplify-ktsapps-dev-192318/ac8dd360-48f4-11ee-a0bf-0e5e8cfd4ae1",
+      "AmplifyAppId": "d121k3r7yef9h1",
+      "APIGatewayAuthURL": "https://s3.amazonaws.com/amplify-ktsapps-dev-192318-deployment/amplify-cfn-templates/api/APIGatewayAuthStack.json"
     },
     "categories": {
       "auth": {
-        "ktsapp8bc2274a8bc2274a": {}
+        "ktsauth": {}
       },
       "function": {
-        "ktsapp37bd30f2": {
-          "deploymentBucketName": "amplify-ktsapp-dev-115134-deployment",
-          "s3Key": "amplify-builds/ktsapp37bd30f2-45576a5a7a584b454c54-build.zip"
+        "parentFunction": {
+          "deploymentBucketName": "amplify-ktsapps-dev-192318-deployment",
+          "s3Key": "amplify-builds/parentFunction-4e396a6a4d5833715244-build.zip"
         },
-        "students": {
-          "deploymentBucketName": "amplify-ktsapp-dev-115134-deployment",
-          "s3Key": "amplify-builds/students-3649456d79616a337376-build.zip"
+        "studentFunction": {
+          "deploymentBucketName": "amplify-ktsapps-dev-192318-deployment",
+          "s3Key": "amplify-builds/studentFunction-5a437a466962716f466d-build.zip"
         }
       },
       "storage": {
-        "dynamo3a282170": {},
-        "students": {}
+        "parentsTable": {},
+        "studentTable": {}
       },
       "api": {
-        "parents": {}
+        "ktsAPI": {}
       }
     }
   }

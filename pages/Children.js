@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Button, StyleSheet, Image, ScrollView } from 'react-native';
+import { useAppContext } from '../src/AppContext';
 
 const Children = () => {
   const [inputFields, setInputFields] = useState([{ id: 1, value: '' }]);
@@ -8,6 +9,7 @@ const Children = () => {
     homeAddress: '',
     school: ''
   });
+  const { data, setData } = useAppContext();
 
   const handleInputChange = (id, text) => {
     const updatedFields = inputFields.map(field => {
@@ -44,11 +46,12 @@ const Children = () => {
   };
 
   const handleSubmit = () => {
+    console.log(data);
     // Perform form submission logic here
-    console.log('Submitted Input Fields:', inputFields);
-    console.log('Selected Transport Plan:', transportPlan);
-    console.log('Home Address:', additionalFields.homeAddress);
-    console.log('School:', additionalFields.school);
+    // console.log('Submitted Input Fields:', inputFields);
+    // console.log('Selected Transport Plan:', transportPlan);
+    // console.log('Home Address:', additionalFields.homeAddress);
+    // console.log('School:', additionalFields.school);
   };
 
   return (
@@ -98,7 +101,6 @@ const Children = () => {
         value={additionalFields.school}
         placeholder="Enter school"
       />
-
       <Button title="Submit" onPress={handleSubmit} />
     </View>
   </ScrollView>

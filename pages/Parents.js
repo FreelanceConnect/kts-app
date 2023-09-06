@@ -1,7 +1,12 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import { Button, StyleSheet, Text, View, TextInput, Image, ScrollView } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+
+import { useAppContext } from '../src/AppContext';
 
 import { Amplify, API } from 'aws-amplify';
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import MyAppLogo from '../components/Logo';
 import {
@@ -15,12 +20,12 @@ function SignOutButton() {
   return <Button onPress={signOut} title="Sign Out" />;
 }
 
-function Parents({ navigation }) {
+function Parents({ userId }) {
+  const navigation = useNavigation();
   const {
     tokens: { colors },
   } = useTheme();
-  const apiName = 'parents'; // replace this with your api name.
-  const path = '/parents';
+  const apiName = 'ktsAPI'; // replace this with your api name.
   const [selectedLanguage, setSelectedLanguage] = useState();
 
   const [formData, setFormData] = useState({
@@ -36,36 +41,56 @@ function Parents({ navigation }) {
     setFormData({...formData, [field]: value});
   };
 
-  const handleSubmit = () => {
-    // Perform form submission logic here
-    // https://uybltsr7wg.execute-api.us-east-1.amazonaws.com/dev/parents
-    let parent_id = 'KTS-C0002'
-    const {name, email, address, city, region, country} = formData;
+   const handleSubmit = () => {
+    const apiName = 'ktsAPI'; // replace this with your api name.
+    const path = `/parents`;
+    const {name, email, address, city, region, country, parent_id} = formData;
     const myInit = {
       body: {
-        parent_id: parent_id,
+        parent_id: "000ll010lg001",
         name: name,
         email: email,
         address: address,
         city: city,
         region: region,
         country: country,
-
       }, // replace this with attributes you need
       headers: {} // OPTIONAL
     };
 
     API.post(apiName, path, myInit)
       .then((response) => {
+        console.log(response)
         // Add your code here
-        console.log("POST on DB")
-        navigation.navigate("children")
+          AsyncStorage.setItem('userData', JSON.stringify(formData))
+          .then(() => {
+            console.log('User data saved successfully');
+          })
+          .catch((error) => {
+            console.log('Error saving user data:', error);
+          });
       })
       .catch((error) => {
         console.log(error.response);
       });
-    console.log(formData);
   };
+
+    useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await AsyncStorage.getItem('userData');
+        if (data !== null) {
+          console.log('Retrieved data:', data);
+          navigation.navigate('children');
+        }
+        else console.log('no user data yet');
+      } catch (error) {
+        console.log('Error retrieving data:', error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   return (
     <ScrollView>

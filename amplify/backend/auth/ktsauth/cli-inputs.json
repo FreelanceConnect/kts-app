@@ -1,10 +1,10 @@
 {
   "version": "1",
   "cognitoConfig": {
-    "identityPoolName": "ktsapp8bc2274a8bc2274a_identitypool_e6651d49",
-    "allowUnauthenticatedIdentities": false,
-    "resourceNameTruncated": "ktsapp8bc2274a",
-    "userPoolName": "ktsapp8bc2274a_userpool_8bc2274a",
+    "identityPoolName": "ktsauth_identitypool_8bd5e1bc",
+    "allowUnauthenticatedIdentities": true,
+    "resourceNameTruncated": "ktsappd5b33644",
+    "userPoolName": "ktsusers",
     "autoVerifiedAttributes": [
       "phone_number"
     ],
@@ -13,7 +13,7 @@
       "SMS Text Message"
     ],
     "smsAuthenticationMessage": "Your authentication code is {####}",
-    "smsVerificationMessage": "Your verification code is {####}",
+    "smsVerificationMessage": "Welcome to kids transportation service, your verification code is: {####}",
     "emailVerificationSubject": "Your verification code",
     "emailVerificationMessage": "Your verification code is {####}",
     "defaultPasswordPolicy": false,
@@ -31,10 +31,10 @@
     "userpoolClientReadAttributes": [
       "email"
     ],
-    "userpoolClientLambdaRole": "ktsapp8bc2274a_userpoolclient_lambda_role",
+    "userpoolClientLambdaRole": "ktsautd5b33644_userpoolclient_lambda_role",
     "userpoolClientSetAttributes": false,
-    "sharedId": "8bc2274a",
-    "resourceName": "ktsapp8bc2274a8bc2274a",
+    "sharedId": "d5b33644",
+    "resourceName": "ktsauth",
     "authSelections": "identityPoolAndUserPool",
     "useDefault": "manual",
     "usernameAttributes": [

@@ -16,13 +16,13 @@
     "s3Key": {
       "Type": "String"
     },
-    "storagedynamo3a282170Name": {
+    "storageparentsTableName": {
       "Type": "String",
-      "Default": "storagedynamo3a282170Name"
+      "Default": "storageparentsTableName"
     },
-    "storagedynamo3a282170Arn": {
+    "storageparentsTableArn": {
       "Type": "String",
-      "Default": "storagedynamo3a282170Arn"
+      "Default": "storageparentsTableArn"
     }
   },
   "Conditions": {
@@ -55,12 +55,12 @@
         "FunctionName": {
           "Fn::If": [
             "ShouldNotCreateEnvResources",
-            "ktsapp37bd30f2",
+            "parentFunction",
             {
               "Fn::Join": [
                 "",
                 [
-                  "ktsapp37bd30f2",
+                  "parentFunction",
                   "-",
                   {
                     "Ref": "env"
@@ -97,12 +97,12 @@
         "RoleName": {
           "Fn::If": [
             "ShouldNotCreateEnvResources",
-            "ktsappLambdaRole8890000d",
+            "ktsappsLambdaRoleab4cb315",
             {
               "Fn::Join": [
                 "",
                 [
-                  "ktsappLambdaRole8890000d",
+                  "ktsappsLambdaRoleab4cb315",
                   "-",
                   {
                     "Ref": "env"
@@ -182,14 +182,14 @@
               ],
               "Resource": [
                 {
-                  "Ref": "storagedynamo3a282170Arn"
+                  "Ref": "storageparentsTableArn"
                 },
                 {
                   "Fn::Join": [
                     "/",
                     [
                       {
-                        "Ref": "storagedynamo3a282170Arn"
+                        "Ref": "storageparentsTableArn"
                       },
                       "index/*"
                     ]

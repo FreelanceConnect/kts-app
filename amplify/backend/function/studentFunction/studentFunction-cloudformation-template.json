@@ -16,13 +16,13 @@
     "s3Key": {
       "Type": "String"
     },
-    "storagestudentsName": {
+    "storagestudentTableName": {
       "Type": "String",
-      "Default": "storagestudentsName"
+      "Default": "storagestudentTableName"
     },
-    "storagestudentsArn": {
+    "storagestudentTableArn": {
       "Type": "String",
-      "Default": "storagestudentsArn"
+      "Default": "storagestudentTableArn"
     }
   },
   "Conditions": {
@@ -55,12 +55,12 @@
         "FunctionName": {
           "Fn::If": [
             "ShouldNotCreateEnvResources",
-            "students",
+            "studentFunction",
             {
               "Fn::Join": [
                 "",
                 [
-                  "students",
+                  "studentFunction",
                   "-",
                   {
                     "Ref": "env"
@@ -97,12 +97,12 @@
         "RoleName": {
           "Fn::If": [
             "ShouldNotCreateEnvResources",
-            "ktsappLambdaRole15a1ee96",
+            "ktsappsLambdaRole2f970631",
             {
               "Fn::Join": [
                 "",
                 [
-                  "ktsappLambdaRole15a1ee96",
+                  "ktsappsLambdaRole2f970631",
                   "-",
                   {
                     "Ref": "env"
@@ -182,14 +182,14 @@
               ],
               "Resource": [
                 {
-                  "Ref": "storagestudentsArn"
+                  "Ref": "storagestudentTableArn"
                 },
                 {
                   "Fn::Join": [
                     "/",
                     [
                       {
-                        "Ref": "storagestudentsArn"
+                        "Ref": "storagestudentTableArn"
                       },
                       "index/*"
                     ]

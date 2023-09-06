@@ -9,7 +9,7 @@ See the License for the specific language governing permissions and limitations 
 
 
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
-const { DeleteCommand, DynamoDBDocumentClient, GetCommand, PutCommand, QueryCommand,  } = require('@aws-sdk/lib-dynamodb');
+const { DeleteCommand, DynamoDBDocumentClient, GetCommand, PutCommand, QueryCommand, ScanCommand } = require('@aws-sdk/lib-dynamodb');
 const awsServerlessExpressMiddleware = require('aws-serverless-express/middleware')
 const bodyParser = require('body-parser')
 const express = require('express')
@@ -17,7 +17,7 @@ const express = require('express')
 const ddbClient = new DynamoDBClient({ region: process.env.TABLE_REGION });
 const ddbDocClient = DynamoDBDocumentClient.from(ddbClient);
 
-let tableName = "parents";
+let tableName = "parentsTable";
 if (process.env.ENV && process.env.ENV !== "NONE") {
   tableName = tableName + '-' + process.env.ENV;
 }
@@ -59,7 +59,7 @@ const convertUrlType = (param, type) => {
  * HTTP Get method for list objects *
  ********************************/
 
-app.get(path + hashKeyPath, async function(req, res) {
+app.get(path, async function(req, res) {
   const condition = {}
   condition[partitionKeyName] = {
     ComparisonOperator: 'EQ'
@@ -82,7 +82,7 @@ app.get(path + hashKeyPath, async function(req, res) {
   }
 
   try {
-    const data = await ddbDocClient.send(new QueryCommand(queryParams));
+    const data = await ddbDocClient.send(new ScanCommand(queryParams));
     res.json(data.Items);
   } catch (err) {
     res.statusCode = 500;
@@ -94,10 +94,11 @@ app.get(path + hashKeyPath, async function(req, res) {
  * HTTP Get method for get single object *
  *****************************************/
 
-app.get(path + '/object' + hashKeyPath + sortKeyPath, async function(req, res) {
+app.get(path + hashKeyPath + sortKeyPath, async function(req, res) {
   const params = {};
   if (userIdPresent && req.apiGateway) {
-    params[partitionKeyName] = req.apiGateway.event.requestContext.identity.cognitoIdentityId || UNAUTH;
+    // params['userId'] = req.apiGateway.event.requestContext.identity.cognitoIdentityId || UNAUTH;
+    params[partitionKeyName] = req.params[partitionKeyName];
   } else {
     params[partitionKeyName] = req.params[partitionKeyName];
     try {

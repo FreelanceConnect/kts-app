@@ -1,6 +1,6 @@
 {
-  "resourceName": "dynamo3a282170",
-  "tableName": "parents",
+  "resourceName": "parentsTable",
+  "tableName": "parentsTable",
   "partitionKey": {
     "fieldName": "parent_id",
     "fieldType": "string"
