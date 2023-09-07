@@ -19,8 +19,7 @@ function SignOutButton() {
 }
 
 function App({ navigation }) {
-      const [username, setUsername] = useState('');
-      const [parentExist, setParentExist] = useState(false);
+      const [phone, setPhone] = useState('');
       const [selectedLanguage, setSelectedLanguage] = useState();
       const [parentId, setParentId] = useState();
 
@@ -30,7 +29,7 @@ function App({ navigation }) {
       const fetchUserData = async () => {
         try {
             const user = await Auth.currentUserInfo();
-            setUsername(user.attributes.phone_number);
+            setPhone(user.attributes.phone_number);
             // Remove the leading "+" sign and any non-numeric characters
             const cleanedNumber = user.attributes.phone_number.replace(/\D/g, '');
             // Get the first part of the cleaned number
@@ -62,7 +61,7 @@ function App({ navigation }) {
         // will render on every subcomponent
         Header={MyAppLogo}
       >
-      <Parents userId={parentId}/>
+      <Parents userId={parentId} phone={phone}/>
       </Authenticator>
     </Authenticator.Provider>
   );

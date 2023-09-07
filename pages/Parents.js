@@ -20,7 +20,7 @@ function SignOutButton() {
   return <Button onPress={signOut} title="Sign Out" />;
 }
 
-function Parents({ userId }) {
+function Parents({ userId, phone }) {
   const navigation = useNavigation();
   const {
     tokens: { colors },
@@ -34,6 +34,7 @@ function Parents({ userId }) {
     email: '',
     quarter: '',
     zone: '',
+    phone: phone,
     errors: {
     name: '',
     email: '',
@@ -84,14 +85,14 @@ const handleChange = (field, value) => {
     const {name, email, quarter, zone} = formData;
     const myInit = {
       body: {
-        parent_id: "56565656565",
+        parent_id: "11111111112",
         numberOfKids: 0,
         address: {
           quarter: quarter,
           zone: zone,
         },
         children: {},
-        phone: "",
+        phone: phone,
         AO: 0,
         TA: 0,
         AP: 0,
@@ -164,21 +165,21 @@ const handleChange = (field, value) => {
         value={formData.email}
         placeholder="Enter Your Email"
       />
-      <Text style={styles.label}>Quarter</Text>
-      {formData.errors.quarter && <Text style={styles.error}>{formData.errors.quarter}</Text>}
-      <TextInput
-        style={styles.input}
-        onChangeText={(value) => handleChange('quarter', value)}
-        value={formData.address}
-        placeholder="Ex: Logpom"
-      />
       <Text style={styles.label}>Zone</Text>
       {formData.errors.zone && <Text style={styles.error}>{formData.errors.zone}</Text>}
       <TextInput
         style={styles.input}
         onChangeText={(value) => handleChange('zone', value)}
         value={formData.address}
-        placeholder="Ex: Avant College le NIL"
+        placeholder="Ex: Logpom"
+      />
+      <Text style={styles.label}>Quarter</Text>
+      {formData.errors.quarter && <Text style={styles.error}>{formData.errors.quarter}</Text>}
+      <TextInput
+        style={styles.input}
+        onChangeText={(value) => handleChange('quarter', value)}
+        value={formData.address}
+        placeholder="Ex: Andem, derrière pharmacie"
       />
 
       <Button title="Submit" onPress={handleSubmit} />

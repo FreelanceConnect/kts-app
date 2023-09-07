@@ -1,6 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Button, StyleSheet, Image, ScrollView } from 'react-native';
 import { useAppContext } from '../src/AppContext';
+
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Children = () => {
   const [inputFields, setInputFields] = useState([{ id: 1, value: '' }]);
@@ -53,6 +56,26 @@ const Children = () => {
     // console.log('Home Address:', additionalFields.homeAddress);
     // console.log('School:', additionalFields.school);
   };
+
+    useEffect(() => {
+    const fetchData = async () => {
+      try {
+      const parentdata = await AsyncStorage.getItem('parentData');
+        if (parentdata !== null) {
+          console.log('Parent retrieved data:', parentdata);
+          if (parentdata !== null) {
+            // setData(parentdata);
+            // navigation.navigate('children');
+          }
+        }
+        else console.log('no user data yet');
+      } catch (error) {
+        console.log('Error retrieving data:', error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   return (
   <ScrollView>
