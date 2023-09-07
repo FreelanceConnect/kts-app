@@ -6,7 +6,7 @@ const Children = () => {
   const [inputFields, setInputFields] = useState([{ id: 1, value: '' }]);
   const [transportPlan, setTransportPlan] = useState('');
   const [additionalFields, setAdditionalFields] = useState({
-    homeAddress: '',
+    class: '',
     school: ''
   });
   const { data, setData } = useAppContext();
@@ -90,9 +90,9 @@ const Children = () => {
 
       <TextInput
         style={styles.additionalFieldInput}
-        onChangeText={(text) => handleAdditionalFieldChange('homeAddress', text)}
+        onChangeText={(text) => handleAdditionalFieldChange('class', text)}
         value={additionalFields.homeAddress}
-        placeholder="Enter home address"
+        placeholder="Enter Class"
       />
 
       <TextInput

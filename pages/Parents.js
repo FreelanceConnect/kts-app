@@ -27,44 +27,87 @@ function Parents({ userId }) {
   } = useTheme();
   const apiName = 'ktsAPI'; // replace this with your api name.
   const [selectedLanguage, setSelectedLanguage] = useState();
+  const { data, setData } = useAppContext();
 
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    address: '',
-    city: '',
-    region: '',
-    country: ''
+    quarter: '',
+    zone: '',
+    errors: {
+    name: '',
+    email: '',
+    quarter: '',
+    zone: '',
+  },
   });
 
-  const handleChange = (field, value) => {
-    setFormData({...formData, [field]: value});
-  };
+const handleChange = (field, value) => {
+  setFormData((prevState) => ({
+    ...prevState,
+    [field]: value,
+    errors: {
+      ...prevState.errors,
+      [field]: '', // Clear the corresponding error state
+    },
+  }));
+};
 
    const handleSubmit = () => {
+
+    let isValid = true;
+    const errors = {};
+
+      // Validate name field
+    if (formData.name.trim() === '') {
+        isValid = false;
+        errors.name = 'Name is required';
+    }
+    if (formData.quarter.trim() === '') {
+        isValid = false;
+        errors.quarter = 'Quarter is required';
+    }
+   if (formData.zone.trim() === '') {
+        isValid = false;
+        errors.zone = 'Zone is required';
+    }
+    // Update the state with validation errors
+    setFormData((prevState) => ({
+      ...prevState,
+      errors,
+    }));
+    
+
+    if (isValid) {
     const apiName = 'ktsAPI'; // replace this with your api name.
     const path = `/parents`;
-    const {name, email, address, city, region, country, parent_id} = formData;
+    const {name, email, quarter, zone} = formData;
     const myInit = {
       body: {
-        parent_id: "000ll010lg001",
-        name: name,
+        parent_id: "56565656565",
+        numberOfKids: 0,
+        address: {
+          quarter: quarter,
+          zone: zone,
+        },
+        children: {},
+        phone: "",
+        AO: 0,
+        TA: 0,
+        AP: 0,
+        CustomerName: name,
         email: email,
-        address: address,
-        city: city,
-        region: region,
-        country: country,
-      }, // replace this with attributes you need
+      },
       headers: {} // OPTIONAL
     };
 
     API.post(apiName, path, myInit)
       .then((response) => {
-        console.log(response)
         // Add your code here
-          AsyncStorage.setItem('userData', JSON.stringify(formData))
+          AsyncStorage.setItem('parentData', JSON.stringify(formData))
           .then(() => {
             console.log('User data saved successfully');
+            navigation.navigate('children');
           })
           .catch((error) => {
             console.log('Error saving user data:', error);
@@ -73,15 +116,20 @@ function Parents({ userId }) {
       .catch((error) => {
         console.log(error.response);
       });
+
+    }
   };
 
     useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await AsyncStorage.getItem('userData');
-        if (data !== null) {
-          console.log('Retrieved data:', data);
-          navigation.navigate('children');
+        const parentdata = await AsyncStorage.getItem('parentData');
+        if (parentdata !== null) {
+          console.log('Retrieved data:', parentdata);
+          if (parentdata !== null) {
+            // setData(parentdata);
+            navigation.navigate('children');
+          }
         }
         else console.log('no user data yet');
       } catch (error) {
@@ -102,6 +150,7 @@ function Parents({ userId }) {
 
       <Text style={styles.textField}>Please enter your information here</Text>
       <Text style={styles.label}>Name</Text>
+     {formData.errors.name && <Text style={styles.error}>{formData.errors.name}</Text>}
       <TextInput
         style={styles.input}
         onChangeText={(value) => handleChange('name', value)}
@@ -115,33 +164,21 @@ function Parents({ userId }) {
         value={formData.email}
         placeholder="Enter Your Email"
       />
-      <Text style={styles.label}>Address</Text>
+      <Text style={styles.label}>Quarter</Text>
+      {formData.errors.quarter && <Text style={styles.error}>{formData.errors.quarter}</Text>}
       <TextInput
         style={styles.input}
-        onChangeText={(value) => handleChange('address', value)}
+        onChangeText={(value) => handleChange('quarter', value)}
         value={formData.address}
-        placeholder="Enter Your Address"
+        placeholder="Ex: Logpom"
       />
-      <Text style={styles.label}>City</Text>
+      <Text style={styles.label}>Zone</Text>
+      {formData.errors.zone && <Text style={styles.error}>{formData.errors.zone}</Text>}
       <TextInput
         style={styles.input}
-        onChangeText={(value) => handleChange('city', value)}
-        value={formData.city}
-        placeholder="Enter Your City"
-      />
-      <Text style={styles.label}>Region</Text>
-      <TextInput
-        style={styles.input}
-        onChangeText={(value) => handleChange('region', value)}
-        value={formData.region}
-        placeholder="Enter Your Region"
-      />
-     <Text style={styles.label}>Country</Text>
-      <TextInput
-        style={styles.input}
-        onChangeText={(value) => handleChange('country', value)}
-        value={formData.country}
-        placeholder="Enter Your Country"
+        onChangeText={(value) => handleChange('zone', value)}
+        value={formData.address}
+        placeholder="Ex: Avant College le NIL"
       />
 
       <Button title="Submit" onPress={handleSubmit} />
@@ -190,6 +227,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     marginBottom: 8,
+  },
+  error: {
+    color: 'red',
+    fontWeight: 'bold',
   },
 });
 
