@@ -11,6 +11,7 @@ Amplify.configure(awsExports);
 Auth.configure(awsExports);
 import AuthScreens from './pages/Welcome';
 import Children from './pages/Children';
+import DriverInfo from './pages/DriverInfo';
 
 
 export default function App() {
@@ -21,6 +22,7 @@ export default function App() {
     <Stack.Navigator>
       <Stack.Screen name="Kids Transportation Service" component={AuthScreens}/>
       <Stack.Screen  name="children" component={Children} /> 
+      <Stack.Screen  name="DriverInfo" component={DriverInfo} /> 
     </Stack.Navigator>
   </NavigationContainer>
   </AppProvider>

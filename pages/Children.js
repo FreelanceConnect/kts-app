@@ -1,291 +1,233 @@
-// import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Button, StyleSheet, Image, ScrollView } from 'react-native';
-// import { useAppContext } from '../src/AppContext';
-
-
-// import AsyncStorage from '@react-native-async-storage/async-storage';
-
-// const Children = () => {
-//   const [inputFields, setInputFields] = useState([{ id: 1, value: '' }]);
-//   const [transportPlan, setTransportPlan] = useState('');
-//   const [additionalFields, setAdditionalFields] = useState({
-//     class: '',
-//     school: ''
-//   });
-//   const { data, setData } = useAppContext();
-
-//   const handleInputChange = (id, text) => {
-//     const updatedFields = inputFields.map(field => {
-//       if (field.id === id) {
-//         return { ...field, value: text };
-//       }
-//       return field;
-//     });
-//     setInputFields(updatedFields);
-//   };
-
-//   const handleAddMore = () => {
-//     const newField = {
-//       id: inputFields.length + 1,
-//       value: ''
-//     };
-//     setInputFields([...inputFields, newField]);
-//   };
-
-//   const handleRemove = (id) => {
-//     const updatedFields = inputFields.filter(field => field.id !== id);
-//     setInputFields(updatedFields);
-//   };
-
-//   const handleTransportPlanChange = (text) => {
-//     setTransportPlan(text);
-//   };
-
-//   const handleAdditionalFieldChange = (fieldName, text) => {
-//     setAdditionalFields(prevState => ({
-//       ...prevState,
-//       [fieldName]: text
-//     }));
-//   };
-
-//   const handleSubmit = () => {
-//     console.log(data);
-//     // Perform form submission logic here
-//     // console.log('Submitted Input Fields:', inputFields);
-//     // console.log('Selected Transport Plan:', transportPlan);
-//     // console.log('Home Address:', additionalFields.homeAddress);
-//     // console.log('School:', additionalFields.school);
-//   };
-
-//     useEffect(() => {
-//     const fetchData = async () => {
-//       try {
-//       const parentdata = await AsyncStorage.getItem('parentData');
-//         if (parentdata !== null) {
-//           console.log('Parent retrieved data:', parentdata);
-//           if (parentdata !== null) {
-//             // setData(parentdata);
-//             // navigation.navigate('children');
-//           }
-//         }
-//         else console.log('no user data yet');
-//       } catch (error) {
-//         console.log('Error retrieving data:', error);
-//       }
-//     };
-
-//     fetchData();
-//   }, []);
-
-//   return (
-//   <ScrollView>
-//     <View style={styles.container}>
-//       <View style={styles.imageContainer}>
-//         <Image style={styles.image} source={require("../assets/KTSLogo.png")} />
-//       </View>
-
-//       <Text style={styles.textField}>Please enter your information here</Text>
-//       {inputFields.map(field => (
-//         <View style={styles.inputContainer} key={field.id}>
-//           <TextInput
-//             style={styles.input}
-//             onChangeText={(text) => handleInputChange(field.id, text)}
-//             value={field.value}
-//             placeholder="Enter value"
-//           />
-//           {inputFields.length > 1 && (
-//             <TouchableOpacity onPress={() => handleRemove(field.id)} style={styles.deleteButton}>
-//               <Text style={styles.deleteButtonText}>X</Text>
-//             </TouchableOpacity>
-//           )}
-//         </View>
-//       ))}
-//       <TouchableOpacity onPress={handleAddMore} style={styles.addButton}>
-//         <Text style={styles.addButtonText}>Add More</Text>
-//       </TouchableOpacity>
-
-//       <TextInput
-//         style={styles.transportPlanInput}
-//         onChangeText={handleTransportPlanChange}
-//         value={transportPlan}
-//         placeholder="Enter transport plan"
-//       />
-
-//       <TextInput
-//         style={styles.additionalFieldInput}
-//         onChangeText={(text) => handleAdditionalFieldChange('class', text)}
-//         value={additionalFields.homeAddress}
-//         placeholder="Enter Class"
-//       />
-
-//       <TextInput
-//         style={styles.additionalFieldInput}
-//         onChangeText={(text) => handleAdditionalFieldChange('school', text)}
-//         value={additionalFields.school}
-//         placeholder="Enter school"
-//       />
-//       <Button title="Submit" onPress={handleSubmit} />
-//     </View>
-//   </ScrollView>
-//   );
-// };
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     padding: 16,
-//     backgroundColor: '#fff',
-//   },
-//   inputContainer: {
-//     flexDirection: 'row',
-//     alignItems: 'center',
-//     marginBottom: 10,
-//   },
-//   input: {
-//     flex: 1,
-//     height: 40,
-//     borderColor: '#ccc',
-//     borderWidth: 1,
-//     paddingHorizontal: 10,
-//   },
-//   deleteButton: {
-//     paddingHorizontal: 12,
-//     marginLeft: 10,
-//     backgroundColor: 'red',
-//     borderRadius: 50,
-//   },
-//   deleteButtonText: {
-//     color: '#fff',
-//     fontWeight: 'bold',
-//   },
-//   addButton: {
-//     alignItems: 'center',
-//     marginBottom: 10,
-//   },
-//   addButtonText: {
-//     color: 'blue',
-//     textDecorationLine: 'underline',
-//   },
-//   transportPlanInput: {
-//     height: 40,
-//     borderColor: '#ccc',
-//     borderWidth: 1,
-//     marginBottom: 10,
-//     paddingHorizontal: 10,
-//   },
-//   additionalFieldInput: {
-//     height: 40,
-//     borderColor: '#ccc',
-//     borderWidth: 1,
-//     marginBottom: 10,
-//     paddingHorizontal: 10,
-//   },
-// });
-
-// export default Children;
-
-
-
+import { View, Text, TextInput, Button, StyleSheet, Image, ScrollView, TouchableOpacity } from 'react-native';
 import React, { useState } from 'react';
+import { Amplify, API } from 'aws-amplify';
+import { useNavigation } from '@react-navigation/native';
+import Modal from '../components/MyModal';
 
 function StudentForm() {
+  const navigation = useNavigation();
   const [students, setStudents] = useState([]);
-  const [name, setName] = useState('');
-  const [studentInfo, setStudentInfo] = useState({});
-  const [selectedName, setSelectedName] = useState('');
+  const [formData, setFormData] = useState({
+    name: '',
+    transportPlan: '',
+    class: '',
+    school: '',
+    errors: {
+      nameError: '',
+      transportPlanError: '',
+      classError: '',
+      schoolError: '',
+    },
+  });
 
-  const handleNameChange = (text) => {
-    setName(text);
+  const handleInputChange = (key, value) => {
+    setFormData({ ...formData, [key]: value });
   };
 
-  const handleInfoChange = (key, value) => {
-    setStudentInfo({ ...studentInfo, [key]: value });
-  };
+  const handleAddStudent = (later) => {
+    let isValid = true;
+    const { name, transportPlan, class: studentClass, school } = formData;
+    const errors = {};
 
-  const handleAddStudent = () => {
-    const newStudent = { name, ...studentInfo };
-    setStudents([...students, newStudent]);
-    setName('');
-    setStudentInfo({});
-  };
+    if (name.trim() === '') {
+      errors.nameError = 'Name is required';
+      isValid = false;
+    }
 
-  const handleNameClick = (student) => {
-    setSelectedName(student.name);
-    setName(student.name);
-    setStudentInfo({ ...student });
-  };
+    if (transportPlan.trim() === '') {
+      errors.transportPlanError = 'Transport Plan is required';
+      isValid = false;
+    }
 
-  const handleDelete = (name) => {
-    const updatedStudents = students.filter((student) => student.name !== name);
-    setStudents(updatedStudents);
-    if (selectedName === name) {
-      setSelectedName('');
-      setName('');
-      setStudentInfo({});
+    if (studentClass.trim() === '') {
+      errors.classError = 'Class is required';
+      isValid = false;
+    }
+
+    if (school.trim() === '') {
+      errors.schoolError = 'School is required';
+      isValid = false;
+    }
+
+    if (isValid) {
+      const newStudent = { name, transportPlan, class: studentClass, school };
+      setStudents([...students, newStudent]);
+      setFormData({
+        name: '',
+        transportPlan: '',
+        class: '',
+        school: '',
+        errors: {
+          nameError: '',
+          transportPlanError: '',
+          classError: '',
+          schoolError: '',
+        },
+      });
+    } else {
+      setFormData({ ...formData, errors });
     }
   };
 
-  return (
-   <ScrollView> 
-    <View style={styles.container}>
-    <View style={styles.imageContainer}>
-      <Image style={styles.image} source={require("../assets/KTSLogo.png")} />
-    </View>
+  const handleSubmit = (later) => {
+    const { name, transportPlan, class: studentClass, school } = formData;
+    let isValid = true;
+    const errors = {};
 
-      <TextInput
-        style={styles.input}
-        value={name}
-        onChangeText={handleNameChange}
-        placeholder="Student Name"
-      />
-      <TextInput
-        style={styles.input}
-        value={studentInfo.age}
-        onChangeText={(text) => handleInfoChange('age', text)}
-        placeholder="Age"
-      />
-      <TextInput
-        style={styles.input}
-        value={studentInfo.grade}
-        onChangeText={(text) => handleInfoChange('grade', text)}
-        placeholder="Grade"
-      />
-      <TextInput
-        style={styles.input}
-        value={studentInfo.address}
-        onChangeText={(text) => handleInfoChange('address', text)}
-        placeholder="Address"
-      />
-      <Button title="Add Student" onPress={handleAddStudent} />
-      {students.map((student, index) => (
-        <View key={index} style={styles.studentContainer}>
-          <TouchableOpacity
-            onPress={() => handleNameClick(student)}
-            style={[
-              styles.studentNameContainer,
-              selectedName === student.name && styles.selectedNameContainer,
-            ]}
-          >
-            <Text
-              style={[
-                styles.studentName,
-                selectedName === student.name && styles.selectedNameText,
-              ]}
-            >
-              {student.name}
+    if (name.trim() === '') {
+      errors.nameError = 'Name is required';
+      isValid = false;
+    }
+
+    if (transportPlan.trim() === '') {
+      errors.transportPlanError = 'Transport Plan is required';
+      isValid = false;
+    }
+
+    if (studentClass.trim() === '') {
+      errors.classError = 'Class is required';
+      isValid = false;
+    }
+
+    if (school.trim() === '') {
+      errors.schoolError = 'School is required';
+      isValid = false;
+    }
+
+    if (isValid || later) {
+      // API request logic here
+      // ...
+
+      navigation.navigate('DriverInfo');
+    } else {
+      setFormData({ ...formData, errors });
+    }
+  };
+
+  console.log(students.lentgh);
+
+  return (
+    <ScrollView>
+      <View style={styles.container}>
+        <View style={styles.imageContainer}>
+          <Image style={styles.image} source={require("../assets/KTSLogo.png")} />
+        </View>
+          {students.length ? (
+            <Text style={styles.studentInfo}>
+              Click on each student to see or update information
             </Text>
-            <TouchableOpacity onPress={() => handleDelete(student.name)}>
-              <Text style={styles.deleteButton}>X</Text>
-            </TouchableOpacity>
+          ) : null}
+        {students.map((student, index) => (
+          <View style={styles.Modalcontainer} key={index}>
+            <Modal name={student.name} TransportPlan={student.transportPlan} Class={student.class} School={student.school}/>
+          </View>
+        ))}
+
+        <Text style={styles.label}>Name</Text>
+        {formData.errors.nameError && <Text style={styles.error}>{formData.errors.nameError}</Text>}
+        <TextInput
+          style={styles.input}
+          value={formData.name}
+          onChangeText={(text) => handleInputChange('name', text)}
+          placeholder="Name"
+        />
+
+        <Text style={styles.label}>Transport Plan</Text>
+        {formData.errors.transportPlanError && <Text style={styles.error}>{formData.errors.transportPlanError}</Text>}
+        <TextInput
+          style={styles.input}
+          value={formData.transportPlan}
+          onChangeText={(text) => handleInputChange('transportPlan', text)}
+          placeholder="EX: Aller et Retour"
+        />
+
+        <Text style={styles.label}>Class</Text>
+        {formData.errors.classError && <Text style={styles.error}>{formData.errors.classError}</Text>}
+        <TextInput
+          style={styles.input}
+          value={formData.class}
+          onChangeText={(text) => handleInputChange('class', text)}
+          placeholder="Class"
+        />
+
+        <Text style={styles.label}>School</Text>
+        {formData.errors.schoolError && <Text style={styles.error}>{formData.errors.schoolError}</Text>}
+        <TextInput
+          style={styles.input}
+          value={formData.school}
+          onChangeText={(text) => handleInputChange('school', text)}
+          placeholder="School"
+        />
+
+
+
+        {students.length ? (
+
+                <View style={styles.containerContinue}>
+      <View style={styles.element1}>
+        <TouchableOpacity
+          style={[styles.button, { backgroundColor: '#2196F3' }]}
+          >
+        <Text style={[styles.textStyle, { backgroundColor: '#2196F3' }]} onPress={handleAddStudent}>Add Another student</Text>
+      </TouchableOpacity>
+      </View>
+      <View style={styles.element2}>
+       <TouchableOpacity
+          style={[styles.button, { backgroundColor: '#2196F3' }]}
+          >
+         <Text style={[styles.textStyle, { backgroundColor: '#2196F3' }]} onPress={() => handleSubmit(true)}>Continue</Text>
+      </TouchableOpacity>
+      </View>
+    </View>
+        ) : (
+        <View style={styles.buttonContainer}>
+        <TouchableOpacity
+          style={[styles.button, { backgroundColor: '#2196F3' }]}
+          >
+        <Text style={[styles.textStyle, { backgroundColor: '#2196F3' }]} onPress={handleAddStudent} >Add Student</Text>
           </TouchableOpacity>
         </View>
-      ))}
-    </View>
-  </ScrollView>
+
+        )}
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+   students: {
+     fontWeight: 'bold',
+     fontSize: '25',
+     textAlign: 'center',
+   },
+    textStyle: {
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  containerContinue: {
+    flexDirection: 'row',
+  },
+  element1: {
+    flex: 3,
+    marginRight: 4,
+    // Additional styling for Element 1
+  },
+  element2: {
+    flex: 2,
+    marginLefrt: 4,
+    // Additional styling for Element 2
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
   container: {
     flex: 1,
     padding: 20,
@@ -298,39 +240,26 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     paddingHorizontal: 10,
   },
-  studentContainer: {
-    marginBottom: 10,
-  },
-  studentNameContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 5,
-  },
-  selectedNameContainer: {
-    backgroundColor: '#cce6ff',
-  },
-  studentName: {
-    flex: 1,
-    fontSize: 16,
-  },
-  selectedNameText: {
-    fontWeight: 'bold',
-  },
-  deleteButton: {
-    color: 'red',
-    marginLeft: 10,
-  },
- imageContainer: {
+  imageContainer: {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center'
   },
   image: {
     width: 150,
-    height: 150    },
+    height: 150
+  },
+  error: {
+    color: 'red',
+    fontWeight: 'bold',
+  },
+    button: {
+    borderRadius: 5,
+    padding: 10,
+    elevation: 2,
+    marginVertical: 10,
+    width: '100%',
+  },
 });
 
 export default StudentForm;
