@@ -84,7 +84,7 @@ const MyModal = ({ name, TransportPlan, Class,School }) => {
         style={[styles.button, { backgroundColor: '#2196F3' }]}
         onPress={() => setModalVisible(true)}
       >
-        <Text style={[styles.textStyle, { backgroundColor: '#2196F3' }]}>{name}</Text>
+        <Text style={[styles.textStyle, { backgroundColor: '#2196F3' }]}>Update</Text>
       </TouchableOpacity>
     </View>
   );
@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
     padding: 10,
     elevation: 2,
     marginVertical: 10,
-    width: '100%',
+    width: '80%',
   },
   textStyle: {
     color: 'white',

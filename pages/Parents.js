@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import { Button, StyleSheet, Text, View, TextInput, Image, ScrollView } from 'react-native';
+import { Button, StyleSheet, Text, View, TextInput, Image, ScrollView, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 import { useAppContext } from '../src/AppContext';
@@ -9,16 +9,12 @@ import { Amplify, API } from 'aws-amplify';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import MyAppLogo from '../components/Logo';
-import {
+import SignOutButton from '../components/SignOutBtn';
+import {  
   Authenticator,
   useAuthenticator,
   useTheme,
 } from '@aws-amplify/ui-react-native';
-
-function SignOutButton() {
-  const { signOut } = useAuthenticator();
-  return <Button onPress={signOut} title="Sign Out" />;
-}
 
 function Parents({ userId, phone }) {
   const navigation = useNavigation();
@@ -29,6 +25,8 @@ function Parents({ userId, phone }) {
   const [selectedLanguage, setSelectedLanguage] = useState();
   const { data, setData } = useAppContext();
 
+  const [showForm, setShowForm] = useState(true);
+  const [showOtherBtn, setShowOtherBtn] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -126,11 +124,17 @@ const handleChange = (field, value) => {
       try {
         const parentdata = await AsyncStorage.getItem('parentData');
         if (parentdata !== null) {
-          console.log('Retrieved data:', parentdata);
-          if (parentdata !== null) {
-            // setData(parentdata);
-            navigation.navigate('children');
-          }
+          const data= JSON.parse(parentdata);
+          console.log(data);
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          name: data.name,
+          email: data.email,
+          quarter: data.quarter,
+          zone: data.zone,
+        }));
+          setShowOtherBtn(true);
+          navigation.navigate('children');
         }
         else console.log('no user data yet');
       } catch (error) {
@@ -148,41 +152,64 @@ const handleChange = (field, value) => {
     <View style={styles.imageContainer}>
       <Image style={styles.image} source={require("../assets/KTSLogo.png")} />
     </View>
+        <Text style={styles.textField}>Please enter your information here</Text>
+        <Text style={styles.label}>Name</Text>
+        {formData.errors.name && <Text style={styles.error}>{formData.errors.name}</Text>}
+        <TextInput
+          style={styles.input}
+          onChangeText={(value) => handleChange('name', value)}
+          value={formData.name}
+          placeholder="Enter Your name"
+        />
+        <Text style={styles.label}>Email</Text>
+        <TextInput
+          style={styles.input}
+          onChangeText={(value) => handleChange('email', value)}
+          value={formData.email}
+          placeholder="Enter Your Email"
+        />
+        <Text style={styles.label}>Zone</Text>
+        {formData.errors.zone && <Text style={styles.error}>{formData.errors.zone}</Text>}
+        <TextInput
+          style={styles.input}
+          onChangeText={(value) => handleChange('zone', value)}
+          value={formData.zone}
+          placeholder="Ex: Logpom"
+        />
+        <Text style={styles.label}>Quarter</Text>
+        {formData.errors.quarter && <Text style={styles.error}>{formData.errors.quarter}</Text>}
+        <TextInput
+          style={styles.input}
+          onChangeText={(value) => handleChange('quarter', value)}
+          value={formData.quarter}
+          placeholder="Ex: Andem, derrière pharmacie"
+        />
 
-      <Text style={styles.textField}>Please enter your information here</Text>
-      <Text style={styles.label}>Name</Text>
-     {formData.errors.name && <Text style={styles.error}>{formData.errors.name}</Text>}
-      <TextInput
-        style={styles.input}
-        onChangeText={(value) => handleChange('name', value)}
-        value={formData.name}
-        placeholder="Enter Your name"
-      />
-      <Text style={styles.label}>Email</Text>
-      <TextInput
-        style={styles.input}
-        onChangeText={(value) => handleChange('email', value)}
-        value={formData.email}
-        placeholder="Enter Your Email"
-      />
-      <Text style={styles.label}>Zone</Text>
-      {formData.errors.zone && <Text style={styles.error}>{formData.errors.zone}</Text>}
-      <TextInput
-        style={styles.input}
-        onChangeText={(value) => handleChange('zone', value)}
-        value={formData.address}
-        placeholder="Ex: Logpom"
-      />
-      <Text style={styles.label}>Quarter</Text>
-      {formData.errors.quarter && <Text style={styles.error}>{formData.errors.quarter}</Text>}
-      <TextInput
-        style={styles.input}
-        onChangeText={(value) => handleChange('quarter', value)}
-        value={formData.address}
-        placeholder="Ex: Andem, derrière pharmacie"
-      />
+      {showOtherBtn ? (
+        <View style={styles.containerContinue}>
+          <View style={styles.element1}>
+            <TouchableOpacity style={[styles.button, { backgroundColor: '#2196F3' }]}>
+              <Text style={[styles.textStyle, { backgroundColor: '#2196F3' }]} >Update</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.element2}>
+            <TouchableOpacity style={[styles.button, { backgroundColor: '#2196F3' }]} onPress={() => navigation.navigate('children')}>
+              <Text style={[styles.textStyle, { backgroundColor: '#2196F3' }]} >Continue</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      ) : (
+         <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={[styles.button, { backgroundColor: '#2196F3' }]}
+            onPress={handleSubmit}
+          >
+            <Text style={[styles.textStyle, { backgroundColor: '#2196F3' }]}>SUBMIT</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+        
 
-      <Button title="Submit" onPress={handleSubmit} />
         <View style={style.container}>
           <SignOutButton />
         </View>
@@ -196,6 +223,36 @@ const style = StyleSheet.create({
 });
 
 const styles = StyleSheet.create({
+   containerContinue: {
+    flexDirection: 'row',
+  },
+    element1: {
+    flex: 3,
+    marginRight: 4,
+    // Additional styling for Element 1
+  },
+  element2: {
+    flex: 2,
+    marginLefrt: 4,
+    // Additional styling for Element 2
+  },
+  textStyle: {
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  button: {
+    borderRadius: 5,
+    padding: 10,
+    elevation: 2,
+    marginVertical: 10,
+    width: '100%',
+  },
     textField: {
     fontSize: 18,
     marginBottom: 16,
