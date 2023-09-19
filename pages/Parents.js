@@ -106,6 +106,7 @@ const handleChange = (field, value) => {
           AsyncStorage.setItem('parentData', JSON.stringify(formData))
           .then(() => {
             console.log('User data saved successfully');
+            setShowOtherBtn(true);
             navigation.navigate('children');
           })
           .catch((error) => {
@@ -193,8 +194,8 @@ const handleChange = (field, value) => {
             </TouchableOpacity>
           </View>
           <View style={styles.element2}>
-            <TouchableOpacity style={[styles.button, { backgroundColor: '#2196F3' }]} onPress={() => navigation.navigate('children')}>
-              <Text style={[styles.textStyle, { backgroundColor: '#2196F3' }]} >Continue</Text>
+            <TouchableOpacity style={[styles.button, { backgroundColor: '#008000' }]} onPress={() => navigation.navigate('children')}>
+              <Text style={[styles.textStyle, { backgroundColor: '#008000' }]} >NEXT</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -267,7 +268,7 @@ const styles = StyleSheet.create({
   input: {
     height: 40,
     borderColor: '#ccc',
-    borderRadius: '2',
+    borderRadius: 2,
     borderWidth: 2,
     marginBottom: 10,
     paddingHorizontal: 10,

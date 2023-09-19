@@ -162,7 +162,9 @@ function StudentForm() {
           }));
 
           // Use setStudents to update the state
+          setShowForm(false);
           setStudents(students);
+          navigation.navigate('DriverInfo');
         }
         else console.log('no Student data yet');
       } catch (error) {
@@ -183,19 +185,22 @@ function StudentForm() {
       {students.map((student, index) => (
     <View key={index}>
     <View style={styles.cardContainer}>
-      <View style={styles.imageContainer}>
-        <View style={styles.placeholder} />
-      </View>
-      
-      <View style={styles.detailsContainer}>
-        <Text style={styles.name}>{student.name}</Text>
-        <Text style={styles.transportPlan}>Transport Plan: {student.transportPlan}</Text>
-        <Text style={styles.class}>Class: {student.class}</Text>
-        <Text style={styles.school}>School: {student.school}</Text>
+      <>
+        <Text style={styles.infoLabel}>Student Info:</Text>
+        <View style={styles.studentInfoContainer}>
+          <View style={styles.studentDetails}>
+            <Text style={styles.studentName}>Name: {student.name}</Text>
+            <Text style={styles.studentPhone}>Transport Plan: {student.transportPlan}</Text>
+            <Text style={styles.studentID}>School: {student.school}</Text>
+            <Text style={styles.studentGrade}>Class: {student.class}</Text>
+            <Text style={styles.studentFeedback}>Status: </Text>
           <View style={styles.Modalcontainer} key={index}>
             <Modal name={student.name} TransportPlan={student.transportPlan} Class={student.class} School={student.school} />
           </View>
-      </View>
+          </View>
+          <View style={styles.studentPicture}></View>
+        </View>
+      </>
     </View>
 
         </View>
@@ -254,8 +259,8 @@ function StudentForm() {
             </TouchableOpacity>
           </View>
           <View style={styles.element2}>
-            <TouchableOpacity style={[styles.button, { backgroundColor: '#2196F3' }]} onPress={() => navigation.navigate('DriverInfo')}>
-              <Text style={[styles.textStyle, { backgroundColor: '#2196F3' }]} >Continue</Text>
+            <TouchableOpacity style={[styles.button, { backgroundColor: '#008000' }]} onPress={() => navigation.navigate('DriverInfo')}>
+              <Text style={[styles.textStyle, { backgroundColor: '#008000' }]} >NEXT</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -266,6 +271,45 @@ function StudentForm() {
 }
 
 const styles = StyleSheet.create({
+
+  infoLabel: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  studentInfoContainer: {
+    flexDirection: 'row',
+  },
+  studentDetails: {
+    flex: 1,
+    marginRight: 20,
+  },
+  studentName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  studentPhone: {
+    fontSize: 14,
+    color: '#555',
+    marginBottom: 5,
+  },
+  studentID: {
+    fontSize: 14,
+    marginBottom: 5,
+  },
+  studentGrade: {
+    fontSize: 14,
+    marginBottom: 5,
+  },
+  studentFeedback: {
+    fontSize: 14,
+  },
+  studentPicture: {
+    width: 100,
+    height: 100,
+    backgroundColor: '#ccc',
+  },
    students: {
      fontWeight: 'bold',
      fontSize: '25',

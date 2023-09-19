@@ -55,7 +55,7 @@ const styles = StyleSheet.create({
   input: {
     height: 40,
     borderColor: '#ccc',
-    borderRadius: '2',
+    borderRadius: 2,
     borderWidth: 2,
     marginBottom: 10,
     paddingHorizontal: 10,
