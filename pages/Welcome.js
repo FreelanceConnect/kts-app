@@ -34,7 +34,8 @@ function App({ navigation }) {
             const cleanedNumber = user.attributes.phone_number.replace(/\D/g, '');
             // Get the first part of the cleaned number
             const firstPart = cleanedNumber.substring(0, 3);
-            const userID = `KTS-P-${cleanedNumber}`;
+            const remainingPart = cleanedNumber.substring(3); // Remove the first part
+            const userID = `KTS-P-${remainingPart}`;
             setParentId(userID);
           } catch (error) {
             console.log('Error fetching user data:', error);

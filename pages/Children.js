@@ -4,6 +4,7 @@ import { Amplify, API } from 'aws-amplify';
 import { useNavigation } from '@react-navigation/native';
 import Modal from '../components/MyModal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 function StudentForm() {
   const navigation = useNavigation();
@@ -16,6 +17,8 @@ function StudentForm() {
   const [parent_id, setParent_id]=useState('');
   const [parentZone, setParentZone]=useState('');
   const [parentQuarter, setParentQuarter]=useState('');
+  const [selectedTime, setSelectedTime] = useState(new Date());
+  const [isTimePickerVisible, setTimePickerVisibility] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     transportPlan: '',
@@ -31,6 +34,21 @@ function StudentForm() {
 
   const handleInputChange = (key, value) => {
     setFormData({ ...formData, [key]: value });
+  };
+
+  const showTimePicker = () => {
+    setTimePickerVisibility(true);
+  };
+
+  const hideTimePicker = () => {
+    setTimePickerVisibility(false);
+  };
+
+  const handleTimeChange = (event, time) => {
+    if (time !== undefined) {
+      setSelectedTime(time);
+    }
+    hideTimePicker();
   };
 
   const handleAddStudent = (later) => {
@@ -148,7 +166,6 @@ function StudentForm() {
       try {
         const parentdata = await AsyncStorage.getItem('parentData');
         if (parentdata !== null) {
-          console.log("this is parent's data",parentdata);
           const data= JSON.parse(parentdata);
           setParentName(data.name);
           setParentQuarter(data.quarter);
@@ -167,7 +184,6 @@ function StudentForm() {
         const studentdata = await AsyncStorage.getItem('studentsData');
         if (studentdata.lentgh !== 0 && studentdata !== null) {
           const datas= JSON.parse(studentdata);
-          console.log("this is student's data", datas);
           // Update the students array
           const updatedStudents = datas.updatedStudents;
           const students = updatedStudents.map(student => ({
@@ -188,8 +204,18 @@ function StudentForm() {
       }
     };
 
+    const deleteDataFromAsyncStorage = async (key) => {
+  try {
+    await AsyncStorage.removeItem(key);
+    console.log('Data successfully deleted from async storage.');
+  } catch (error) {
+    console.log('Error deleting data from async storage:', error);
+  }
+};
+
     fetchData();
     fetchStudentData();
+
 
   }, []);
 
@@ -258,6 +284,23 @@ function StudentForm() {
             onChangeText={(text) => handleInputChange('school', text)}
             placeholder="School"
           />
+
+    <View>
+    <Button title="Select School Finish Time" onPress={showTimePicker} />
+      <TextInput
+        style={styles.input}
+        value={selectedTime.toLocaleTimeString()}
+        placeholder="Selected Time"
+      />
+      {isTimePickerVisible && (
+        <DateTimePicker
+          value={selectedTime}
+          mode="time"
+          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+          onChange={handleTimeChange}
+        />
+      )}
+    </View>
 
           <View style={styles.buttonContainer}>
             {isLoading ? (

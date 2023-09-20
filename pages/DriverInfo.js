@@ -43,13 +43,10 @@ const DriverInfoScreen = () => {
       if (storedChildren) {
         const updateChildren = JSON.parse(storedChildren);
         setChildren(dummychildren);
-        // console.log("dummy children");
         console.log("Stored students", updateChildren.updatedStudents[0]);
       }
       else {
-       console.log("dummies");
-       setChildren(dummychildren);
-      }
+       console.log("No data yet");      }
     } catch (error) {
       console.log('Error fetching children data:', error);
     }

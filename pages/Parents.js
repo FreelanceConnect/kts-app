@@ -84,7 +84,7 @@ const handleChange = (field, value) => {
     const {name, email, quarter, zone} = formData;
     const myInit = {
       body: {
-        parent_id: "11111111112",
+        parent_id: userId,
         numberOfKids: 0,
         address: {
           quarter: quarter,
@@ -131,7 +131,6 @@ const handleChange = (field, value) => {
         const parentdata = await AsyncStorage.getItem('parentData');
         if (parentdata !== null) {
           const data= JSON.parse(parentdata);
-          console.log(data);
         setFormData((prevFormData) => ({
           ...prevFormData,
           name: data.name,
@@ -147,7 +146,6 @@ const handleChange = (field, value) => {
         console.log('Error retrieving data:', error);
       }
     };
-
     fetchData();
   }, []);
 
