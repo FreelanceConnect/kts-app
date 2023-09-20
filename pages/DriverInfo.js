@@ -42,8 +42,29 @@ const DriverInfoScreen = () => {
       const storedChildren = await AsyncStorage.getItem('studentsData');
       if (storedChildren) {
         const updateChildren = JSON.parse(storedChildren);
-        setChildren(dummychildren);
-        console.log("Stored students", updateChildren.updatedStudents[0]);
+        console.log("Stored students", updateChildren.updatedStudents);
+        const storedData = updateChildren.updatedStudents;
+        const childObjects = storedData.map((student, index) => {
+        return {
+          id: index + 1,
+          name: student.name,
+          driver: {
+            picture: student.driver.picture,
+            name: student.driver.name,
+            phoneNumber: student.driver.phoneNumber,
+            carImmatriculation: student.driver.carImmatriculation,
+            rating: student.driver.rating,
+            feedback: student.driver.feedback,
+          },
+          pickTime: student.pickTime,
+          dropOffTime: student.dropOffTime,
+          schoolFinishTime: student.schoolFinishTime,
+        };
+      });
+      setChildren(childObjects);
+
+
+
       }
       else {
        console.log("No data yet");      }

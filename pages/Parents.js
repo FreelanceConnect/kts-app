@@ -34,6 +34,7 @@ function Parents({ userId, phone }) {
     quarter: '',
     zone: '',
     phone: phone,
+    parent_id: userId,
     errors: {
     name: '',
     email: '',

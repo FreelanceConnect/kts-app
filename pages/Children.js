@@ -24,6 +24,7 @@ function StudentForm() {
     transportPlan: '',
     class: '',
     school: '',
+    schoolOffTime: '',
     errors: {
       nameError: '',
       transportPlanError: '',
@@ -34,6 +35,12 @@ function StudentForm() {
 
   const handleInputChange = (key, value) => {
     setFormData({ ...formData, [key]: value });
+  };
+
+  const generateUniqueId = () => {
+    const timestamp = Date.now();
+    const randomNum = Math.random().toString(36).substring(2);
+    return `${timestamp}-${randomNum}`;
   };
 
   const showTimePicker = () => {
@@ -78,15 +85,17 @@ function StudentForm() {
 
     if (isValid) {
     setIsLoading(true);
+    const student_id = generateUniqueId();
     const path = `/students`;
     const myInit = {
       body: {
-        student_id: "787978787878kk",
+        student_id: student_id,
         student: name,
-        parent_id: "11111111112",
+        parent_id: parent_id,
         parentName: parentName,
         transportPlan: transportPlan,
         school: school,
+        schoolOffTime: selectedTime,
         address: {
           quarter: parentQuarter,
           zone: parentZone,
@@ -99,16 +108,32 @@ function StudentForm() {
         rating: "",
         feedback: '',
       },
+        driverMorning: {
+        picture: '',
+        name: '',
+        phoneNumber: '',
+        carImmatriculation: '',
+        rating: "",
+        feedback: '',
+      },
+      driverEvening: {
+        picture: '',
+        name: '',
+        phoneNumber: '',
+        carImmatriculation: '',
+        rating: "",
+        feedback: '',
+      },
       pickTime: '',
       dropOffTime: '',
-      schoolFinishTime: '03:00 PM',
+      schoolFinishTime: '',
       },
       headers: {} // OPTIONAL
     };
 
     API.post(apiName, path, myInit)
       .then((response) => {
-      const newStudent = { name, transportPlan, class: studentClass, school };
+      const newStudent = myInit.body;
       setStudents(prevStudents => {
         const updatedStudents = [...prevStudents, newStudent];
         const studentsObject = { updatedStudents };
@@ -167,9 +192,11 @@ function StudentForm() {
         const parentdata = await AsyncStorage.getItem('parentData');
         if (parentdata !== null) {
           const data= JSON.parse(parentdata);
+          console.log(data);
           setParentName(data.name);
           setParentQuarter(data.quarter);
           setParentZone(data.zone);
+          setParent_id(data.parent_id);
         }
         else console.log('no Parent data yet');
       } catch (error) {
@@ -196,7 +223,7 @@ function StudentForm() {
           // Use setStudents to update the state
           setShowForm(false);
           setStudents(students);
-          navigation.navigate('DriverInfo');
+          // navigation.navigate('DriverInfo');
         }
         else console.log('no Student data yet');
       } catch (error) {
@@ -204,7 +231,7 @@ function StudentForm() {
       }
     };
 
-    const deleteDataFromAsyncStorage = async (key) => {
+const deleteDataFromAsyncStorage = async (key) => {
   try {
     await AsyncStorage.removeItem(key);
     console.log('Data successfully deleted from async storage.');
@@ -289,6 +316,7 @@ function StudentForm() {
     <Button title="Select School Finish Time" onPress={showTimePicker} />
       <TextInput
         style={styles.input}
+        onChangeText={(text) => handleInputChange('schoolOffTime', text)}
         value={selectedTime.toLocaleTimeString()}
         placeholder="Selected Time"
       />
