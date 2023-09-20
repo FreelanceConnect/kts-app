@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import { Button, StyleSheet, Text, View, TextInput, Image, ScrollView, TouchableOpacity } from 'react-native';
+import { Button, StyleSheet, Text, View, TextInput, Image, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 import { useAppContext } from '../src/AppContext';
@@ -23,6 +23,7 @@ function Parents({ userId, phone }) {
   } = useTheme();
   const apiName = 'ktsAPI'; // replace this with your api name.
   const [selectedLanguage, setSelectedLanguage] = useState();
+  const [isLoading, setIsLoading] = useState(false);
   const { data, setData } = useAppContext();
 
   const [showForm, setShowForm] = useState(true);
@@ -99,21 +100,25 @@ const handleChange = (field, value) => {
       },
       headers: {} // OPTIONAL
     };
-
+    setIsLoading(true);
     API.post(apiName, path, myInit)
       .then((response) => {
         // Add your code here
+
           AsyncStorage.setItem('parentData', JSON.stringify(formData))
           .then(() => {
             console.log('User data saved successfully');
             setShowOtherBtn(true);
+             setIsLoading(false);
             navigation.navigate('children');
           })
           .catch((error) => {
+             setIsLoading(false);
             console.log('Error saving user data:', error);
           });
       })
       .catch((error) => {
+        setIsLoading(false);
         console.log(error.response);
       });
 
@@ -200,13 +205,17 @@ const handleChange = (field, value) => {
           </View>
         </View>
       ) : (
-         <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={[styles.button, { backgroundColor: '#2196F3' }]}
-            onPress={handleSubmit}
-          >
-            <Text style={[styles.textStyle, { backgroundColor: '#2196F3' }]}>SUBMIT</Text>
-          </TouchableOpacity>
+        <View style={styles.buttonContainer}>
+          {isLoading ? (
+            <ActivityIndicator size="small" color="#2196F3" />
+          ) : (
+            <TouchableOpacity
+              style={[styles.button, { backgroundColor: '#2196F3' }]}
+              onPress={handleSubmit}
+            >
+              <Text style={[styles.textStyle, { backgroundColor: '#2196F3' }]}>SUBMIT</Text>
+            </TouchableOpacity>
+          )}
         </View>
       )}
         

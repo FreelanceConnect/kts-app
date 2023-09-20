@@ -1,9 +1,10 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const DriverInfoScreen = () => {
   // Sample data for demonstration
-  const children = [
+  const dummychildren = [
     {
       id: 1,
       name: 'Sherina',
@@ -15,20 +16,44 @@ const DriverInfoScreen = () => {
         rating: 4.5,
         feedback: 'Great driver!',
       },
-      pickTime: '08:00 AM',
-      dropOffTime: '08:30 AM',
+      pickTime: '',
+      dropOffTime: '',
       schoolFinishTime: '03:00 PM',
     },
     {
       id: 2,
       name: 'Emily',
       driver: null, // No driver assigned yet
-      pickTime: '09:00 AM',
-      dropOffTime: '09:30 AM',
+      pickTime: '',
+      dropOffTime: '',
       schoolFinishTime: '03:00 PM',
     },
     // Add more children data as needed
   ];
+
+  const [children, setChildren] = useState([]);
+
+  useEffect(() => {
+    fetchChildrenData();
+  }, []);
+
+  const fetchChildrenData = async () => {
+    try {
+      const storedChildren = await AsyncStorage.getItem('studentsData');
+      if (storedChildren) {
+        const updateChildren = JSON.parse(storedChildren);
+        setChildren(dummychildren);
+        // console.log("dummy children");
+        console.log("Stored students", updateChildren.updatedStudents[0]);
+      }
+      else {
+       console.log("dummies");
+       setChildren(dummychildren);
+      }
+    } catch (error) {
+      console.log('Error fetching children data:', error);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -38,8 +63,8 @@ const DriverInfoScreen = () => {
           <View style={styles.infoContainer}>
             <View style={styles.column}>
               <Text style={styles.infoLabel}>Student Info:</Text>
-              <Text style={styles.infoText}>Pick Time: {child.pickTime}</Text>
-              <Text style={styles.infoText}>Drop-Off Time: {child.dropOffTime}</Text>
+              <Text style={styles.infoText}>Pick Time: {child.pickTime ? child.pickTime : 'Waiting for admin'}</Text>
+              <Text style={styles.infoText}>Drop-Off Time: {child.dropOffTime ? child.dropOffTime : 'Waiting for admin'}</Text>
               <Text style={styles.infoText}>School Finish Time: {child.schoolFinishTime}</Text>
             </View>
             <View style={[styles.column, styles.largeColumn]}>
@@ -87,11 +112,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   column: {
-    flex: 1,
+    flex: 2,
     paddingHorizontal: 8,
   },
   largeColumn: {
-    flex: 2,
+    flex: 3,
   },
   infoLabel: {
     fontSize: 16,

@@ -1,4 +1,4 @@
-import { View, Text, TextInput, Button, StyleSheet, Image, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Image, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { Amplify, API } from 'aws-amplify';
 import { useNavigation } from '@react-navigation/native';
@@ -10,6 +10,7 @@ function StudentForm() {
   const apiName = 'ktsAPI';
   const [showForm, setShowForm] = useState(true);
   const [btnText, setBtnText] = useState('Add Another Student')
+  const [isLoading, setIsLoading] = useState(false);
   const [students, setStudents] = useState([]);
   const [parentName, setParentName]=useState('');
   const [parent_id, setParent_id]=useState('');
@@ -58,19 +59,31 @@ function StudentForm() {
     }
 
     if (isValid) {
+    setIsLoading(true);
     const path = `/students`;
     const myInit = {
       body: {
         student_id: "787978787878kk",
+        student: name,
         parent_id: "11111111112",
         parentName: parentName,
+        transportPlan: transportPlan,
+        school: school,
         address: {
           quarter: parentQuarter,
           zone: parentZone,
         },
-        student: name,
-        transportPlan: transportPlan,
-        school: school,
+        driver: {
+        picture: '',
+        name: '',
+        phoneNumber: '',
+        carImmatriculation: '',
+        rating: "",
+        feedback: '',
+      },
+      pickTime: '',
+      dropOffTime: '',
+      schoolFinishTime: '03:00 PM',
       },
       headers: {} // OPTIONAL
     };
@@ -84,9 +97,11 @@ function StudentForm() {
         AsyncStorage.setItem('studentsData', JSON.stringify(studentsObject))
           .then(() => {
             console.log('User data saved successfully');
+            setIsLoading(false);
           })
           .catch((error) => {
             console.log('Error saving user data:', error);
+            setIsLoading(false);
           });
         return updatedStudents;
       });
@@ -107,6 +122,7 @@ function StudentForm() {
       })
       .catch((error) => {
         console.log(error.response);
+        setIsLoading(false);
       });
     } else {
       setFormData({ ...formData, errors });
@@ -174,6 +190,7 @@ function StudentForm() {
 
     fetchData();
     fetchStudentData();
+
   }, []);
 
   return (
@@ -186,10 +203,9 @@ function StudentForm() {
     <View key={index}>
     <View style={styles.cardContainer}>
       <>
-        <Text style={styles.infoLabel}>Student Info:</Text>
+        <Text style={styles.infoLabel}>Student: {student.name}</Text>
         <View style={styles.studentInfoContainer}>
           <View style={styles.studentDetails}>
-            <Text style={styles.studentName}>Name: {student.name}</Text>
             <Text style={styles.studentPhone}>Transport Plan: {student.transportPlan}</Text>
             <Text style={styles.studentID}>School: {student.school}</Text>
             <Text style={styles.studentGrade}>Class: {student.class}</Text>
@@ -244,9 +260,16 @@ function StudentForm() {
           />
 
           <View style={styles.buttonContainer}>
-            <TouchableOpacity style={[styles.button, { backgroundColor: '#2196F3' }]} onPress={handleAddStudent}>
-              <Text style={[styles.textStyle, { backgroundColor: '#2196F3' }]}>Add Student</Text>
-            </TouchableOpacity>
+            {isLoading ? (
+              <ActivityIndicator size="small" color="#2196F3" />
+            ) : (
+              <TouchableOpacity
+                style={[styles.button, { backgroundColor: '#2196F3' }]}
+                onPress={handleAddStudent}
+              >
+                <Text style={[styles.textStyle, { backgroundColor: '#2196F3' }]}>Add Student</Text>
+              </TouchableOpacity>
+            )}
           </View>
         </>
       )}
