@@ -3,33 +3,6 @@ import { View, Text, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const DriverInfoScreen = () => {
-  // Sample data for demonstration
-  const dummychildren = [
-    {
-      id: 1,
-      name: 'Sherina',
-      driver: {
-        picture: 'driver1.jpg',
-        name: 'Abada',
-        phoneNumber: '+1234567890',
-        carImmatriculation: 'ABC123',
-        rating: 4.5,
-        feedback: 'Great driver!',
-      },
-      pickTime: '',
-      dropOffTime: '',
-      schoolFinishTime: '03:00 PM',
-    },
-    {
-      id: 2,
-      name: 'Emily',
-      driver: null, // No driver assigned yet
-      pickTime: '',
-      dropOffTime: '',
-      schoolFinishTime: '03:00 PM',
-    },
-    // Add more children data as needed
-  ];
 
   const [children, setChildren] = useState([]);
 
@@ -42,8 +15,8 @@ const DriverInfoScreen = () => {
       const storedChildren = await AsyncStorage.getItem('studentsData');
       if (storedChildren) {
         const updateChildren = JSON.parse(storedChildren);
-        console.log("Stored students", updateChildren.updatedStudents);
         const storedData = updateChildren.updatedStudents;
+        console.log("this is stored data", storedData[0]);
         const childObjects = storedData.map((student, index) => {
         return {
           id: index + 1,
@@ -77,18 +50,18 @@ const DriverInfoScreen = () => {
     <View style={styles.container}>
       {children.map((child) => (
         <View key={child.id} style={styles.childContainer}>
-          <Text style={styles.childName}>{child.name}</Text>
           <View style={styles.infoContainer}>
             <View style={styles.column}>
               <Text style={styles.infoLabel}>Student Info:</Text>
+              <Text style={styles.childName}>Name: {child.name}</Text>
               <Text style={styles.infoText}>Pick Time: {child.pickTime ? child.pickTime : 'Waiting for admin'}</Text>
               <Text style={styles.infoText}>Drop-Off Time: {child.dropOffTime ? child.dropOffTime : 'Waiting for admin'}</Text>
               <Text style={styles.infoText}>School Finish Time: {child.schoolFinishTime}</Text>
             </View>
             <View style={[styles.column, styles.largeColumn]}>
-              {child.driver ? (
+            <Text style={styles.infoLabel}>Driver Info:</Text>
+              {child.driver.name !=="" ? (
                 <>
-                  <Text style={styles.infoLabel}>Driver Info:</Text>
                   <View style={styles.driverInfoContainer}>
                     <View style={styles.driverDetails}>
                       <Text style={styles.driverName}>{child.driver.name}</Text>
