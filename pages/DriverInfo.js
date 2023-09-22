@@ -1,6 +1,8 @@
 import React, {useState, useEffect} from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import MyAppLogo from '../components/Logo';
+import StickyFooter from '../components/StickyFooter';
 
 const DriverInfoScreen = () => {
 
@@ -18,9 +20,10 @@ const DriverInfoScreen = () => {
         const storedData = updateChildren.updatedStudents;
         console.log("this is stored data", storedData[0]);
         const childObjects = storedData.map((student, index) => {
+          console.log("this is a student", student.student)
         return {
           id: index + 1,
-          name: student.name,
+          name: student.student,
           driver: {
             picture: student.driver.picture,
             name: student.driver.name,
@@ -47,19 +50,21 @@ const DriverInfoScreen = () => {
   };
 
   return (
+    <ScrollView>
+    <MyAppLogo />
     <View style={styles.container}>
       {children.map((child) => (
         <View key={child.id} style={styles.childContainer}>
           <View style={styles.infoContainer}>
             <View style={styles.column}>
-              <Text style={styles.infoLabel}>Student Info:</Text>
-              <Text style={styles.childName}>Name: {child.name}</Text>
+              <Text style={styles.infoLabel}>Student</Text>
+              <Text style={styles.childName}>{child.name}</Text>
               <Text style={styles.infoText}>Pick Time: {child.pickTime ? child.pickTime : 'Waiting for admin'}</Text>
               <Text style={styles.infoText}>Drop-Off Time: {child.dropOffTime ? child.dropOffTime : 'Waiting for admin'}</Text>
               <Text style={styles.infoText}>School Finish Time: {child.schoolFinishTime}</Text>
             </View>
             <View style={[styles.column, styles.largeColumn]}>
-            <Text style={styles.infoLabel}>Driver Info:</Text>
+            <Text style={styles.infoLabel}>Driver</Text>
               {child.driver.name !=="" ? (
                 <>
                   <View style={styles.driverInfoContainer}>
@@ -83,6 +88,9 @@ const DriverInfoScreen = () => {
         </View>
       ))}
     </View>
+    <StickyFooter title="Your Footer Title" />
+  </ScrollView>
+
   );
 };
 
@@ -95,7 +103,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   childName: {
-    fontSize: 18,
+    fontSize: 14,
     fontWeight: 'bold',
     marginBottom: 8,
   },

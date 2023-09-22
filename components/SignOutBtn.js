@@ -9,7 +9,7 @@ const SignOutButton = () => {
   const { signOut } = useAuthenticator();
 
   return (
-          <View style={styles.buttonContainer}>
+        <View style={styles.buttonContainer}>
          <TouchableOpacity style={[styles.button, { backgroundColor: '#e60000' }]} onPress={signOut}>
               <Text style={[styles.textStyle, { backgroundColor: '#e60000' }]}>LOGOUT</Text>
           </TouchableOpacity>

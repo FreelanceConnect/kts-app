@@ -137,6 +137,7 @@ function StudentForm() {
       setStudents(prevStudents => {
         const updatedStudents = [...prevStudents, newStudent];
         const studentsObject = { updatedStudents };
+        console.log(studentsObject);
         AsyncStorage.setItem('studentsData', JSON.stringify(studentsObject))
           .then(() => {
             console.log('User data saved successfully');
@@ -222,6 +223,7 @@ function StudentForm() {
 
           // Use setStudents to update the state
           setShowForm(false);
+          console.log(students);
           setStudents(students);
           // navigation.navigate('DriverInfo');
         }
@@ -242,6 +244,8 @@ const deleteDataFromAsyncStorage = async (key) => {
 
     fetchData();
     fetchStudentData();
+    // deleteDataFromAsyncStorage("parentData");
+    // deleteDataFromAsyncStorage("studentsData");
 
 
   }, []);
