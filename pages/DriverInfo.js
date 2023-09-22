@@ -50,6 +50,7 @@ const DriverInfoScreen = () => {
   };
 
   return (
+    <>
     <ScrollView>
     <MyAppLogo />
     <View style={styles.container}>
@@ -88,8 +89,9 @@ const DriverInfoScreen = () => {
         </View>
       ))}
     </View>
-    <StickyFooter title="Your Footer Title" />
   </ScrollView>
+  <StickyFooter title="Your Footer Title" />
+  </>
 
   );
 };

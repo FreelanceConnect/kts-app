@@ -88,7 +88,7 @@ function StudentForm() {
     const student_id = generateUniqueId();
     const path = `/students`;
     const myInit = {
-      body: {
+    body: {
         student_id: student_id,
         student: name,
         parent_id: parent_id,
@@ -108,7 +108,7 @@ function StudentForm() {
         rating: "",
         feedback: '',
       },
-        driverMorning: {
+      driverMorning: {
         picture: '',
         name: '',
         phoneNumber: '',
@@ -137,7 +137,6 @@ function StudentForm() {
       setStudents(prevStudents => {
         const updatedStudents = [...prevStudents, newStudent];
         const studentsObject = { updatedStudents };
-        console.log(studentsObject);
         AsyncStorage.setItem('studentsData', JSON.stringify(studentsObject))
           .then(() => {
             console.log('User data saved successfully');
@@ -165,7 +164,7 @@ function StudentForm() {
         // Add your code here
       })
       .catch((error) => {
-        console.log(error.response);
+        console.log(error);
         setIsLoading(false);
       });
     } else {
@@ -193,7 +192,6 @@ function StudentForm() {
         const parentdata = await AsyncStorage.getItem('parentData');
         if (parentdata !== null) {
           const data= JSON.parse(parentdata);
-          console.log(data);
           setParentName(data.name);
           setParentQuarter(data.quarter);
           setParentZone(data.zone);
@@ -207,31 +205,64 @@ function StudentForm() {
 
 
 // Fetch student data from Async Storage
-    const fetchStudentData = async () => {
-      try {
-        const studentdata = await AsyncStorage.getItem('studentsData');
-        if (studentdata.lentgh !== 0 && studentdata !== null) {
-          const datas= JSON.parse(studentdata);
-          // Update the students array
-          const updatedStudents = datas.updatedStudents;
-          const students = updatedStudents.map(student => ({
-            class: student.class,
-            name: student.name,
-            school: student.school,
-            transportPlan: student.transportPlan
-          }));
+const fetchStudentData = async () => {
+  try {
+    const studentData = await AsyncStorage.getItem('studentsData');
+    if (studentData && studentData.length !== 0) {
+      const parsedData = JSON.parse(studentData);
+      const updatedStudents = parsedData.updatedStudents;
+      const students = updatedStudents.map(student => ({
+        student_id: student.student_id,
+        student: student.name,
+        parent_id: student.parent_id,
+        parentName: student.parentName,
+        transportPlan: student.transportPlan,
+        school: student.school,
+        schoolOffTime: selectedTime,
+        address: {
+          quarter: student.parentQuarter,
+          zone: student.parentZone,
+        },
+        driver: {
+          picture: student.driver.picture,
+          name: student.driver.name,
+          phoneNumber: student.driver.phoneNumber,
+          carImmatriculation: student.driver.carImmatriculation,
+          rating: student.driver.rating,
+          feedback: student.driver.feedback,
+        },
+        driverMorning: {
+          picture: student.driverMorning.picture,
+          name: student.driverMorning.name,
+          phoneNumber: student.driverMorning.phoneNumber,
+          carImmatriculation: student.driverMorning.carImmatriculation,
+          rating: student.driverMorning.rating,
+          feedback: student.driverMorning.feedback,
+        },
+        driverEvening: {
+          picture: student.driverEvening.picture,
+          name: student.driverEvening.name,
+          phoneNumber: student.driverEvening.phoneNumber,
+          carImmatriculation: student.driverEvening.carImmatriculation,
+          rating: student.driverEvening.rating,
+          feedback: student.driverEvening.feedback,
+        },
+        pickTime: student.pickTime,
+        dropOffTime: student.dropOffTime,
+        schoolFinishTime: student.schoolFinishTime,
+      }));
 
-          // Use setStudents to update the state
-          setShowForm(false);
-          console.log(students);
-          setStudents(students);
-          // navigation.navigate('DriverInfo');
-        }
-        else console.log('no Student data yet');
-      } catch (error) {
-        console.log('Error retrieving data:', error);
-      }
-    };
+      setShowForm(false);
+      setStudents(students);
+      // navigation.navigate('DriverInfo');
+    } else {
+      console.log('No student data yet');
+    }
+  } catch (error) {
+    console.log('Error retrieving data:', error);
+  }
+};
+
 
 const deleteDataFromAsyncStorage = async (key) => {
   try {

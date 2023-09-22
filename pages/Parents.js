@@ -110,7 +110,7 @@ const handleChange = (field, value) => {
           .then(() => {
             console.log('User data saved successfully');
             setShowOtherBtn(true);
-             setIsLoading(false);
+            setIsLoading(false);
             navigation.navigate('children');
           })
           .catch((error) => {
@@ -126,12 +126,12 @@ const handleChange = (field, value) => {
     }
   };
 
-    useEffect(() => {
+  useEffect(() => {
     const fetchData = async () => {
       try {
         const parentdata = await AsyncStorage.getItem('parentData');
         if (parentdata !== null) {
-          const data= JSON.parse(parentdata);
+        const data= JSON.parse(parentdata);
         setFormData((prevFormData) => ({
           ...prevFormData,
           name: data.name,
