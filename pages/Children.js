@@ -213,7 +213,7 @@ const fetchStudentData = async () => {
       const updatedStudents = parsedData.updatedStudents;
       const students = updatedStudents.map(student => ({
         student_id: student.student_id,
-        student: student.name,
+        student: student.student,
         parent_id: student.parent_id,
         parentName: student.parentName,
         transportPlan: student.transportPlan,
@@ -291,7 +291,7 @@ const deleteDataFromAsyncStorage = async (key) => {
     <View key={index}>
     <View style={styles.cardContainer}>
       <>
-        <Text style={styles.infoLabel}>Student: {student.name}</Text>
+        <Text style={styles.infoLabel}>Student: {student.student}</Text>
         <View style={styles.studentInfoContainer}>
           <View style={styles.studentDetails}>
             <Text style={styles.studentPhone}>Transport Plan: {student.transportPlan}</Text>
