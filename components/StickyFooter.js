@@ -1,10 +1,17 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
+import { Feather } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { FontAwesome5 } from '@expo/vector-icons';
+
 const StickyFooter = ({ title }) => {
   return (
     <View style={styles.footerContainer}>
-      <Text style={styles.footerTitle}>{title}</Text>
+      <MaterialCommunityIcons name="account" size={50} color="black" />
+      <Feather name="settings" size={50} color="black" />
+
+      <FontAwesome5 name="child" size={50} color="black" /> 
     </View>
   );
 };
@@ -23,6 +30,10 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: -2 }, // for iOS shadow
     shadowOpacity: 0.8, // for iOS shadow
     zIndex: 1, // to ensure the footer is above other components
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
   },
   footerTitle: {
     fontSize: 18,

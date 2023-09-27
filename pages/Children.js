@@ -95,6 +95,7 @@ function StudentForm() {
         parentName: parentName,
         transportPlan: transportPlan,
         school: school,
+        class: studentClass,
         schoolOffTime: selectedTime,
         address: {
           quarter: parentQuarter,
@@ -211,6 +212,7 @@ const fetchStudentData = async () => {
     if (studentData && studentData.length !== 0) {
       const parsedData = JSON.parse(studentData);
       const updatedStudents = parsedData.updatedStudents;
+      // console.log(updatedStudents[0].class);
       const students = updatedStudents.map(student => ({
         student_id: student.student_id,
         student: student.student,
@@ -218,6 +220,7 @@ const fetchStudentData = async () => {
         parentName: student.parentName,
         transportPlan: student.transportPlan,
         school: student.school,
+        class: student.class,
         schoolOffTime: selectedTime,
         address: {
           quarter: student.parentQuarter,
