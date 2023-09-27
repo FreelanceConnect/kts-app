@@ -10,6 +10,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import MyAppLogo from '../components/Logo';
 import SignOutButton from '../components/SignOutBtn';
+import StickyFooter from '../components/StickyFooter';
 import {  
   Authenticator,
   useAuthenticator,
@@ -151,6 +152,7 @@ const handleChange = (field, value) => {
   }, []);
 
   return (
+    <>
     <ScrollView>
     <View style={styles.container}>
 
@@ -224,6 +226,7 @@ const handleChange = (field, value) => {
         </View>
     </View>
     </ScrollView>
+    </>
   );
 }
 

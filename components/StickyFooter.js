@@ -8,10 +8,10 @@ import { FontAwesome5 } from '@expo/vector-icons';
 const StickyFooter = ({ title }) => {
   return (
     <View style={styles.footerContainer}>
-      <MaterialCommunityIcons name="account" size={50} color="black" />
-      <Feather name="settings" size={50} color="black" />
+      <MaterialCommunityIcons name="account" size={40} color="black" />
+      <Feather name="settings" size={40} color="black" />
 
-      <FontAwesome5 name="child" size={50} color="black" /> 
+      <FontAwesome5 name="child" size={40} color="black" /> 
     </View>
   );
 };

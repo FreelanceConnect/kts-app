@@ -3,14 +3,36 @@ import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import MyAppLogo from '../components/Logo';
 import StickyFooter from '../components/StickyFooter';
+import { Amplify, API } from 'aws-amplify';
 
 const DriverInfoScreen = () => {
 
   const [children, setChildren] = useState([]);
+  const apiName = 'ktsAPI'; // replace this with your api name.
+  const path = `/students`;
+    const myInit = {
+       headers: { 
+       // Allow POST method
+        },
+      response: true,
+  };
 
   useEffect(() => {
     fetchChildrenData();
+    fetchInfoFromAPI();
   }, []);
+
+  const fetchInfoFromAPI = () => {
+        API.get(apiName, path, myInit)
+        .then((response) => {
+          // Add your code here
+          console.log("success");
+          console.log(response.data);
+        })
+        .catch((error) => {
+          console.log(error.response);
+        });
+  }
 
   const fetchChildrenData = async () => {
     try {
