@@ -38,6 +38,25 @@
           "delete"
         ]
       }
+    },
+    "/drivers": {
+      "name": "/drivers",
+      "lambdaFunction": "driversFunction",
+      "permissions": {
+        "setting": "protected",
+        "auth": [
+          "create",
+          "read",
+          "update",
+          "delete"
+        ],
+        "guest": [
+          "create",
+          "read",
+          "update",
+          "delete"
+        ]
+      }
     }
   }
 }

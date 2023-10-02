@@ -19,6 +19,13 @@ export type AmplifyDependentResourcesAttributes = {
     }
   },
   "function": {
+    "driversFunction": {
+      "Arn": "string",
+      "LambdaExecutionRole": "string",
+      "LambdaExecutionRoleArn": "string",
+      "Name": "string",
+      "Region": "string"
+    },
     "parentFunction": {
       "Arn": "string",
       "LambdaExecutionRole": "string",
@@ -35,6 +42,14 @@ export type AmplifyDependentResourcesAttributes = {
     }
   },
   "storage": {
+    "Drivers": {
+      "Arn": "string",
+      "Name": "string",
+      "PartitionKeyName": "string",
+      "PartitionKeyType": "string",
+      "Region": "string",
+      "StreamArn": "string"
+    },
     "parentsTable": {
       "Arn": "string",
       "Name": "string",

@@ -24,11 +24,16 @@
         "studentFunction": {
           "deploymentBucketName": "amplify-ktsapps-dev-192318-deployment",
           "s3Key": "amplify-builds/studentFunction-5a437a466962716f466d-build.zip"
+        },
+        "driversFunction": {
+          "deploymentBucketName": "amplify-ktsapps-dev-192318-deployment",
+          "s3Key": "amplify-builds/driversFunction-787a3051783467344261-build.zip"
         }
       },
       "storage": {
         "parentsTable": {},
-        "studentTable": {}
+        "studentTable": {},
+        "Drivers": {}
       },
       "api": {
         "ktsAPI": {}

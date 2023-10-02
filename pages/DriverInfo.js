@@ -5,7 +5,8 @@ import MyAppLogo from '../components/Logo';
 import StickyFooter from '../components/StickyFooter';
 import { Amplify, API } from 'aws-amplify';
 
-const DriverInfoScreen = () => {
+const DriverInfoScreen = ({route}) => {
+  const { parent_id } = route.params;
 
   const [children, setChildren] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -19,9 +20,29 @@ const DriverInfoScreen = () => {
   };
 
   useEffect(() => {
+    console.log("Here is parent_id in driver info", parent_id);
+    fetchData();
     fetchChildrenData();
     fetchInfoFromAPI();
   }, []);
+
+
+
+    const fetchData = async () => {
+      try {
+        const parentdata = await AsyncStorage.getItem('parentData');
+        if (parentdata !== null) {
+          const data= JSON.parse(parentdata);
+          setParentName(data.name);
+          setParentQuarter(data.quarter);
+          setParentZone(data.zone);
+          setParent_id(data.parent_id);
+        }
+        else console.log('no Parent data yet');
+      } catch (error) {
+        console.log('Error retrieving data:', error);
+      }
+    };
 
   const fetchInfoFromAPI = () => {
         setIsLoading(true);
@@ -29,11 +50,11 @@ const DriverInfoScreen = () => {
         .then((response) => {
           // Add your code here
         const dataFromAPI = response.data;
-        console.log("here is data from API", dataFromAPI);
         const childObjects = dataFromAPI.map((student, index) => {
         return {
           id: index + 1,
           name: student.student,
+          parent_id: student.parent_id,
           driver: {
             picture: student.driver.picture,
             name: student.driver.name,
@@ -107,36 +128,26 @@ const DriverInfoScreen = () => {
                 <ActivityIndicator size="small" color="#2196F3" />
                ) : (
                <>
-               <Text style={styles.infoText}>Pick Time: {child.pickTime ? child.pickTime : 'Waiting for admin'}</Text>
-               <Text style={styles.infoText}>Drop-Off Time: {child.dropOffTime ? child.dropOffTime : 'Waiting for admin'}</Text>
-              <Text style={styles.infoText}>School Finish Time: {child.schoolFinishTime}</Text>
+               <Text style={styles.infoText}>Pick Up: {child.pickTime ? child.pickTime : 'Waiting for admin'}</Text>
+               <Text style={styles.infoText}>Drop-Off: {child.dropOffTime ? child.dropOffTime : 'Waiting for admin'}</Text>
+              <Text style={styles.infoText}>School End: {child.schoolFinishTime}</Text>
               </>
               )}
             </View>
             <View style={[styles.column, styles.largeColumn]}>
-            <Text style={styles.infoLabel}>Driver</Text>
-              {child.driver.name !=="" ? (
-                <>
+                 <Text style={styles.infoLabel}>Driver</Text>
                   <View style={styles.driverInfoContainer}>
                     <View style={styles.driverDetails}>
-                      {isLoading ? (
-                        <ActivityIndicator size="small" color="#2196F3" />
-                      ) : (
-                        <Text style={styles.driverName}>{child.driver.name}</Text>
-                      )}
-                      <Text style={styles.driverPhone}>{child.driver.phoneNumber}</Text>
-                      <Text style={styles.driverCar}>{child.driver.carImmatriculation}</Text>
+                      <Text style={styles.driverName}>{child.driver.name}</Text>
+                      <Text style={styles.driverPhone}>{(child.driver.phoneNumber === '') ? 'Waiting for the admin' : child.driver.phoneNumber}</Text>
+                      <Text style={styles.driverCar}>{(child.driver.carImmatriculation === '') ? 'Waiting for admin' : child.driver.carImmatriculation}</Text>
                       <Text style={styles.driverRating}>
-                        Rating: {child.driver.rating} stars
+                        Rating: {(child.driver.rating === '') ? 'Waiting for admin' : child.driver.rating} stars
                       </Text>
-                      <Text style={styles.driverFeedback}>{child.driver.feedback}</Text>
+                      <Text style={styles.driverFeedback}>Feedback: {(child.driver.feedback === '') ? 'Waiting for admin' : child.driver.feedback}</Text>
                     </View>
                     <View style={styles.driverPicture}></View>
-                  </View>
-                </>
-              ) : (
-                <Text style={styles.waitingText}>Waiting for Admin</Text>
-              )}
+              </View>
             </View>
           </View>
         </View>

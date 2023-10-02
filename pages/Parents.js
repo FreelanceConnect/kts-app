@@ -107,12 +107,13 @@ const handleChange = (field, value) => {
       .then((response) => {
         // Add your code here
 
-          AsyncStorage.setItem('parentData', JSON.stringify(formData))
+          AsyncStorage.setItem('parentData', JSON.stringify(myInit.body))
           .then(() => {
             console.log('User data saved successfully');
             setShowOtherBtn(true);
             setIsLoading(false);
-            navigation.navigate('children');
+          navigation.navigate('children', {parentName: formData.name, parent_id: userId, 
+            parentZone: formData.zone, parentQuarter: formData.quarter} );
           })
           .catch((error) => {
              setIsLoading(false);
@@ -128,26 +129,80 @@ const handleChange = (field, value) => {
   };
 
   useEffect(() => {
+    console.log("here is parent ID parents component", userId);
+         const fetchInfoFromAPI = () => {
+          const apiName = 'ktsAPI';
+          const path = `/parents/${userId}`;
+          const myInit = {
+             headers: { 
+             // Allow POST method
+              },
+            response: true,
+          };
+          setIsLoading(true);
+          API.get(apiName, path, myInit)
+          .then((response) => {
+          const data = response.data;
+          setIsLoading(false);
+          // Check if user exist in our Dynamo DB
+          if (data.parent_id) {
+
+            setFormData((prevFormData) => ({
+            ...prevFormData,
+            name: data.CustomerName,
+            email: data.email,
+            quarter: data.address.quarter,
+            zone: data.address.zone,
+          }));
+
+          AsyncStorage.setItem('parentData', JSON.stringify(data))
+          .then(() => {
+            console.log('User data saved successfully');
+            setShowOtherBtn(true);
+            setIsLoading(false);
+          // navigation.navigate('children', {parentName: formData.name, parent_id: userId, 
+          //   parentZone: formData.zone, parentQuarter: formData.quarter} );
+          })
+          .catch((error) => {
+             setIsLoading(false);
+            console.log('Error saving user data:', error);
+          });
+          }
+
+          })
+          .catch((error) => {
+            console.log(error.response);
+          });
+      }
+
+      // check User data from our Local storage
+
     const fetchData = async () => {
       try {
         const parentdata = await AsyncStorage.getItem('parentData');
         if (parentdata !== null) {
         const data= JSON.parse(parentdata);
         setFormData((prevFormData) => ({
-          ...prevFormData,
-          name: data.name,
-          email: data.email,
-          quarter: data.quarter,
-          zone: data.zone,
+            ...prevFormData,
+            name: data.CustomerName,
+            email: data.email,
+            quarter: data.address.quarter,
+            zone: data.address.zone,
         }));
           setShowOtherBtn(true);
-          navigation.navigate('children');
+          navigation.navigate('children', {parentName: formData.name, parent_id: userId, 
+            parentZone: formData.zone, parentQuarter: formData.quarter} );
         }
-        else console.log('no user data yet');
+        else {
+          console.log('no user data yet');
+          //get the data from API if no data from our Localstorage
+          fetchInfoFromAPI();
+        }
       } catch (error) {
         console.log('Error retrieving data:', error);
       }
     };
+    // fetchInfoFromAPI();
     fetchData();
   }, []);
 
@@ -200,7 +255,8 @@ const handleChange = (field, value) => {
             </TouchableOpacity>
           </View>
           <View style={styles.element2}>
-            <TouchableOpacity style={[styles.button, { backgroundColor: '#008000' }]} onPress={() => navigation.navigate('children')}>
+            <TouchableOpacity style={[styles.button, { backgroundColor: '#008000' }]} onPress={() => navigation.navigate('children', {parentName: formData.name, parent_id: userId, 
+            parentZone: formData.zone, parentQuarter: formData.quarter})}>
               <Text style={[styles.textStyle, { backgroundColor: '#008000' }]} >NEXT</Text>
             </TouchableOpacity>
           </View>

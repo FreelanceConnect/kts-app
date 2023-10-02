@@ -1,0 +1,10 @@
+{
+  "resourceName": "Drivers",
+  "tableName": "Drivers",
+  "partitionKey": {
+    "fieldName": "driver_id",
+    "fieldType": "string"
+  },
+  "gsi": [],
+  "triggerFunctions": []
+}

@@ -17,6 +17,14 @@
           ],
           "category": "function",
           "resourceName": "studentFunction"
+        },
+        {
+          "attributes": [
+            "Name",
+            "Arn"
+          ],
+          "category": "function",
+          "resourceName": "driversFunction"
         }
       ],
       "providerPlugin": "awscloudformation",
@@ -52,6 +60,25 @@
     }
   },
   "function": {
+    "driversFunction": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributeEnvMap": {
+            "Arn": "TABLE_ARN",
+            "Name": "TABLE_NAME"
+          },
+          "attributes": [
+            "Name",
+            "Arn"
+          ],
+          "category": "storage",
+          "resourceName": "Drivers"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
     "parentFunction": {
       "build": true,
       "dependsOn": [
@@ -92,6 +119,22 @@
     }
   },
   "parameters": {
+    "AMPLIFY_function_driversFunction_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "driversFunction"
+        }
+      ]
+    },
+    "AMPLIFY_function_driversFunction_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "driversFunction"
+        }
+      ]
+    },
     "AMPLIFY_function_parentFunction_deploymentBucketName": {
       "usedBy": [
         {
@@ -126,6 +169,10 @@
     }
   },
   "storage": {
+    "Drivers": {
+      "providerPlugin": "awscloudformation",
+      "service": "DynamoDB"
+    },
     "parentsTable": {
       "providerPlugin": "awscloudformation",
       "service": "DynamoDB"
