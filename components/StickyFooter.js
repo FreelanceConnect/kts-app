@@ -9,9 +9,9 @@ const StickyFooter = ({ title }) => {
   return (
     <View style={styles.footerContainer}>
       <MaterialCommunityIcons name="account" size={40} color="black" />
-      <Feather name="settings" size={40} color="black" />
 
       <FontAwesome5 name="child" size={40} color="black" /> 
+      <Feather name="truck" size={40} color="black" />
     </View>
   );
 };

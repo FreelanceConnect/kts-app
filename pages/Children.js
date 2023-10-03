@@ -15,6 +15,7 @@ import { useNavigation } from "@react-navigation/native";
 import Modal from "../components/MyModal";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import StickyFooter from '../components/StickyFooter';
 
 function StudentForm({ route }) {
     const { parent_id } = route.params;
@@ -340,6 +341,7 @@ function StudentForm({ route }) {
   }, []);
 
   return (
+    <>
     <ScrollView>
       <View style={styles.container}>
         <View style={styles.imageContainer}>
@@ -348,13 +350,13 @@ function StudentForm({ route }) {
             source={require("../assets/KTSLogo.png")}
           />
         </View>
-        {students.map((student, index) => {
-          if (student.parent_id === parent_id) {
-            return (
-              <View key={index}>
-                {isLoading ? (
-                  <ActivityIndicator size="small" color="#2196F3" />
-                ) : (
+        {isLoading ? (
+          <ActivityIndicator size="small" color="#2196F3" />
+        ) : (
+          students.map((student, index) => {
+            if (student.parent_id === parent_id) {
+              return (
+                <View key={index}>
                   <View style={styles.cardContainer}>
                     <>
                       <Text style={styles.infoLabel}>
@@ -385,11 +387,11 @@ function StudentForm({ route }) {
                       </View>
                     </>
                   </View>
-                )}
-              </View>
-            );
-          }
-        })}
+                </View>
+              );
+            }
+          })
+        )}
         {showForm && (
           <>
             <Text style={styles.label}>Name</Text>
@@ -509,7 +511,9 @@ function StudentForm({ route }) {
           </View>
         ) : null}
       </View>
+
     </ScrollView>
+  </>
   );
 }
 

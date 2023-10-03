@@ -118,43 +118,49 @@ const DriverInfoScreen = ({route}) => {
     <ScrollView>
     <MyAppLogo />
     <View style={styles.container}>
-      {children.map((child) => (
-        <View key={child.id} style={styles.childContainer}>
-          <View style={styles.infoContainer}>
-            <View style={styles.column}>
-              <Text style={styles.infoLabel}>Student</Text>
-              <Text style={styles.childName}>{child.name}</Text>
-               {isLoading ? (
-                <ActivityIndicator size="small" color="#2196F3" />
-               ) : (
-               <>
-               <Text style={styles.infoText}>Pick Up: {child.pickTime ? child.pickTime : 'Waiting for admin'}</Text>
-               <Text style={styles.infoText}>Drop-Off: {child.dropOffTime ? child.dropOffTime : 'Waiting for admin'}</Text>
-              <Text style={styles.infoText}>School End: {child.schoolFinishTime}</Text>
-              </>
-              )}
-            </View>
-            <View style={[styles.column, styles.largeColumn]}>
-                 <Text style={styles.infoLabel}>Driver</Text>
-                  <View style={styles.driverInfoContainer}>
-                    <View style={styles.driverDetails}>
-                      <Text style={styles.driverName}>{child.driver.name}</Text>
-                      <Text style={styles.driverPhone}>{(child.driver.phoneNumber === '') ? 'Waiting for the admin' : child.driver.phoneNumber}</Text>
-                      <Text style={styles.driverCar}>{(child.driver.carImmatriculation === '') ? 'Waiting for admin' : child.driver.carImmatriculation}</Text>
-                      <Text style={styles.driverRating}>
-                        Rating: {(child.driver.rating === '') ? 'Waiting for admin' : child.driver.rating} stars
-                      </Text>
-                      <Text style={styles.driverFeedback}>Feedback: {(child.driver.feedback === '') ? 'Waiting for admin' : child.driver.feedback}</Text>
+      {isLoading ? (
+        <ActivityIndicator size="small" color="#2196F3" />
+      ) : (
+        children.map((child) => {
+          if (child.parent_id === parent_id) {
+            return (
+              <View key={child.id} style={styles.childContainer}>
+                <View style={styles.infoContainer}>
+                  <View style={styles.column}>
+                    <Text style={styles.infoLabel}>Student</Text>
+                    <Text style={styles.childName}>{child.name}</Text>
+                    <>
+                      <Text style={styles.infoText}>Pick Up: {child.pickTime ? child.pickTime : 'Waiting for admin'}</Text>
+                      <Text style={styles.infoText}>Drop-Off: {child.dropOffTime ? child.dropOffTime : 'Waiting for admin'}</Text>
+                      <Text style={styles.infoText}>School End: {child.schoolFinishTime}</Text>
+                    </>
+                  </View>
+                  <View style={[styles.column, styles.largeColumn]}>
+                    <Text style={styles.infoLabel}>Driver</Text>
+                    <View style={styles.driverInfoContainer}>
+                      <View style={styles.driverDetails}>
+                        <Text style={styles.driverName}>{child.driver.name}</Text>
+                        <Text style={styles.driverPhone}>{(child.driver.phoneNumber === '') ? 'Waiting for the admin' : child.driver.phoneNumber}</Text>
+                        <Text style={styles.driverCar}>{(child.driver.carImmatriculation === '') ? 'Waiting for admin' : child.driver.carImmatriculation}</Text>
+                        <Text style={styles.driverRating}>
+                          Rating: {(child.driver.rating === '') ? 'Waiting for admin' : child.driver.rating} stars
+                        </Text>
+                        <Text style={styles.driverFeedback}>Feedback: {(child.driver.feedback === '') ? 'Waiting for admin' : child.driver.feedback}</Text>
+                      </View>
+                      <View style={styles.driverPicture}></View>
                     </View>
-                    <View style={styles.driverPicture}></View>
+                  </View>
+                </View>
               </View>
-            </View>
-          </View>
-        </View>
-      ))}
+            );
+          } else {
+            return null; // Skip rendering for other children
+          }
+        })
+      )}
     </View>
   </ScrollView>
-  <StickyFooter title="Your Footer Title" />
+  <StickyFooter title="" />
   </>
 
   );
@@ -166,7 +172,7 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   childContainer: {
-    marginBottom: 16,
+    marginBottom: 30,
   },
   childName: {
     fontSize: 14,
