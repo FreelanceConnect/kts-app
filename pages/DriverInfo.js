@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator} from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Image} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import MyAppLogo from '../components/Logo';
 import StickyFooter from '../components/StickyFooter';
@@ -51,6 +51,12 @@ const DriverInfoScreen = ({route}) => {
           // Add your code here
         const dataFromAPI = response.data;
         const childObjects = dataFromAPI.map((student, index) => {
+        const currentTime = new Date().getHours(); // Get the current hour
+        if (currentTime < 12) {
+          student.driver = student.driverMorning; // Assign driverMorning if it's before noon
+        } else {
+          student.driver = student.driverEvening; // Assign driverEvening if it's noon or later
+        }
         return {
           id: index + 1,
           name: student.student,
@@ -65,7 +71,7 @@ const DriverInfoScreen = ({route}) => {
           },
           pickTime: student.pickTime,
           dropOffTime: student.dropOffTime,
-          schoolFinishTime: student.schoolFinishTime,
+          schoolFinishTime: student.schoolOffTime,
         };
       });
       setChildren(childObjects);
@@ -85,6 +91,7 @@ const DriverInfoScreen = ({route}) => {
         const updateChildren = JSON.parse(storedChildren);
         const storedData = updateChildren.updatedStudents;
         const childObjects = storedData.map((student, index) => {
+
         return {
           id: index + 1,
           name: student.student,
@@ -98,7 +105,7 @@ const DriverInfoScreen = ({route}) => {
           },
           pickTime: student.pickTime,
           dropOffTime: student.dropOffTime,
-          schoolFinishTime: student.schoolFinishTime,
+          schoolFinishTime: student.schoolOffTime,
         };
       });
       setChildren(childObjects);
@@ -123,6 +130,14 @@ const DriverInfoScreen = ({route}) => {
       ) : (
         children.map((child) => {
           if (child.parent_id === parent_id) {
+          const studentTime = child.schoolFinishTime
+          // Parse the string into a Date object
+            const dateObj = new Date(studentTime);
+
+            // Extract the time portion
+            const timeString = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            console.log(child.driver);
+
             return (
               <View key={child.id} style={styles.childContainer}>
                 <View style={styles.infoContainer}>
@@ -132,23 +147,29 @@ const DriverInfoScreen = ({route}) => {
                     <>
                       <Text style={styles.infoText}>Pick Up: {child.pickTime ? child.pickTime : 'Waiting for admin'}</Text>
                       <Text style={styles.infoText}>Drop-Off: {child.dropOffTime ? child.dropOffTime : 'Waiting for admin'}</Text>
-                      <Text style={styles.infoText}>School End: {child.schoolFinishTime}</Text>
+                      <Text style={styles.infoText}>School End: {timeString}</Text>
                     </>
                   </View>
                   <View style={[styles.column, styles.largeColumn]}>
                     <Text style={styles.infoLabel}>Driver</Text>
-                    <View style={styles.driverInfoContainer}>
-                      <View style={styles.driverDetails}>
-                        <Text style={styles.driverName}>{child.driver.name}</Text>
-                        <Text style={styles.driverPhone}>{(child.driver.phoneNumber === '') ? 'Waiting for the admin' : child.driver.phoneNumber}</Text>
-                        <Text style={styles.driverCar}>{(child.driver.carImmatriculation === '') ? 'Waiting for admin' : child.driver.carImmatriculation}</Text>
-                        <Text style={styles.driverRating}>
-                          Rating: {(child.driver.rating === '') ? 'Waiting for admin' : child.driver.rating} stars
-                        </Text>
-                        <Text style={styles.driverFeedback}>Feedback: {(child.driver.feedback === '') ? 'Waiting for admin' : child.driver.feedback}</Text>
+                      <View style={styles.driverInfoContainer}>
+                        {(child.driver.name==="") ? (
+                          <Text style={styles.waitingText}>Waiting for the admin</Text>
+                        ) : (
+                          <>
+                            <View style={styles.driverDetails}>
+                              <Text style={styles.driverName}>Name: {child.driver.name}</Text>
+                              <Text style={styles.driverPhone}>Phone: {child.driver.phoneNumber}</Text>
+                              <Text style={styles.driverCar}>Car: {child.driver.carImmatriculation}</Text>
+                              <Text style={styles.driverRating}>Rating: {child.driver.rating} stars</Text>
+                              <Text style={styles.driverFeedback}>Feedback: {child.driver.feedback}</Text>
+                            </View>
+                            <View style={styles.driverPicture}>
+                              <Image source={{ uri: child.driver.picture }} style={{ width: 100, height: 100 }} />
+                            </View>
+                          </>
+                        )}
                       </View>
-                      <View style={styles.driverPicture}></View>
-                    </View>
                   </View>
                 </View>
               </View>

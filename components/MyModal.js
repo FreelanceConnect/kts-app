@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { View, Modal, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 
-const MyModal = ({ name, TransportPlan, Class,School }) => {
+const MyModal = ({ name, TransportPlan, Class,School, EndTime }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [text, setText] = useState(name);
   const [transportPlan, setTransportPlan] = useState(TransportPlan);
   const [studentClass, setStudentClass] = useState(Class);
   const [school, setSchool] = useState(School);
+  const [endTime, setEndTime] = useState(EndTime);
 
   const handleUpdate = () => {
     // Handle the update logic here
@@ -61,6 +62,14 @@ const MyModal = ({ name, TransportPlan, Class,School }) => {
               value={school}
               onChangeText={setSchool}
               placeholder="Enter school"
+              placeholderTextColor="white"
+              editable={true}
+            />
+            <TextInput
+              style={[styles.input, { color: 'white', borderColor: 'white' }]}
+              value={endTime}
+              onChangeText={setEndTime}
+              placeholder="School End Time"
               placeholderTextColor="white"
               editable={true}
             />

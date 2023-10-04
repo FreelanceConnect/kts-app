@@ -18,7 +18,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import StickyFooter from '../components/StickyFooter';
 
 function StudentForm({ route }) {
-    const { parent_id } = route.params;
+    const { parent_id, parentName, parentQuarter, parentZone} = route.params;
   const navigation = useNavigation();
   const apiName = "ktsAPI";
   const [showForm, setShowForm] = useState(true);
@@ -195,7 +195,6 @@ function StudentForm({ route }) {
 
   // Fetch Parents data from async storage
   useEffect(() => {
-    console.log("here is parent ID chidren component",parent_id);
 
     const fetchInfoFromAPI = () => {
       setIsLoading(true);
@@ -355,6 +354,7 @@ function StudentForm({ route }) {
         ) : (
           students.map((student, index) => {
             if (student.parent_id === parent_id) {
+              const studentTime=student.schoolOffTime.toLocaleTimeString().split(':').slice(0, 2).join(':');
               return (
                 <View key={index}>
                   <View style={styles.cardContainer}>
@@ -373,13 +373,14 @@ function StudentForm({ route }) {
                           <Text style={styles.studentGrade}>
                             Class: {student.class}
                           </Text>
-                          <Text style={styles.studentFeedback}>Status: </Text>
+                          <Text style={styles.studentFeedback}>End Time: {studentTime}</Text>
                           <View style={styles.Modalcontainer} key={index}>
                             <Modal
-                              name={student.name}
+                              name={student.student}
                               TransportPlan={student.transportPlan}
                               Class={student.class}
                               School={student.school}
+                              EndTime= {studentTime}
                             />
                           </View>
                         </View>
