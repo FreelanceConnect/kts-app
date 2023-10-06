@@ -129,7 +129,6 @@ const handleChange = (field, value) => {
   };
 
   useEffect(() => {
-    console.log("here is parent ID parents component", userId);
          const fetchInfoFromAPI = () => {
           const apiName = 'ktsAPI';
           const path = `/parents/${userId}`;

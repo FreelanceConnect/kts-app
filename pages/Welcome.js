@@ -4,6 +4,7 @@ import { Button, StyleSheet, Text, View, TextInput, Image, ScrollView, ActivityI
 import { Amplify, API, Auth } from 'aws-amplify';
 import { Picker } from '@react-native-picker/picker';
 import { useAppContext } from '../src/AppContext';
+import { useNavigation } from "@react-navigation/native";
 import {
   Authenticator,
   useAuthenticator,
@@ -13,16 +14,17 @@ import {
 import Parents from './Parents'
 import MyAppLogo from '../components/Logo';
 
-function SignOutButton() {
+function SignOutButton() {e
   const { signOut } = useAuthenticator();
   return <Button onPress={signOut} title="Sign Out" />;
 }
 
-function App({ navigation }) {
+function App() {
   const [phone, setPhone] = useState('');
   const [selectedLanguage, setSelectedLanguage] = useState();
   const [parentId, setParentId] = useState();
   const [isLoading, setIsLoading] = useState(true);
+  const navigation = useNavigation();
 
   const { data, setData } = useAppContext();
 
@@ -30,12 +32,15 @@ function App({ navigation }) {
     const fetchUserData = async () => {
       try {
         const user = await Auth.currentUserInfo();
-        console.log("This is user on welcome page", user);
         setPhone(user.attributes.phone_number);
         const cleanedNumber = user.attributes.phone_number.replace(/\D/g, '');
         const firstPart = cleanedNumber.substring(0, 3);
         const remainingPart = cleanedNumber.substring(3);
         const userID = `KTS-P-${remainingPart}`;
+        const driverID = `KTS-D-${remainingPart}`;
+         
+        CheckIfDriver(driverID);
+        setPhone(user.attributes.phone_number);
         setParentId(userID);
         setIsLoading(false);
       } catch (error) {
@@ -45,6 +50,29 @@ function App({ navigation }) {
 
     fetchUserData();
   }, []);
+
+      const CheckIfDriver = async({driverID})=> {
+          const apiName = 'ktsAPI';
+          driverID="KTS-D-653099451";
+          const path = `/drivers/${driverID}`;
+          const myInit = {
+             headers: { 
+             // Allow POST method
+              },
+            response: true,
+          };
+          API.get(apiName, path, myInit)
+          .then((response) => {
+          const data = response.data;
+          // Check if user exist in our Dynamo DB
+          if (data.driver_id) {
+            navigation.navigate('DriverScreen', {driver_id: driver_id} );
+          }
+          })
+          .catch((error) => {
+            console.log(error.response);
+          });
+      }
 
   const {
     tokens: { colors },

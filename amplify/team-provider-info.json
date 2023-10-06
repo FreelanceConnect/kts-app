@@ -14,7 +14,8 @@
     },
     "categories": {
       "auth": {
-        "ktsauth": {}
+        "ktsauth": {},
+        "userPoolGroups": {}
       },
       "function": {
         "parentFunction": {

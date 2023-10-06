@@ -17,12 +17,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import StickyFooter from '../components/StickyFooter';
 
-function StudentForm({ route }) {
-  const { parent_id, parentName, parentQuarter, parentZone} = route.params;
+function DriverScreen({ route }) {
+    const { parent_id, parentName, parentQuarter, parentZone} = route.params;
   const navigation = useNavigation();
   const apiName = "ktsAPI";
   const [showForm, setShowForm] = useState(true);
-  const [shownext, setShowNext] = useState(false);
   const [btnText, setBtnText] = useState("Add Another Child");
   const [isLoading, setIsLoading] = useState(false);
   const [students, setStudents] = useState([]);
@@ -151,7 +150,6 @@ function StudentForm({ route }) {
               .then(() => {
                 console.log("User data saved successfully");
                 setIsLoading(false);
-                setShowNext(true);
               })
               .catch((error) => {
                 console.log("Error saving user data:", error);
@@ -200,6 +198,7 @@ function StudentForm({ route }) {
 
     const fetchInfoFromAPI = () => {
       setIsLoading(true);
+      setShowForm(false);
       const apiName = "ktsAPI";
       const path = `/students`;
       const myInit = {
@@ -214,12 +213,6 @@ function StudentForm({ route }) {
           const data = response.data;
           setIsLoading(false);
           const students = data.map((student) => {
-            const myparent_id = student.parent_id;
-            if (parent_id===myparent_id) {
-              setShowForm(false);
-              setShowNext(true);
-            }
-
             return {
               student_id: student.student_id,
               student: student.student,
@@ -261,10 +254,9 @@ function StudentForm({ route }) {
               dropOffTime: student.dropOffTime,
               schoolFinishTime: student.schoolFinishTime,
             };
-          
           });
           setStudents(students);
-
+          setShowForm(false);
         })
         .catch((error) => {
           console.log(error.response);
@@ -358,14 +350,9 @@ function StudentForm({ route }) {
           />
         </View>
         {isLoading ? (
-          <ActivityIndicator size="large" color="#2196F3" />
+          <ActivityIndicator size="small" color="#2196F3" />
         ) : (
           students.map((student, index) => {
-
-            // if (student.parent_id === parent_id && index === 0) {
-            //   setShowNext(true);
-            //   setShowForm(false);
-            // }
             if (student.parent_id === parent_id) {
               const studentTime=student.schoolOffTime.toLocaleTimeString().split(':').slice(0, 2).join(':');
               return (
@@ -406,89 +393,97 @@ function StudentForm({ route }) {
             }
           })
         )}
-           {isLoading ? (
-            <ActivityIndicator style={styles.spinner} size="large" color="#2196F3" />
-          ) : (
-            showForm && (
-              <>
-                <Text style={styles.label}>Name</Text>
-                {formData.errors.nameError && (
-                  <Text style={styles.error}>{formData.errors.nameError}</Text>
-                )}
-                <TextInput
-                  style={styles.input}
-                  value={formData.name}
-                  onChangeText={(text) => handleInputChange("name", text)}
-                  placeholder="Name"
+        {showForm && (
+          <>
+            <Text style={styles.label}>Name</Text>
+            {formData.errors.nameError && (
+              <Text style={styles.error}>{formData.errors.nameError}</Text>
+            )}
+            <TextInput
+              style={styles.input}
+              value={formData.name}
+              onChangeText={(text) => handleInputChange("name", text)}
+              placeholder="Name"
+            />
+
+            <Text style={styles.label}>Transport Plan</Text>
+            {formData.errors.transportPlanError && (
+              <Text style={styles.error}>
+                {formData.errors.transportPlanError}
+              </Text>
+            )}
+            <TextInput
+              style={styles.input}
+              value={formData.transportPlan}
+              onChangeText={(text) => handleInputChange("transportPlan", text)}
+              placeholder="EX: Aller et Retour"
+            />
+
+            <Text style={styles.label}>Class</Text>
+            {formData.errors.classError && (
+              <Text style={styles.error}>{formData.errors.classError}</Text>
+            )}
+            <TextInput
+              style={styles.input}
+              value={formData.class}
+              onChangeText={(text) => handleInputChange("class", text)}
+              placeholder="Class"
+            />
+
+            <Text style={styles.label}>School</Text>
+            {formData.errors.schoolError && (
+              <Text style={styles.error}>{formData.errors.schoolError}</Text>
+            )}
+            <TextInput
+              style={styles.input}
+              value={formData.school}
+              onChangeText={(text) => handleInputChange("school", text)}
+              placeholder="School"
+            />
+
+            <View>
+              <Button
+                title="Select School Finish Time"
+                onPress={showTimePicker}
+              />
+              <TextInput
+                style={styles.input}
+                onChangeText={(text) =>
+                  handleInputChange("schoolOffTime", text)
+                }
+                value={selectedTime.toLocaleTimeString()}
+                placeholder="Selected Time"
+              />
+              {isTimePickerVisible && (
+                <DateTimePicker
+                  value={selectedTime}
+                  mode="time"
+                  display={Platform.OS === "ios" ? "spinner" : "default"}
+                  onChange={handleTimeChange}
                 />
+              )}
+            </View>
 
-                <Text style={styles.label}>Transport Plan</Text>
-                {formData.errors.transportPlanError && (
-                  <Text style={styles.error}>
-                    {formData.errors.transportPlanError}
-                  </Text>
-                )}
-                <TextInput
-                  style={styles.input}
-                  value={formData.transportPlan}
-                  onChangeText={(text) => handleInputChange("transportPlan", text)}
-                  placeholder="EX: Aller et Retour"
-                />
-
-                <Text style={styles.label}>Class</Text>
-                {formData.errors.classError && (
-                  <Text style={styles.error}>{formData.errors.classError}</Text>
-                )}
-                <TextInput
-                  style={styles.input}
-                  value={formData.class}
-                  onChangeText={(text) => handleInputChange("class", text)}
-                  placeholder="Class"
-                />
-
-                <Text style={styles.label}>School</Text>
-                {formData.errors.schoolError && (
-                  <Text style={styles.error}>{formData.errors.schoolError}</Text>
-                )}
-                <TextInput
-                  style={styles.input}
-                  value={formData.school}
-                  onChangeText={(text) => handleInputChange("school", text)}
-                  placeholder="School"
-                />
-
-                <View>
-                  <Button title="Select School Finish Time" onPress={showTimePicker} />
-                  <TextInput
-                    style={styles.input}
-                    onChangeText={(text) => handleInputChange("schoolOffTime", text)}
-                    value={selectedTime.toLocaleTimeString()}
-                    placeholder="Selected Time"
-                  />
-                  {isTimePickerVisible && (
-                    <DateTimePicker
-                      value={selectedTime}
-                      mode="time"
-                      display={Platform.OS === "ios" ? "spinner" : "default"}
-                      onChange={handleTimeChange}
-                    />
-                  )}
-                </View>
-
-                <View style={styles.buttonContainer}>
-                  <TouchableOpacity
-                    style={[styles.button, { backgroundColor: "#2196F3" }]}
-                    onPress={handleAddStudent}
+            <View style={styles.buttonContainer}>
+              {isLoading ? (
+                <ActivityIndicator size="small" color="#2196F3" />
+              ) : (
+                <TouchableOpacity
+                  style={[styles.button, { backgroundColor: "#2196F3" }]}
+                  onPress={handleAddStudent}
+                >
+                  <Text
+                    style={[styles.textStyle, { backgroundColor: "#2196F3" }]}
                   >
-                    <Text style={[styles.textStyle, { backgroundColor: "#2196F3" }]}>
-                      Add Student
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </>
-            )
-          )}
-        {shownext ? (
+                    Add Student
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          </>
+        )}
+
+        {students.length ? (
           <View style={styles.containerContinue}>
             <View style={styles.element1}>
               <TouchableOpacity
@@ -666,4 +661,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default StudentForm;
+export default DriverScreen;

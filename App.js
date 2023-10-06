@@ -12,6 +12,7 @@ Auth.configure(awsExports);
 import AuthScreens from './pages/Welcome';
 import Children from './pages/Children';
 import DriverInfo from './pages/DriverInfo';
+import DriverScreen from './pages/DriverScreen';
 
 
 export default function App() {
@@ -23,6 +24,7 @@ export default function App() {
       <Stack.Screen name="Kids Transportation Service" component={AuthScreens}/>
       <Stack.Screen  name="children" component={Children} /> 
       <Stack.Screen  name="DriverInfo" component={DriverInfo} /> 
+      <Stack.Screen  name="DriverScreen" component={DriverScreen} /> 
     </Stack.Navigator>
   </NavigationContainer>
   </AppProvider>
