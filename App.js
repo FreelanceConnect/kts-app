@@ -21,7 +21,7 @@ export default function App() {
   <AppProvider>
   <NavigationContainer>
     <Stack.Navigator>
-      <Stack.Screen name="Kids Transportation Service" component={AuthScreens}/>
+      <Stack.Screen name="Welcome to KTS" component={AuthScreens}/>
       <Stack.Screen  name="children" component={Children} /> 
       <Stack.Screen  name="DriverInfo" component={DriverInfo} /> 
       <Stack.Screen  name="DriverScreen" component={DriverScreen} /> 

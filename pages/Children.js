@@ -184,7 +184,7 @@ function StudentForm({ route }) {
   };
   const updateButtonText = () => {
     if (showForm) {
-      setBtnText("Add Another Student");
+      setBtnText("Add Another Child");
     } else {
       setBtnText("Hide Form");
     }
@@ -481,7 +481,7 @@ function StudentForm({ route }) {
                     onPress={handleAddStudent}
                   >
                     <Text style={[styles.textStyle, { backgroundColor: "#2196F3" }]}>
-                      Add Student
+                      Add Child
                     </Text>
                   </TouchableOpacity>
                 </View>

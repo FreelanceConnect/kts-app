@@ -31,7 +31,7 @@ function App() {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const user = await Auth.currentUserInfo();
+        const user = await Auth.currentAuthenticatedUser();
         setPhone(user.attributes.phone_number);
         const cleanedNumber = user.attributes.phone_number.replace(/\D/g, '');
         const firstPart = cleanedNumber.substring(0, 3);
@@ -47,8 +47,29 @@ function App() {
         console.log('Error fetching user data:', error);
       }
     };
+    const checkAuth = () => {
+      return new Promise(async (resolve, reject) => {
+        try {
+          const user = await Auth.currentAuthenticatedUser();
+          resolve(user);
+        } catch (error) {
+          reject(error);
+        }
+      });
+    };
 
-    fetchUserData();
+    checkAuth()
+      .then((user) => {
+        // Handle successful authentication
+        fetchUserData();
+        // console.log('User:', user);
+      })
+      .catch((error) => {
+        // Handle authentication error
+        setIsLoading(false)
+        // console.error('Authentication error:', error);
+      });
+    
   }, []);
 
       const CheckIfDriver = async({driverID})=> {
@@ -94,7 +115,7 @@ function App() {
         )}
         Header={MyAppLogo}
       >
-        <Parents userId={parentId} phone={phone} />
+      <Parents userId={parentId} phone={phone} />
       </Authenticator>
     </Authenticator.Provider>
   );

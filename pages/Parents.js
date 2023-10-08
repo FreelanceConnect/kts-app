@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 
 import { useAppContext } from '../src/AppContext';
 
-import { Amplify, API } from 'aws-amplify';
+import { Amplify, API, Auth } from 'aws-amplify';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -17,7 +17,7 @@ import {
   useTheme,
 } from '@aws-amplify/ui-react-native';
 
-function Parents({ userId, phone }) {
+function Parents() {
   const navigation = useNavigation();
   const {
     tokens: { colors },
@@ -29,6 +29,8 @@ function Parents({ userId, phone }) {
 
   const [showForm, setShowForm] = useState(true);
   const [showOtherBtn, setShowOtherBtn] = useState(false);
+  const [phone, setPhone] = useState('');
+  const [userId, setParentId] = useState();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -129,6 +131,7 @@ const handleChange = (field, value) => {
   };
 
   useEffect(() => {
+    console.log("here is paremt_id", userId);
          const fetchInfoFromAPI = () => {
           const apiName = 'ktsAPI';
           const path = `/parents/${userId}`;
@@ -202,6 +205,48 @@ const handleChange = (field, value) => {
       }
     };
     // fetchInfoFromAPI();
+
+
+
+      const fetchUserData = async () => {
+      try {
+        const user = await Auth.currentAuthenticatedUser();
+        setPhone(user.attributes.phone_number);
+        const cleanedNumber = user.attributes.phone_number.replace(/\D/g, '');
+        const firstPart = cleanedNumber.substring(0, 3);
+        const remainingPart = cleanedNumber.substring(3);
+        const userID = `KTS-P-${remainingPart}`;
+        const driverID = `KTS-D-${remainingPart}`;
+        setPhone(user.attributes.phone_number);
+        setParentId(userID);
+      } catch (error) {
+        console.log('Error fetching user data:', error);
+      }
+    };
+    const checkAuth = () => {
+      return new Promise(async (resolve, reject) => {
+        try {
+          const user = await Auth.currentAuthenticatedUser();
+          resolve(user);
+        } catch (error) {
+          reject(error);
+        }
+      });
+    };
+
+    checkAuth()
+      .then((user) => {
+        // Handle successful authentication
+        fetchUserData();
+        // console.log('User:', user);
+      })
+      .catch((error) => {
+        // Handle authentication error
+        // setIsLoading(false)
+        console.error('Authentication error:', error);
+      });
+
+
     fetchData();
   }, []);
 
