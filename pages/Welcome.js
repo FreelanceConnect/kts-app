@@ -42,6 +42,7 @@ function App() {
         CheckIfDriver(driverID);
         setPhone(user.attributes.phone_number);
         setParentId(userID);
+        setParentId("4545454");
         setIsLoading(false);
       } catch (error) {
         console.log('Error fetching user data:', error);

@@ -361,11 +361,6 @@ function StudentForm({ route }) {
           <ActivityIndicator size="large" color="#2196F3" />
         ) : (
           students.map((student, index) => {
-
-            // if (student.parent_id === parent_id && index === 0) {
-            //   setShowNext(true);
-            //   setShowForm(false);
-            // }
             if (student.parent_id === parent_id) {
               const studentTime=student.schoolOffTime.toLocaleTimeString().split(':').slice(0, 2).join(':');
               return (
@@ -406,10 +401,7 @@ function StudentForm({ route }) {
             }
           })
         )}
-           {isLoading ? (
-            <ActivityIndicator style={styles.spinner} size="large" color="#2196F3" />
-          ) : (
-            showForm && (
+            {showForm && (
               <>
                 <Text style={styles.label}>Name</Text>
                 {formData.errors.nameError && (
@@ -486,8 +478,7 @@ function StudentForm({ route }) {
                   </TouchableOpacity>
                 </View>
               </>
-            )
-          )}
+            )}
         {shownext ? (
           <View style={styles.containerContinue}>
             <View style={styles.element1}>

@@ -30,14 +30,14 @@ function Parents() {
   const [showForm, setShowForm] = useState(true);
   const [showOtherBtn, setShowOtherBtn] = useState(false);
   const [phone, setPhone] = useState('');
-  const [userId, setParentId] = useState();
+  const [parent_id, setParentId] = useState();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     quarter: '',
     zone: '',
     phone: phone,
-    parent_id: userId,
+    parent_id: parent_id,
     errors: {
     name: '',
     email: '',
@@ -88,7 +88,7 @@ const handleChange = (field, value) => {
     const {name, email, quarter, zone} = formData;
     const myInit = {
       body: {
-        parent_id: userId,
+        parent_id: parent_id,
         numberOfKids: 0,
         address: {
           quarter: quarter,
@@ -114,7 +114,7 @@ const handleChange = (field, value) => {
             console.log('User data saved successfully');
             setShowOtherBtn(true);
             setIsLoading(false);
-          navigation.navigate('children', {parentName: formData.name, parent_id: userId, 
+          navigation.navigate('children', {parentName: formData.name, parent_id: parent_id, 
             parentZone: formData.zone, parentQuarter: formData.quarter} );
           })
           .catch((error) => {
@@ -131,8 +131,7 @@ const handleChange = (field, value) => {
   };
 
   useEffect(() => {
-    console.log("here is paremt_id", userId);
-         const fetchInfoFromAPI = () => {
+         const fetchInfoFromAPI = (userId) => {
           const apiName = 'ktsAPI';
           const path = `/parents/${userId}`;
           const myInit = {
@@ -162,7 +161,7 @@ const handleChange = (field, value) => {
             console.log('User data saved successfully');
             setShowOtherBtn(true);
             setIsLoading(false);
-          // navigation.navigate('children', {parentName: formData.name, parent_id: userId, 
+          // navigation.navigate('children', {parentName: formData.name, parent_id: parent_id, 
           //   parentZone: formData.zone, parentQuarter: formData.quarter} );
           })
           .catch((error) => {
@@ -177,38 +176,8 @@ const handleChange = (field, value) => {
           });
       }
 
-      // check User data from our Local storage
 
-    const fetchData = async () => {
-      try {
-        const parentdata = await AsyncStorage.getItem('parentData');
-        if (parentdata !== null) {
-        const data= JSON.parse(parentdata);
-        setFormData((prevFormData) => ({
-            ...prevFormData,
-            name: data.CustomerName,
-            email: data.email,
-            quarter: data.address.quarter,
-            zone: data.address.zone,
-        }));
-          setShowOtherBtn(true);
-          navigation.navigate('children', {parentName: formData.name, parent_id: userId, 
-            parentZone: formData.zone, parentQuarter: formData.quarter} );
-        }
-        else {
-          console.log('no user data yet');
-          //get the data from API if no data from our Localstorage
-          fetchInfoFromAPI();
-        }
-      } catch (error) {
-        console.log('Error retrieving data:', error);
-      }
-    };
-    // fetchInfoFromAPI();
-
-
-
-      const fetchUserData = async () => {
+    const fetchUserData = async () => {
       try {
         const user = await Auth.currentAuthenticatedUser();
         setPhone(user.attributes.phone_number);
@@ -219,35 +188,53 @@ const handleChange = (field, value) => {
         const driverID = `KTS-D-${remainingPart}`;
         setPhone(user.attributes.phone_number);
         setParentId(userID);
+        fetchInfoFromAPI(userID);
       } catch (error) {
         console.log('Error fetching user data:', error);
       }
     };
-    const checkAuth = () => {
-      return new Promise(async (resolve, reject) => {
+     const fetchData = async () => {
         try {
-          const user = await Auth.currentAuthenticatedUser();
-          resolve(user);
+          await fetchUserData();
         } catch (error) {
-          reject(error);
+          console.log('Error fetching data:', error);
         }
-      });
-    };
+      };
 
-    checkAuth()
-      .then((user) => {
-        // Handle successful authentication
-        fetchUserData();
-        // console.log('User:', user);
-      })
-      .catch((error) => {
-        // Handle authentication error
-        // setIsLoading(false)
-        console.error('Authentication error:', error);
-      });
+      fetchData();
 
 
-    fetchData();
+      // check User data from our Local storage
+
+    // const fetchDataFromStorage = async () => {
+    //   try {
+    //     await fetchUserData();
+    //     const parentdata = await AsyncStorage.getItem('parentData');
+    //     if (parentdata !== null) {
+    //     const data= JSON.parse(parentdata);
+    //     console.log(parent_id);
+    //     console.log(data.parent_id);
+    //     setFormData((prevFormData) => ({
+    //         ...prevFormData,
+    //         name: data.CustomerName,
+    //         email: data.email,
+    //         quarter: data.address.quarter,
+    //         zone: data.address.zone,
+    //     }));
+    //       setShowOtherBtn(true);
+    //       navigation.navigate('children', {parentName: formData.name, parent_id: parent_id, 
+    //         parentZone: formData.zone, parentQuarter: formData.quarter} );
+    //     }
+    //     else {
+    //       console.log('no user data yet');
+    //       //get the data from API if no data from our Localstorage
+    //       fetchInfoFromAPI();
+    //     }
+    //   } catch (error) {
+    //     console.log('Error retrieving data:', error);
+    //   }
+    // };
+    fetchInfoFromAPI();
   }, []);
 
   return (
@@ -299,7 +286,7 @@ const handleChange = (field, value) => {
             </TouchableOpacity>
           </View>
           <View style={styles.element2}>
-            <TouchableOpacity style={[styles.button, { backgroundColor: '#008000' }]} onPress={() => navigation.navigate('children', {parentName: formData.name, parent_id: userId, 
+            <TouchableOpacity style={[styles.button, { backgroundColor: '#008000' }]} onPress={() => navigation.navigate('children', {parentName: formData.name, parent_id: parent_id, 
             parentZone: formData.zone, parentQuarter: formData.quarter})}>
               <Text style={[styles.textStyle, { backgroundColor: '#008000' }]} >NEXT</Text>
             </TouchableOpacity>
