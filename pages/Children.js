@@ -25,6 +25,7 @@ function StudentForm({ route }) {
   const [shownext, setShowNext] = useState(false);
   const [btnText, setBtnText] = useState("Add Another Child");
   const [isLoading, setIsLoading] = useState(false);
+  const [isAddingChild, setIsAddingChild] = useState(false);
   const [students, setStudents] = useState([]);
   const [selectedTime, setSelectedTime] = useState(new Date());
   const [isTimePickerVisible, setTimePickerVisibility] = useState(false);
@@ -93,7 +94,7 @@ function StudentForm({ route }) {
     }
 
     if (isValid) {
-      setIsLoading(true);
+     setIsAddingChild(true);
       const student_id = generateUniqueId();
       const path = `/students`;
       const myInit = {
@@ -150,7 +151,7 @@ function StudentForm({ route }) {
             AsyncStorage.setItem("studentsData", JSON.stringify(studentsObject))
               .then(() => {
                 console.log("User data saved successfully");
-                setIsLoading(false);
+                setIsAddingChild(false);
                 setShowNext(true);
               })
               .catch((error) => {
@@ -477,12 +478,15 @@ function StudentForm({ route }) {
           <TouchableOpacity
             style={[styles.button, { backgroundColor: "#2196F3" }]}
             onPress={handleAddStudent}
+            disabled={isAddingChild} // Disable the button while adding child
           >
-            <Text
-              style={[styles.textStyle, { backgroundColor: "#2196F3" }]}
-            >
-              Add Child
-            </Text>
+            {isAddingChild ? (
+              <ActivityIndicator color="#ffffff" /> // Show loading indicator while adding child
+            ) : (
+              <Text style={[styles.textStyle, { backgroundColor: "#2196F3" }]}>
+                Add Child
+              </Text>
+            )}
           </TouchableOpacity>
         </View>
       </>
