@@ -165,7 +165,7 @@ const DriverInfoScreen = ({route}) => {
                               <Text style={styles.driverFeedback}>Feedback: {child.driver.feedback}</Text>
                             </View>
                             <View style={styles.driverPicture}>
-                              <Image source={{ uri: child.driver.picture }} style={{ width: 100, height: 100 }} />
+                               <Image source={{ uri: child.driver.picture }} style={{ width: 100, height: 120, marginTop: 10 }} resizeMode="contain" />
                             </View>
                           </>
                         )}
@@ -225,9 +225,7 @@ const styles = StyleSheet.create({
   },
   driverPicture: {
     width: 80,
-    height: 80,
-    marginBottom: 8,
-    backgroundColor: '#2196F3', // Blue color
+    // Blue color
   },
   driverDetails: {
     flex: 1,

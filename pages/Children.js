@@ -357,129 +357,137 @@ function StudentForm({ route }) {
             source={require("../assets/KTSLogo.png")}
           />
         </View>
-        {isLoading ? (
-          <ActivityIndicator size="large" color="#2196F3" />
-        ) : (
-          students.map((student, index) => {
-            if (student.parent_id === parent_id) {
-              const studentTime=student.schoolOffTime.toLocaleTimeString().split(':').slice(0, 2).join(':');
-              return (
-                <View key={index}>
-                  <View style={styles.cardContainer}>
-                    <>
-                      <Text style={styles.infoLabel}>
-                        Student: {student.student}
-                      </Text>
-                      <View style={styles.studentInfoContainer}>
-                        <View style={styles.studentDetails}>
-                          <Text style={styles.studentPhone}>
-                            Transport Plan: {student.transportPlan}
-                          </Text>
-                          <Text style={styles.studentID}>
-                            School: {student.school}
-                          </Text>
-                          <Text style={styles.studentGrade}>
-                            Class: {student.class}
-                          </Text>
-                          <Text style={styles.studentFeedback}>End Time: {studentTime}</Text>
-                          <View style={styles.Modalcontainer} key={index}>
-                            <Modal
-                              name={student.student}
-                              TransportPlan={student.transportPlan}
-                              Class={student.class}
-                              School={student.school}
-                              EndTime= {studentTime}
-                            />
-                          </View>
-                        </View>
-                        <View style={styles.studentPicture}></View>
-                      </View>
-                    </>
-                  </View>
-                </View>
-              );
-            }
-          })
-        )}
-            {showForm && (
+{isLoading ? (
+  <ActivityIndicator size="large" color="#2196F3" />
+) : (
+  <>
+    {students.map((student, index) => {
+      if (student.parent_id === parent_id) {
+        const studentTime = student.schoolOffTime
+          .toLocaleTimeString()
+          .split(":")
+          .slice(0, 2)
+          .join(":");
+        return (
+          <View key={index}>
+            <View style={styles.cardContainer}>
               <>
-                <Text style={styles.label}>Name</Text>
-                {formData.errors.nameError && (
-                  <Text style={styles.error}>{formData.errors.nameError}</Text>
-                )}
-                <TextInput
-                  style={styles.input}
-                  value={formData.name}
-                  onChangeText={(text) => handleInputChange("name", text)}
-                  placeholder="Name"
-                />
-
-                <Text style={styles.label}>Transport Plan</Text>
-                {formData.errors.transportPlanError && (
-                  <Text style={styles.error}>
-                    {formData.errors.transportPlanError}
-                  </Text>
-                )}
-                <TextInput
-                  style={styles.input}
-                  value={formData.transportPlan}
-                  onChangeText={(text) => handleInputChange("transportPlan", text)}
-                  placeholder="EX: Aller et Retour"
-                />
-
-                <Text style={styles.label}>Class</Text>
-                {formData.errors.classError && (
-                  <Text style={styles.error}>{formData.errors.classError}</Text>
-                )}
-                <TextInput
-                  style={styles.input}
-                  value={formData.class}
-                  onChangeText={(text) => handleInputChange("class", text)}
-                  placeholder="Class"
-                />
-
-                <Text style={styles.label}>School</Text>
-                {formData.errors.schoolError && (
-                  <Text style={styles.error}>{formData.errors.schoolError}</Text>
-                )}
-                <TextInput
-                  style={styles.input}
-                  value={formData.school}
-                  onChangeText={(text) => handleInputChange("school", text)}
-                  placeholder="School"
-                />
-
-                <View>
-                  <Button title="Select School Finish Time" onPress={showTimePicker} />
-                  <TextInput
-                    style={styles.input}
-                    onChangeText={(text) => handleInputChange("schoolOffTime", text)}
-                    value={selectedTime.toLocaleTimeString()}
-                    placeholder="Selected Time"
-                  />
-                  {isTimePickerVisible && (
-                    <DateTimePicker
-                      value={selectedTime}
-                      mode="time"
-                      display={Platform.OS === "ios" ? "spinner" : "default"}
-                      onChange={handleTimeChange}
-                    />
-                  )}
-                </View>
-
-                <View style={styles.buttonContainer}>
-                  <TouchableOpacity
-                    style={[styles.button, { backgroundColor: "#2196F3" }]}
-                    onPress={handleAddStudent}
-                  >
-                    <Text style={[styles.textStyle, { backgroundColor: "#2196F3" }]}>
-                      Add Child
+                <Text style={styles.infoLabel}>
+                  Student: {student.student}
+                </Text>
+                <View style={styles.studentInfoContainer}>
+                  <View style={styles.studentDetails}>
+                    <Text style={styles.studentPhone}>
+                      Transport Plan: {student.transportPlan}
                     </Text>
-                  </TouchableOpacity>
+                    <Text style={styles.studentID}>
+                      School: {student.school}
+                    </Text>
+                    <Text style={styles.studentGrade}>
+                      Class: {student.class}
+                    </Text>
+                    <Text style={styles.studentFeedback}>
+                      End Time: {studentTime}
+                    </Text>
+                    <View style={styles.Modalcontainer} key={index}>
+                      <Modal
+                        name={student.student}
+                        TransportPlan={student.transportPlan}
+                        Class={student.class}
+                        School={student.school}
+                        EndTime={studentTime}
+                      />
+                    </View>
+                  </View>
+                  <View style={styles.studentPicture}></View>
                 </View>
               </>
-            )}
-        {shownext ? (
+            </View>
+          </View>
+        );
+      }
+    })}
+    {showForm && (
+      <>
+        <Text style={styles.label}>Name of child</Text>
+        {formData.errors.nameError && (
+          <Text style={styles.error}>{formData.errors.nameError}</Text>
+        )}
+        <TextInput
+          style={styles.input}
+          value={formData.name}
+          onChangeText={(text) => handleInputChange("name", text)}
+          placeholder="Name"
+        />
+
+        <Text style={styles.label}>Transport Plan</Text>
+        {formData.errors.transportPlanError && (
+          <Text style={styles.error}>
+            {formData.errors.transportPlanError}
+          </Text>
+        )}
+        <TextInput
+          style={styles.input}
+          value={formData.transportPlan}
+          onChangeText={(text) => handleInputChange("transportPlan", text)}
+          placeholder="EX: Aller et Retour"
+        />
+
+        <Text style={styles.label}>Class</Text>
+        {formData.errors.classError && (
+          <Text style={styles.error}>{formData.errors.classError}</Text>
+        )}
+        <TextInput
+          style={styles.input}
+          value={formData.class}
+          onChangeText={(text) => handleInputChange("class", text)}
+          placeholder="Class"
+        />
+
+        <Text style={styles.label}>School</Text>
+        {formData.errors.schoolError && (
+          <Text style={styles.error}>{formData.errors.schoolError}</Text>
+        )}
+        <TextInput
+          style={styles.input}
+          value={formData.school}
+          onChangeText={(text) => handleInputChange("school", text)}
+          placeholder="School"
+        />
+
+        <View>
+          <Button title="Select School Finish Time" onPress={showTimePicker} />
+          <TextInput
+            style={styles.input}
+            onChangeText={(text) => handleInputChange("schoolOffTime", text)}
+            value={selectedTime.toLocaleTimeString()}
+            placeholder="Selected Time"
+          />
+          {isTimePickerVisible && (
+            <DateTimePicker
+              value={selectedTime}
+              mode="time"
+              display={Platform.OS === "ios" ? "spinner" : "default"}
+              onChange={handleTimeChange}
+            />
+          )}
+        </View>
+
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={[styles.button, { backgroundColor: "#2196F3" }]}
+            onPress={handleAddStudent}
+          >
+            <Text
+              style={[styles.textStyle, { backgroundColor: "#2196F3" }]}
+            >
+              Add Child
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </>
+    )}
+            {shownext ? (
           <View style={styles.containerContinue}>
             <View style={styles.element1}>
               <TouchableOpacity
@@ -507,6 +515,9 @@ function StudentForm({ route }) {
             </View>
           </View>
         ) : null}
+  </>
+)}
+
       </View>
 
     </ScrollView>

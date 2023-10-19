@@ -176,6 +176,37 @@ const handleChange = (field, value) => {
           });
       }
 
+            // check User data from our Local storage
+
+    const fetchDataFromStorage = async () => {
+      try {
+        await fetchUserData();
+        const parentdata = await AsyncStorage.getItem('parentData');
+        if (parentdata !== null) {
+        const data= JSON.parse(parentdata);
+        console.log(parent_id);
+        console.log(data.parent_id);
+        setFormData((prevFormData) => ({
+            ...prevFormData,
+            name: data.CustomerName,
+            email: data.email,
+            quarter: data.address.quarter,
+            zone: data.address.zone,
+        }));
+          setShowOtherBtn(true);
+          navigation.navigate('children', {parentName: formData.name, parent_id: parent_id, 
+            parentZone: formData.zone, parentQuarter: formData.quarter} );
+        }
+        else {
+          console.log('no user data yet');
+          //get the data from API if no data from our Localstorage
+          fetchInfoFromAPI();
+        }
+      } catch (error) {
+        console.log('Error retrieving data:', error);
+      }
+    };
+
 
     const fetchUserData = async () => {
       try {
@@ -188,6 +219,7 @@ const handleChange = (field, value) => {
         const driverID = `KTS-D-${remainingPart}`;
         setPhone(user.attributes.phone_number);
         setParentId(userID);
+        console.log("here is ID", userID);
         fetchInfoFromAPI(userID);
       } catch (error) {
         console.log('Error fetching user data:', error);
@@ -203,38 +235,7 @@ const handleChange = (field, value) => {
 
       fetchData();
 
-
-      // check User data from our Local storage
-
-    // const fetchDataFromStorage = async () => {
-    //   try {
-    //     await fetchUserData();
-    //     const parentdata = await AsyncStorage.getItem('parentData');
-    //     if (parentdata !== null) {
-    //     const data= JSON.parse(parentdata);
-    //     console.log(parent_id);
-    //     console.log(data.parent_id);
-    //     setFormData((prevFormData) => ({
-    //         ...prevFormData,
-    //         name: data.CustomerName,
-    //         email: data.email,
-    //         quarter: data.address.quarter,
-    //         zone: data.address.zone,
-    //     }));
-    //       setShowOtherBtn(true);
-    //       navigation.navigate('children', {parentName: formData.name, parent_id: parent_id, 
-    //         parentZone: formData.zone, parentQuarter: formData.quarter} );
-    //     }
-    //     else {
-    //       console.log('no user data yet');
-    //       //get the data from API if no data from our Localstorage
-    //       fetchInfoFromAPI();
-    //     }
-    //   } catch (error) {
-    //     console.log('Error retrieving data:', error);
-    //   }
-    // };
-    fetchInfoFromAPI();
+    // fetchInfoFromAPI();
   }, []);
 
   return (

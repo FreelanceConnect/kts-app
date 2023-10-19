@@ -8,10 +8,19 @@ import { FontAwesome5 } from '@expo/vector-icons';
 const StickyFooter = ({ title }) => {
   return (
     <View style={styles.footerContainer}>
-      <MaterialCommunityIcons name="account" size={40} color="black" />
-
-      <FontAwesome5 name="child" size={40} color="black" /> 
-      <Feather name="truck" size={40} color="black" />
+      
+      <View style={{ alignItems: 'center' }}>
+        <MaterialCommunityIcons name="account" size={25} color="black" />
+        <Text style={{ marginTop: 5 }}>Profile</Text>
+      </View>
+      <View style={{ alignItems: 'center' }}>
+        <FontAwesome5 name="child" size={25} color="black" /> 
+        <Text style={{ marginTop: 5 }}>Children</Text>
+      </View>
+      <View style={{ alignItems: 'center' }}>
+        <Feather name="truck" size={25} color="black" />
+        <Text style={{ marginTop: 5 }}>Cars</Text>
+      </View>
     </View>
   );
 };
@@ -23,8 +32,8 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     backgroundColor: 'white',
-    paddingVertical: 10,
-    paddingHorizontal: 16,
+    paddingVertical: 8,
+    paddingHorizontal: 30,
     elevation: 6, // for Android shadow
     shadowColor: 'rgba(0, 0, 0, 0.3)', // for iOS shadow
     shadowOffset: { width: 0, height: -2 }, // for iOS shadow
@@ -33,7 +42,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
   },
   footerTitle: {
     fontSize: 18,
