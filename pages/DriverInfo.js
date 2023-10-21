@@ -130,13 +130,6 @@ const DriverInfoScreen = ({route}) => {
       ) : (
         children.map((child) => {
           if (child.parent_id === parent_id) {
-          const studentTime = child.schoolFinishTime
-          // Parse the string into a Date object
-            const dateObj = new Date(studentTime);
-
-            // Extract the time portion
-            const timeString = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            console.log(child.driver);
 
             return (
               <View key={child.id} style={styles.childContainer}>
@@ -147,7 +140,7 @@ const DriverInfoScreen = ({route}) => {
                     <>
                       <Text style={styles.infoText}>Pick Up: {child.pickTime ? child.pickTime : 'Waiting for admin'}</Text>
                       <Text style={styles.infoText}>Drop-Off: {child.dropOffTime ? child.dropOffTime : 'Waiting for admin'}</Text>
-                      <Text style={styles.infoText}>School End: {timeString}</Text>
+                      <Text style={styles.infoText}>School End: {child.schoolFinishTime}</Text>
                     </>
                   </View>
                   <View style={[styles.column, styles.largeColumn]}>

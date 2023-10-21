@@ -16,6 +16,7 @@ import Modal from "../components/MyModal";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import StickyFooter from '../components/StickyFooter';
+import Dropdown from '../components/Dropdown';
 
 function StudentForm({ route }) {
   const { parent_id, parentName, parentQuarter, parentZone} = route.params;
@@ -27,7 +28,6 @@ function StudentForm({ route }) {
   const [isLoading, setIsLoading] = useState(false);
   const [isAddingChild, setIsAddingChild] = useState(false);
   const [students, setStudents] = useState([]);
-  const [selectedTime, setSelectedTime] = useState(new Date());
   const [isTimePickerVisible, setTimePickerVisibility] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -40,8 +40,10 @@ function StudentForm({ route }) {
       transportPlanError: "",
       classError: "",
       schoolError: "",
+      schoolOffTime: "",
     },
   });
+
 
   const handleInputChange = (key, value) => {
     setFormData({ ...formData, [key]: value });
@@ -53,24 +55,9 @@ function StudentForm({ route }) {
     return `${timestamp}-${randomNum}`;
   };
 
-  const showTimePicker = () => {
-    setTimePickerVisibility(true);
-  };
-
-  const hideTimePicker = () => {
-    setTimePickerVisibility(false);
-  };
-
-  const handleTimeChange = (event, time) => {
-    if (time !== undefined) {
-      setSelectedTime(time);
-    }
-    hideTimePicker();
-  };
-
   const handleAddStudent = (later) => {
     let isValid = true;
-    const { name, transportPlan, class: studentClass, school } = formData;
+    const { name, transportPlan, class: studentClass, school, schoolOffTime } = formData;
     const errors = {};
 
     if (name.trim() === "") {
@@ -106,7 +93,6 @@ function StudentForm({ route }) {
           transportPlan: transportPlan,
           school: school,
           class: studentClass,
-          schoolOffTime: selectedTime,
           address: {
             quarter: parentQuarter,
             zone: parentZone,
@@ -137,7 +123,7 @@ function StudentForm({ route }) {
           },
           pickTime: "",
           dropOffTime: "",
-          schoolFinishTime: "",
+          schoolOffTime: schoolOffTime,
         },
         headers: {}, // OPTIONAL
       };
@@ -229,7 +215,7 @@ function StudentForm({ route }) {
               transportPlan: student.transportPlan,
               school: student.school,
               class: student.class,
-              schoolOffTime: selectedTime,
+              schoolOffTime: student.schoolOffTime,
               address: {
                 quarter: student.parentQuarter,
                 zone: student.parentZone,
@@ -279,7 +265,6 @@ function StudentForm({ route }) {
         if (studentData && studentData.length !== 0) {
           const parsedData = JSON.parse(studentData);
           const updatedStudents = parsedData.updatedStudents;
-          // console.log(updatedStudents[0].class);
           const students = updatedStudents.map((student) => ({
             student_id: student.student_id,
             student: student.student,
@@ -288,7 +273,7 @@ function StudentForm({ route }) {
             transportPlan: student.transportPlan,
             school: student.school,
             class: student.class,
-            schoolOffTime: selectedTime,
+            schoolOffTime: student.schoolOffTime,
             address: {
               quarter: student.parentQuarter,
               zone: student.parentZone,
@@ -363,12 +348,10 @@ function StudentForm({ route }) {
 ) : (
   <>
     {students.map((student, index) => {
+      console.log("here is school finish timest", student.schoolOffTime);
       if (student.parent_id === parent_id) {
-        const studentTime = student.schoolOffTime
-          .toLocaleTimeString()
-          .split(":")
-          .slice(0, 2)
-          .join(":");
+        const studentTime = student.schoolOffTime;
+          console.log(student);
         return (
           <View key={index}>
             <View style={styles.cardContainer}>
@@ -420,6 +403,7 @@ function StudentForm({ route }) {
           onChangeText={(text) => handleInputChange("name", text)}
           placeholder="Name"
         />
+        <Dropdown />
 
         <Text style={styles.label}>Transport Plan</Text>
         {formData.errors.transportPlanError && (
@@ -431,7 +415,7 @@ function StudentForm({ route }) {
           style={styles.input}
           value={formData.transportPlan}
           onChangeText={(text) => handleInputChange("transportPlan", text)}
-          placeholder="EX: Aller et Retour"
+          placeholder="EX: Both Ways"
         />
 
         <Text style={styles.label}>Class</Text>
@@ -457,21 +441,13 @@ function StudentForm({ route }) {
         />
 
         <View>
-          <Button title="Select School Finish Time" onPress={showTimePicker} />
+         <Text style={styles.label}>School Closing Time</Text>
           <TextInput
             style={styles.input}
             onChangeText={(text) => handleInputChange("schoolOffTime", text)}
-            value={selectedTime.toLocaleTimeString()}
-            placeholder="Selected Time"
+            value={formData.schoolOffTime}
+            placeholder="EX: 2PM"
           />
-          {isTimePickerVisible && (
-            <DateTimePicker
-              value={selectedTime}
-              mode="time"
-              display={Platform.OS === "ios" ? "spinner" : "default"}
-              onChange={handleTimeChange}
-            />
-          )}
         </View>
 
         <View style={styles.buttonContainer}>
@@ -609,9 +585,11 @@ const styles = StyleSheet.create({
   input: {
     height: 40,
     borderColor: "gray",
-    borderWidth: 1,
+    borderColor: 'gray',
+    borderWidth: 0.5,
+    borderRadius: 8,
+    paddingHorizontal: 8,
     marginBottom: 10,
-    paddingHorizontal: 10,
   },
   imageContainer: {
     display: "flex",
