@@ -44,6 +44,17 @@ function StudentForm({ route }) {
     },
   });
 
+  const transportPlanData = [
+    { label: 'Both Ways', value: '1' },
+    { label: 'House to School', value: '2' },
+    { label: 'School to House', value: '3' },
+  ];
+
+  const SchoolData = [
+    { label: 'Canadian School', value: '1' },
+    { label: 'Paypirus Logpom', value: '2' },
+  ];
+
 
   const handleInputChange = (key, value) => {
     setFormData({ ...formData, [key]: value });
@@ -66,7 +77,7 @@ function StudentForm({ route }) {
     }
 
     if (transportPlan.trim() === "") {
-      errors.transportPlanError = "Transport Plan is required";
+      errors.transportPlanError = "Please select a transport plan";
       isValid = false;
     }
 
@@ -403,20 +414,13 @@ function StudentForm({ route }) {
           onChangeText={(text) => handleInputChange("name", text)}
           placeholder="Name"
         />
-        <Dropdown />
-
         <Text style={styles.label}>Transport Plan</Text>
         {formData.errors.transportPlanError && (
           <Text style={styles.error}>
             {formData.errors.transportPlanError}
           </Text>
         )}
-        <TextInput
-          style={styles.input}
-          value={formData.transportPlan}
-          onChangeText={(text) => handleInputChange("transportPlan", text)}
-          placeholder="EX: Both Ways"
-        />
+        <Dropdown data= {transportPlanData} label="Transport Plan" handleValueChange={handleInputChange}/>
 
         <Text style={styles.label}>Class</Text>
         {formData.errors.classError && (
@@ -433,12 +437,7 @@ function StudentForm({ route }) {
         {formData.errors.schoolError && (
           <Text style={styles.error}>{formData.errors.schoolError}</Text>
         )}
-        <TextInput
-          style={styles.input}
-          value={formData.school}
-          onChangeText={(text) => handleInputChange("school", text)}
-          placeholder="School"
-        />
+        <Dropdown data= {SchoolData} label="School" handleValueChange={handleInputChange}/>
 
         <View>
          <Text style={styles.label}>School Closing Time</Text>
