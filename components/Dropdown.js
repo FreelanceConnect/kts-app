@@ -4,7 +4,7 @@
   import AntDesign from '@expo/vector-icons/AntDesign';
 
 
-  const DropdownComponent = ({data, label, handleValueChange}) => {
+  const DropdownComponent = ({data, label, handleValueChange, position}) => {
     const [value, setValue] = useState(null);
     const [isFocus, setIsFocus] = useState(false);
 
@@ -18,9 +18,18 @@
       }
       return null;
     };
+      let containerStyle = {};
+       if (position === "modal") {
+          containerStyle.backgroundColor = '#404040';
+        } else if (position === 'right') {
+          containerStyle.backgroundColor = 'blue';
+        } else {
+          containerStyle.backgroundColor = 'white';
+          containerStyle.marginLeft = -16;
+        }
 
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, containerStyle]}>
         {renderLabel()}
         <Dropdown
           style={[styles.dropdown, isFocus && { borderColor: 'blue' }]}
@@ -39,9 +48,10 @@
           onFocus={() => setIsFocus(true)}
           onBlur={() => setIsFocus(false)}
           onChange = {(text) => {
+            console.log(label);
             setValue(text.value);
             setIsFocus(false);
-            handleValueChange("transportPlan", text.value)
+            handleValueChange(label, text.value)
             }
           }
           renderLeftIcon={() => (
@@ -61,17 +71,16 @@
 
   const styles = StyleSheet.create({
     container: {
-      backgroundColor: 'white',
       padding: 16,
+      width: '110%',
     },
     dropdown: {
       height: 40,
-      width: 332,
       borderColor: 'gray',
-      borderWidth: 0.5,
+      borderWidth: 1,
       borderRadius: 8,
-      marginLeft: -15,
       paddingHorizontal: 8,
+      borderWidth: 1,
     },
     icon: {
       marginRight: 5,

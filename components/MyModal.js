@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { View, Modal, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Modal, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import Dropdown from './Dropdown';
 
-const MyModal = ({ name, TransportPlan, Class,School, EndTime }) => {
+const MyModal = ({ name, TransportPlan, Class,School, EndTime, schoolOffTimeData, SchoolData, transportPlanData, handleInputChange }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [text, setText] = useState(name);
   const [transportPlan, setTransportPlan] = useState(TransportPlan);
@@ -21,6 +22,7 @@ const MyModal = ({ name, TransportPlan, Class,School, EndTime }) => {
   };
 
   return (
+    <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
     <View style={styles.centeredView}>
       <Modal
         animationType="slide"
@@ -43,41 +45,20 @@ const MyModal = ({ name, TransportPlan, Class,School, EndTime }) => {
             />
             <TextInput
               style={[styles.input, { color: 'white', borderColor: 'white' }]}
-              value={transportPlan}
-              onChangeText={setTransportPlan}
-              placeholder="Enter transport plan"
-              placeholderTextColor="white"
-              editable={true}
-            />
-            <TextInput
-              style={[styles.input, { color: 'white', borderColor: 'white' }]}
-              value={studentClass}
-              onChangeText={setStudentClass}
-              placeholder="Enter class"
-              placeholderTextColor="white"
-              editable={true}
-            />
-            <TextInput
-              style={[styles.input, { color: 'white', borderColor: 'white' }]}
               value={school}
               onChangeText={setSchool}
               placeholder="Enter school"
               placeholderTextColor="white"
               editable={true}
             />
-            <TextInput
-              style={[styles.input, { color: 'white', borderColor: 'white' }]}
-              value={endTime}
-              onChangeText={setEndTime}
-              placeholder="School End Time"
-              placeholderTextColor="white"
-              editable={true}
-            />
+            <Dropdown data= {transportPlanData} label="transportPlan" handleValueChange={handleInputChange} position="modal"/>
+            <Dropdown data= {SchoolData} label="school" handleValueChange={handleInputChange} position="modal"/>
+            <Dropdown data= {schoolOffTimeData} label="schoolOffTime" handleValueChange={handleInputChange} position="modal"/>
             <TouchableOpacity
               style={[styles.button, { backgroundColor: '#2196F3' }]}
               onPress={handleUpdate}
             >
-              <Text style={[styles.textStyle, { backgroundColor: '#2196F3' }]}>Update</Text>
+            <Text style={[styles.textStyle, { backgroundColor: '#2196F3' }]}>Update</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -96,6 +77,7 @@ const MyModal = ({ name, TransportPlan, Class,School, EndTime }) => {
         <Text style={[styles.textStyle, { backgroundColor: '#2196F3' }]}>Update</Text>
       </TouchableOpacity>
     </View>
+    </ScrollView>
   );
 };
 
@@ -144,7 +126,7 @@ const styles = StyleSheet.create({
   input: {
     height: 40,
     borderColor: 'white',
-    borderWidth: 1,
+    borderWidth: 0.5,
     borderRadius: 5,
     width: '100%',
     paddingHorizontal: 10,

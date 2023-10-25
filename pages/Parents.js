@@ -27,9 +27,10 @@ function Parents() {
   const [isLoading, setIsLoading] = useState(false);
   const { data, setData } = useAppContext();
 
-  const [showForm, setShowForm] = useState(true);
+  const [showForm, setShowForm] = useState(false);
   const [showOtherBtn, setShowOtherBtn] = useState(false);
   const [phone, setPhone] = useState('');
+  const [isAddingParent, setIsAddingParent] = useState(false);
   const [parent_id, setParentId] = useState();
   const [formData, setFormData] = useState({
     name: '',
@@ -104,26 +105,26 @@ const handleChange = (field, value) => {
       },
       headers: {} // OPTIONAL
     };
-    setIsLoading(true);
+    setIsAddingParent(true);
     API.post(apiName, path, myInit)
       .then((response) => {
         // Add your code here
 
-          AsyncStorage.setItem('parentData', JSON.stringify(myInit.body))
+          AsyncStorage.setItem(parent_id, JSON.stringify(myInit.body))
           .then(() => {
             console.log('User data saved successfully');
             setShowOtherBtn(true);
-            setIsLoading(false);
+            setIsAddingParent(false);
           navigation.navigate('children', {parentName: formData.name, parent_id: parent_id, 
             parentZone: formData.zone, parentQuarter: formData.quarter} );
           })
           .catch((error) => {
-             setIsLoading(false);
+             setIsAddingParent(false);
             console.log('Error saving user data:', error);
           });
       })
       .catch((error) => {
-        setIsLoading(false);
+        setIsAddingParent(false);
         console.log(error.response);
       });
 
@@ -156,7 +157,7 @@ const handleChange = (field, value) => {
             zone: data.address.zone,
           }));
 
-          AsyncStorage.setItem('parentData', JSON.stringify(data))
+          AsyncStorage.setItem(userId, JSON.stringify(data))
           .then(() => {
             console.log('User data saved successfully');
             setShowOtherBtn(true);
@@ -178,14 +179,11 @@ const handleChange = (field, value) => {
 
             // check User data from our Local storage
 
-    const fetchDataFromStorage = async () => {
+    const fetchDataFromStorage = async (parentData) => {
       try {
-        await fetchUserData();
-        const parentdata = await AsyncStorage.getItem('parentData');
+        const parentdata = await AsyncStorage.getItem(parentData);
         if (parentdata !== null) {
         const data= JSON.parse(parentdata);
-        console.log(parent_id);
-        console.log(data.parent_id);
         setFormData((prevFormData) => ({
             ...prevFormData,
             name: data.CustomerName,
@@ -194,13 +192,13 @@ const handleChange = (field, value) => {
             zone: data.address.zone,
         }));
           setShowOtherBtn(true);
-          navigation.navigate('children', {parentName: formData.name, parent_id: parent_id, 
-            parentZone: formData.zone, parentQuarter: formData.quarter} );
+          // navigation.navigate('children', {parentName: formData.name, parent_id: parent_id, 
+          //   parentZone: formData.zone, parentQuarter: formData.quarter} );
         }
         else {
           console.log('no user data yet');
           //get the data from API if no data from our Localstorage
-          fetchInfoFromAPI();
+          fetchInfoFromAPI(parentData);
         }
       } catch (error) {
         console.log('Error retrieving data:', error);
@@ -220,7 +218,7 @@ const handleChange = (field, value) => {
         setPhone(user.attributes.phone_number);
         setParentId(userID);
         console.log("here is ID", userID);
-        fetchInfoFromAPI(userID);
+        fetchDataFromStorage(userID);
       } catch (error) {
         console.log('Error fetching user data:', error);
       }
@@ -239,13 +237,16 @@ const handleChange = (field, value) => {
   }, []);
 
   return (
-    <>
     <ScrollView>
     <View style={styles.container}>
 
     <View style={styles.imageContainer}>
       <Image style={styles.image} source={require("../assets/KTSLogo.png")} />
     </View>
+      {isLoading ? (
+            <ActivityIndicator size="small" color="#2196F3" />
+          ) : (
+      <>
         <Text style={styles.textField}>Please enter your information here</Text>
         <Text style={styles.label}>Name</Text>
         {formData.errors.name && <Text style={styles.error}>{formData.errors.name}</Text>}
@@ -295,26 +296,31 @@ const handleChange = (field, value) => {
         </View>
       ) : (
         <View style={styles.buttonContainer}>
-          {isLoading ? (
-            <ActivityIndicator size="small" color="#2196F3" />
-          ) : (
-            <TouchableOpacity
-              style={[styles.button, { backgroundColor: '#2196F3' }]}
-              onPress={handleSubmit}
-            >
-              <Text style={[styles.textStyle, { backgroundColor: '#2196F3' }]}>SUBMIT</Text>
-            </TouchableOpacity>
-          )}
+          <TouchableOpacity
+            style={[styles.button, { backgroundColor: "#2196F3" }]}
+            onPress={handleSubmit}
+            disabled={isAddingParent} // Disable the button while adding child
+          >
+            {isAddingParent ? (
+              <ActivityIndicator color="#ffffff" /> // Show loading indicator while adding child
+            ) : (
+              <Text style={[styles.textStyle, { backgroundColor: "#2196F3" }]}>
+                Add Child
+              </Text>
+            )}
+          </TouchableOpacity>
         </View>
       )}
-        
 
         <View style={style.container}>
           <SignOutButton />
         </View>
+   </>
+   )}
+        
+
     </View>
     </ScrollView>
-    </>
   );
 }
 

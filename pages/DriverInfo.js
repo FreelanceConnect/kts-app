@@ -71,7 +71,7 @@ const DriverInfoScreen = ({route}) => {
           },
           pickTime: student.pickTime,
           dropOffTime: student.dropOffTime,
-          schoolFinishTime: student.schoolOffTime,
+          schoolOffTime: student.schoolOffTime,
         };
       });
       setChildren(childObjects);
@@ -84,6 +84,8 @@ const DriverInfoScreen = ({route}) => {
         });
   }
 
+
+  // Fetch driver's data from Async storage
   const fetchChildrenData = async () => {
     try {
       const storedChildren = await AsyncStorage.getItem('studentsData');
@@ -130,6 +132,15 @@ const DriverInfoScreen = ({route}) => {
       ) : (
         children.map((child) => {
           if (child.parent_id === parent_id) {
+            if (child.schoolOffTime === '1') {
+              schoolClosingTime = '1:30PM';
+            } else if (child.schoolOffTime === '2') {
+              schoolClosingTime = '2PM';
+            } else if (child.schoolOffTime === '3') {
+              schoolClosingTime = '2:30PM';
+            } else {
+              schoolClosingTime = 'Not Specified';
+            }
 
             return (
               <View key={child.id} style={styles.childContainer}>
@@ -140,7 +151,7 @@ const DriverInfoScreen = ({route}) => {
                     <>
                       <Text style={styles.infoText}>Pick Up: {child.pickTime ? child.pickTime : 'Waiting for admin'}</Text>
                       <Text style={styles.infoText}>Drop-Off: {child.dropOffTime ? child.dropOffTime : 'Waiting for admin'}</Text>
-                      <Text style={styles.infoText}>School End: {child.schoolFinishTime}</Text>
+                      <Text style={styles.infoText}>School closing time: {schoolClosingTime}</Text>
                     </>
                   </View>
                   <View style={[styles.column, styles.largeColumn]}>

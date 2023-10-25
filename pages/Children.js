@@ -55,6 +55,12 @@ function StudentForm({ route }) {
     { label: 'Paypirus Logpom', value: '2' },
   ];
 
+  const schoolOffTimeData = [
+    { label: '1:30PM', value: '1' },
+    { label: '2PM', value: '2' },
+    { label: '2:30PM', value: '2' },
+  ];
+
 
   const handleInputChange = (key, value) => {
     setFormData({ ...formData, [key]: value });
@@ -66,6 +72,8 @@ function StudentForm({ route }) {
     return `${timestamp}-${randomNum}`;
   };
 
+
+  // Validate and submit data
   const handleAddStudent = (later) => {
     let isValid = true;
     const { name, transportPlan, class: studentClass, school, schoolOffTime } = formData;
@@ -87,10 +95,15 @@ function StudentForm({ route }) {
     }
 
     if (school.trim() === "") {
-      errors.schoolError = "School is required";
+      errors.schoolError = "Please select a school";
       isValid = false;
     }
 
+    if (schoolOffTime.trim() === "") {
+      errors.schoolOffTimeError = "Please select school closing time";
+      isValid = false;
+    }
+    // Validate form Data
     if (isValid) {
      setIsAddingChild(true);
       const student_id = generateUniqueId();
@@ -257,7 +270,6 @@ function StudentForm({ route }) {
               },
               pickTime: student.pickTime,
               dropOffTime: student.dropOffTime,
-              schoolFinishTime: student.schoolFinishTime,
             };
           
           });
@@ -315,7 +327,6 @@ function StudentForm({ route }) {
             },
             pickTime: student.pickTime,
             dropOffTime: student.dropOffTime,
-            schoolFinishTime: student.schoolFinishTime,
           }));
 
           setShowForm(false);
@@ -340,7 +351,7 @@ function StudentForm({ route }) {
 
     // fetchStudentData();
     fetchInfoFromAPI();
-    // deleteDataFromAsyncStorage("parentData");
+    // deleteDataFromAsyncStorage("KTS-P-671515042");
     // deleteDataFromAsyncStorage("studentsData");
   }, []);
 
@@ -362,7 +373,33 @@ function StudentForm({ route }) {
       console.log("here is school finish timest", student.schoolOffTime);
       if (student.parent_id === parent_id) {
         const studentTime = student.schoolOffTime;
-          console.log(student);
+        if (student.school === '1') {
+          schoolName = "Canadian School";
+        } else if (student.school === '2') {
+          schoolName = "Paypirus Logpom";
+        } else {
+          schoolName = student.school;
+        }
+
+        if (student.transportPlan === '1') {
+          transportPlan = 'Both Ways';
+        } else if (student.transportPlan === '2') {
+          transportPlan = 'House to School';
+        } else if (student.transportPlan === '3') {
+          transportPlan = 'School to House';
+        } else {
+          transportPlan = 'Not Specified';
+        }
+
+       if (student.schoolOffTime === '1') {
+          schoolClosingTime = '1:30PM';
+        } else if (student.schoolOffTime === '2') {
+          schoolClosingTime = '2PM';
+        } else if (student.schoolOffTime === '3') {
+          schoolClosingTime = '2:30PM';
+        } else {
+          schoolClosingTime = 'Not Specified';
+        }
         return (
           <View key={index}>
             <View style={styles.cardContainer}>
@@ -373,24 +410,29 @@ function StudentForm({ route }) {
                 <View style={styles.studentInfoContainer}>
                   <View style={styles.studentDetails}>
                     <Text style={styles.studentPhone}>
-                      Transport Plan: {student.transportPlan}
+                      Transport Plan: {transportPlan}
                     </Text>
                     <Text style={styles.studentID}>
-                      School: {student.school}
+                      School: {schoolName}
                     </Text>
                     <Text style={styles.studentGrade}>
                       Class: {student.class}
                     </Text>
                     <Text style={styles.studentFeedback}>
-                      End Time: {studentTime}
+                      School closing time: {schoolClosingTime}
                     </Text>
                     <View style={styles.Modalcontainer} key={index}>
                       <Modal
                         name={student.student}
-                        TransportPlan={student.transportPlan}
+                        TransportPlan={transportPlan}
                         Class={student.class}
-                        School={student.school}
-                        EndTime={studentTime}
+                        School={schoolName}
+                        EndTime={schoolClosingTime}
+                        transportPlanData={transportPlanData}
+                        SchoolData={SchoolData}
+                        schoolOffTimeData={schoolOffTimeData}
+                        handleInputChange={handleInputChange}
+
                       />
                     </View>
                   </View>
@@ -414,13 +456,6 @@ function StudentForm({ route }) {
           onChangeText={(text) => handleInputChange("name", text)}
           placeholder="Name"
         />
-        <Text style={styles.label}>Transport Plan</Text>
-        {formData.errors.transportPlanError && (
-          <Text style={styles.error}>
-            {formData.errors.transportPlanError}
-          </Text>
-        )}
-        <Dropdown data= {transportPlanData} label="Transport Plan" handleValueChange={handleInputChange}/>
 
         <Text style={styles.label}>Class</Text>
         {formData.errors.classError && (
@@ -433,20 +468,27 @@ function StudentForm({ route }) {
           placeholder="Class"
         />
 
+        <Text style={styles.label}>Transport Plan</Text>
+        {formData.errors.transportPlanError && (
+          <Text style={styles.error}>
+            {formData.errors.transportPlanError}
+          </Text>
+        )}
+        <Dropdown data= {transportPlanData} label="transportPlan" handleValueChange={handleInputChange}/>
+
+
         <Text style={styles.label}>School</Text>
         {formData.errors.schoolError && (
           <Text style={styles.error}>{formData.errors.schoolError}</Text>
         )}
-        <Dropdown data= {SchoolData} label="School" handleValueChange={handleInputChange}/>
+        <Dropdown data= {SchoolData} label="school" handleValueChange={handleInputChange}/>
 
         <View>
          <Text style={styles.label}>School Closing Time</Text>
-          <TextInput
-            style={styles.input}
-            onChangeText={(text) => handleInputChange("schoolOffTime", text)}
-            value={formData.schoolOffTime}
-            placeholder="EX: 2PM"
-          />
+        {formData.errors.schoolOffTimeError && (
+          <Text style={styles.error}>{formData.errors.schoolOffTimeError}</Text>
+        )}
+         <Dropdown data= {schoolOffTimeData} label="schoolOffTime" handleValueChange={handleInputChange}/>
         </View>
 
         <View style={styles.buttonContainer}>
@@ -584,8 +626,7 @@ const styles = StyleSheet.create({
   input: {
     height: 40,
     borderColor: "gray",
-    borderColor: 'gray',
-    borderWidth: 0.5,
+    borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 8,
     marginBottom: 10,
