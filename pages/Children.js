@@ -61,6 +61,16 @@ function StudentForm({ route }) {
     { label: '2:30PM', value: '2' },
   ];
 
+    const gotoprofile = () => {
+      navigation.goBack();
+    };
+
+    // Go back one screen
+    const gototocars = () => {
+      navigation.navigate('DriverInfo', {parent_id: parent_id} ) // or navigation.pop();
+    };
+
+
 
   const handleInputChange = (key, value) => {
     setFormData({ ...formData, [key]: value });
@@ -540,8 +550,8 @@ function StudentForm({ route }) {
 )}
 
       </View>
-
     </ScrollView>
+    <StickyFooter title="" profile={gotoprofile} cars={gototocars}/>
   </>
   );
 }
@@ -622,6 +632,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     backgroundColor: "#fff",
+    marginBottom: 60,
   },
   input: {
     height: 40,

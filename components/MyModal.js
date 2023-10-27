@@ -45,7 +45,7 @@ const MyModal = ({ name, TransportPlan, Class,School, EndTime, schoolOffTimeData
             />
             <TextInput
               style={[styles.input, { color: 'white', borderColor: 'white' }]}
-              value={school}
+              value={Class}
               onChangeText={setSchool}
               placeholder="Enter school"
               placeholderTextColor="white"
@@ -82,6 +82,9 @@ const MyModal = ({ name, TransportPlan, Class,School, EndTime, schoolOffTimeData
 };
 
 const styles = StyleSheet.create({
+  inputContainer: {
+    flexDirection: 'row',
+  },
   centeredView: {
     flex: 1,
     justifyContent: 'center',

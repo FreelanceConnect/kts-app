@@ -4,9 +4,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import MyAppLogo from '../components/Logo';
 import StickyFooter from '../components/StickyFooter';
 import { Amplify, API } from 'aws-amplify';
+import { useNavigation } from '@react-navigation/native';
 
 const DriverInfoScreen = ({route}) => {
   const { parent_id } = route.params;
+  const navigation = useNavigation();
 
   const [children, setChildren] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -18,6 +20,16 @@ const DriverInfoScreen = ({route}) => {
         },
       response: true,
   };
+
+    const gotoprofile = () => {
+      navigation.goBack();
+      navigation.goBack();
+    };
+
+    // Go back one screen
+    const gotoChidren = () => {
+      navigation.goBack();
+    };
 
   useEffect(() => {
     console.log("Here is parent_id in driver info", parent_id);
@@ -185,7 +197,7 @@ const DriverInfoScreen = ({route}) => {
       )}
     </View>
   </ScrollView>
-  <StickyFooter title="" />
+    <StickyFooter title="" profile={gotoprofile} children={gotoChidren}/>
   </>
 
   );
@@ -195,6 +207,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
+    marginBottom: 40,
   },
   childContainer: {
     marginBottom: 30,

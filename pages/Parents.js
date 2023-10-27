@@ -162,8 +162,8 @@ const handleChange = (field, value) => {
             console.log('User data saved successfully');
             setShowOtherBtn(true);
             setIsLoading(false);
-          // navigation.navigate('children', {parentName: formData.name, parent_id: parent_id, 
-          //   parentZone: formData.zone, parentQuarter: formData.quarter} );
+            navigation.navigate('children', {parentName: formData.name, parent_id: userId, 
+            parentZone: formData.zone, parentQuarter: formData.quarter} );
           })
           .catch((error) => {
              setIsLoading(false);
@@ -192,8 +192,8 @@ const handleChange = (field, value) => {
             zone: data.address.zone,
         }));
           setShowOtherBtn(true);
-          // navigation.navigate('children', {parentName: formData.name, parent_id: parent_id, 
-          //   parentZone: formData.zone, parentQuarter: formData.quarter} );
+          navigation.navigate('children', {parentName: formData.name, parent_id: parentData, 
+            parentZone: formData.zone, parentQuarter: formData.quarter} );
         }
         else {
           console.log('no user data yet');
@@ -237,6 +237,7 @@ const handleChange = (field, value) => {
   }, []);
 
   return (
+  <>
     <ScrollView>
     <View style={styles.container}>
 
@@ -318,9 +319,9 @@ const handleChange = (field, value) => {
    </>
    )}
         
-
     </View>
     </ScrollView>
+    </>
   );
 }
 
