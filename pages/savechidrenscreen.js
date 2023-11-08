@@ -24,29 +24,23 @@ function StudentForm({ route }) {
   const apiName = "ktsAPI";
   const [showForm, setShowForm] = useState(true);
   const [shownext, setShowNext] = useState(false);
-  const [otherSchool, setShowOtherSchool] = useState(false);
   const [btnText, setBtnText] = useState("Add Another Child");
   const [isLoading, setIsLoading] = useState(false);
   const [isAddingChild, setIsAddingChild] = useState(false);
   const [students, setStudents] = useState([]);
   const [isTimePickerVisible, setTimePickerVisibility] = useState(false);
-  const [showStudents, setShowStudents] = useState(true);
   const [formData, setFormData] = useState({
     name: "",
     transportPlan: "",
     class: "",
     school: "",
     schoolOffTime: "",
-    schoolOffTimeWednesday: "",
-    schoolOffTimeFriday: "",
     errors: {
       nameError: "",
       transportPlanError: "",
       classError: "",
       schoolError: "",
       schoolOffTime: "",
-      schoolOffTimeWednesday: "",
-      schoolOffTimeFriday: "",
     },
   });
 
@@ -57,63 +51,29 @@ function StudentForm({ route }) {
   ];
 
   const SchoolData = [
-    { label: 'Anderson International School - Bonamoussadi', value: '1' },
-    { label: 'British Isles International School-Makepe', value: '2' },
-    { label: 'College Duvaal - Beedi', value: '3' },
-    { label: 'College Laval - Bonamoussadi', value: '4' },
-    { label: 'College Libermann - Akwa', value: '4' },
-    { label: 'Dewey International School of Arts & Science - Denver', value: '5' },
-    { label: 'Divine International Nursery & Primary School - Denver', value: '6' },
-    { label: 'Duvaal International School - Beedi', value: '7' },
-    { label: 'Ecole la Difference - Santa Barbara', value: '8' },
-    { label: 'Ecole Maternelle & Primaire L Aubaine-Makepe', value: '9' },
-    { label: 'Ecole Maternelle et Primaire Sira - Makepe', value: '10' },
-    { label: 'Gifted Kids Christian Academy - Makepe', value: '11' },
-    { label: 'Integrity For All Nursery & Primary School- Bssasi', value: '12' },
-    { label: 'Kathy Nursery and Primary School - Bssadi', value: '13' },
-    { label: 'New Vision International Kindergarten Nursery & Primary School (NEVIKAPS)', value: '14' },
-    { label: 'Russian Inernational School- Makepe', value: '15' },
-    { label: 'Other', value: 'Enter new School' },
+    { label: 'Canadian School', value: '1' },
+    { label: 'Paypirus Logpom', value: '2' },
   ];
 
   const schoolOffTimeData = [
-    { label: '12:00PM', value: '1' },
-    { label: '12:30PM', value: '2' },
-    { label: '1:00PM', value: '3' },
-    { label: '1:30PM', value: '4' },
-    { label: '2:00PM', value: '5' },
-    { label: '2:30PM', value: '6' },
-    { label: '3:00PM', value: '7' },
-    { label: '3:30PM', value: '8' },
-    { label: '4:00PM', value: '9' },
-    { label: '4:30PM', value: '10' },
-    { label: '5:00PM', value: '11' },
-    { label: '5:30PM', value: '12' },
-    { label: '6:00PM', value: '13' },
+    { label: '1:30PM', value: '1' },
+    { label: '2PM', value: '2' },
+    { label: '2:30PM', value: '2' },
   ];
 
     const gotoprofile = () => {
-       navigation.navigate('Welcome to KTS' );
+      navigation.goBack();
     };
 
     // Go back one screen
-    const gotocars = () => {
+    const gototocars = () => {
       navigation.navigate('DriverInfo', {parent_id: parent_id} ) // or navigation.pop();
     };
-     
 
-    useEffect(() => {
-    if (formData.school === 'Enter new School') {
-      setShowOtherSchool(true);
-    } 
-  }, [formData]);
 
 
   const handleInputChange = (key, value) => {
-    setFormData({ ...formData, [key]: value }); 
-    if (formData.school === 16) {
-      setShowOtherSchool(true);
-    }
+    setFormData({ ...formData, [key]: value });
   };
 
   const generateUniqueId = () => {
@@ -126,7 +86,7 @@ function StudentForm({ route }) {
   // Validate and submit data
   const handleAddStudent = (later) => {
     let isValid = true;
-    const { name, transportPlan, class: studentClass, school, schoolOffTime, schoolOffTimeWednesday, schoolOffTimeFriday } = formData;
+    const { name, transportPlan, class: studentClass, school, schoolOffTime } = formData;
     const errors = {};
 
     if (name.trim() === "") {
@@ -151,14 +111,6 @@ function StudentForm({ route }) {
 
     if (schoolOffTime.trim() === "") {
       errors.schoolOffTimeError = "Please select school closing time";
-      isValid = false;
-    }
-    if (schoolOffTimeWednesday.trim() === "") {
-      errors.schoolOffTimeErrorWednesday = "Please select Wednesday school closing time";
-      isValid = false;
-    }
-    if (schoolOffTimeFriday.trim() === "") {
-      errors.schoolOffTimeErrorFriday = "Please select Friday school closing time";
       isValid = false;
     }
     // Validate form Data
@@ -206,8 +158,6 @@ function StudentForm({ route }) {
           pickTime: "",
           dropOffTime: "",
           schoolOffTime: schoolOffTime,
-          schoolOffTimeWednesday: schoolOffTimeWednesday,
-          schoolOffTimeFriday: schoolOffTimeFriday,
         },
         headers: {}, // OPTIONAL
       };
@@ -257,13 +207,12 @@ function StudentForm({ route }) {
     if (showForm) {
       setBtnText("Add Another Child");
     } else {
-      setBtnText("Show Chidren");
+      setBtnText("Hide Form");
     }
   };
 
   const toggleForm = () => {
     setShowForm((prevState) => !prevState);
-    setShowStudents((prevState) => !prevState);
     updateButtonText();
   };
 
@@ -416,10 +365,6 @@ function StudentForm({ route }) {
     // deleteDataFromAsyncStorage("studentsData");
   }, []);
 
-const dynamicStyle = {
-  backgroundColor: btnText === "Add Another Child" ? "#2196F3" : "#ff1a1a",
-};
-
   return (
     <>
     <ScrollView>
@@ -435,34 +380,41 @@ const dynamicStyle = {
 ) : (
   <>
     {students.map((student, index) => {
-      if (student.parent_id === parent_id && showStudents) {
+      console.log("here is school finish timest", student.schoolOffTime);
+      if (student.parent_id === parent_id) {
         const studentTime = student.schoolOffTime;
-        console.log("Wednesday", student.schoolOffTimeWednesday);
-        console.log("friday", student.schoolOffTimeFriday);
-        const currentDate = new Date();
-        const dayOfWeek = currentDate.getDay();
-
-        console.log("days of week", dayOfWeek);
-        let ComputedSchoolOffTime = student.schoolOffTime;
-        if (dayOfWeek===3) {
-          console.log("time todays",student.schoolOffTimeFriday)
-          // ComputedSchoolOffTime = student.schoolOffTimeWednesday;
-        }
-        if (dayOfWeek===5) {
-          ComputedSchoolOffTime = student.schoolOffTimeFriday;
+        if (student.school === '1') {
+          schoolName = "Canadian School";
+        } else if (student.school === '2') {
+          schoolName = "Paypirus Logpom";
+        } else {
+          schoolName = student.school;
         }
 
+        if (student.transportPlan === '1') {
+          transportPlan = 'Both Ways';
+        } else if (student.transportPlan === '2') {
+          transportPlan = 'House to School';
+        } else if (student.transportPlan === '3') {
+          transportPlan = 'School to House';
+        } else {
+          transportPlan = 'Not Specified';
+        }
 
-       const schoolName = SchoolData.find(item => item.value === student.school)?.label || student.school;
-
-
-       const transportPlan = transportPlanData.find(item => item.value === student.transportPlan)?.label || 'Not Specified';
-
-        const schoolClosingTime = schoolOffTimeData.find(item => item.value === ComputedSchoolOffTime)?.label || 'Not Specified';
+       if (student.schoolOffTime === '1') {
+          schoolClosingTime = '1:30PM';
+        } else if (student.schoolOffTime === '2') {
+          schoolClosingTime = '2PM';
+        } else if (student.schoolOffTime === '3') {
+          schoolClosingTime = '2:30PM';
+        } else {
+          schoolClosingTime = 'Not Specified';
+        }
         return (
           <View key={index}>
             <View style={styles.cardContainer}>
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', borderWidth: 1, borderColor: '#2196F3', padding: 10, margin: 5, borderRadius: 5, }}>
+              <>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: '', borderWidth: 1, borderColor: '#2196F3', padding: 10, margin: 5, borderRadius: 5 }}>
                       <Text style={styles.infoLabel}>
                         Student Name: {'\n'}{student.student}
                       </Text>
@@ -484,7 +436,7 @@ const dynamicStyle = {
                 <View style={styles.studentInfoContainer}>
                   <View style={styles.studentDetails}>
 
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', borderWidth: 0.3, borderColor: '#000', padding: 10, margin: 5, borderRadius: 5 }}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: '', borderWidth: 0.3, borderColor: '#000', padding: 10, margin: 5, borderRadius: 5 }}>
                     <Text style={styles.studentGrade}>
                       Class: {'\n'}{student.class}
                     </Text>
@@ -503,14 +455,11 @@ const dynamicStyle = {
                         />
                       </View>
                     </View>
-                  </View>
-                  <View style={styles.studentPicture}></View>
-                </View>
-                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', borderWidth: 0.3, borderColor: '#000', padding: 10, margin: 5, borderRadius: 5 }}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: '', borderWidth: 0.3, borderColor: '#000', padding: 10, margin: 5, borderRadius: 5 }}>
                     <Text style={styles.studentPhone}>
                       Transport Plan: {'\n'}{transportPlan}
                     </Text>
-                    <View>
+                      <View style={{ marginLeft: -10 }}>
                         <Modal
                           name={student.student}
                           TransportPlan={transportPlan}
@@ -523,15 +472,16 @@ const dynamicStyle = {
                           handleInputChange={handleInputChange}
                           isTransportPlan={true}
                         />
+                      </View>
                     </View>
-                    </View>
-                    <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between', borderWidth: 0.3, borderColor: '#2196F3', padding: 10, margin: 5, borderRadius: 5 }}>
-                    <View>
+                  </View>
+                  <View style={styles.studentPicture}></View>
+                </View>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: '', borderWidth: 0.3, borderColor: '#2196F3', padding: 10, margin: 5, borderRadius: 5 }}>
                     <Text style={styles.studentID}>
                       School: {'\n'}{schoolName}
                     </Text>
-                    </View>
-                      <View>
+                      <View style={{ marginLeft: -10 }}>
                         <Modal
                           name={student.student}
                           TransportPlan={transportPlan}
@@ -547,7 +497,7 @@ const dynamicStyle = {
                       </View>
                     </View>
 
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', borderWidth: 0.3, borderColor: '#2196F3', padding: 10, margin: 5, borderRadius: 5 }}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: '', borderWidth: 0.3, borderColor: '#2196F3', padding: 10, margin: 5, borderRadius: 5 }}>
                       <Text style={styles.studentFeedback}>
                         School closing time: {'\n'}{schoolClosingTime}
                       </Text>
@@ -566,6 +516,7 @@ const dynamicStyle = {
                         />
                       </View>
                     </View>
+              </>
             </View>
           </View>
         );
@@ -609,40 +560,13 @@ const dynamicStyle = {
           <Text style={styles.error}>{formData.errors.schoolError}</Text>
         )}
         <Dropdown data= {SchoolData} label="school" handleValueChange={handleInputChange}/>
-      { otherSchool && 
-      (<>
-      <Text style={styles.label}>If other, Enter the School</Text>
-      <TextInput
-          style={styles.input}
-          value={formData.school}
-          onChangeText={(text) => handleInputChange("school", text)}
-          placeholder="Ex: Canadian School"
-        />
-        </>
-        ) }
 
         <View>
-         <Text style={styles.label}>School Closing Time (Regular Days)</Text>
+         <Text style={styles.label}>School Closing Time</Text>
         {formData.errors.schoolOffTimeError && (
           <Text style={styles.error}>{formData.errors.schoolOffTimeError}</Text>
         )}
          <Dropdown data= {schoolOffTimeData} label="schoolOffTime" handleValueChange={handleInputChange}/>
-        </View>
-
-        <View>
-         <Text style={styles.label}>School Closing Time (Wednesday)</Text>
-        {formData.errors.schoolOffTimeErrorWednesday && (
-          <Text style={styles.error}>{formData.errors.schoolOffTimeErrorWednesday}</Text>
-        )}
-         <Dropdown data= {schoolOffTimeData} label="schoolOffTimeWednesday" handleValueChange={handleInputChange}/>
-        </View>
-
-        <View>
-         <Text style={styles.label}>School Closing Time (Friday)</Text>
-        {formData.errors.schoolOffTimeErrorFriday && (
-          <Text style={styles.error}>{formData.errors.schoolOffTimeErrorFriday}</Text>
-        )}
-         <Dropdown data= {schoolOffTimeData} label="schoolOffTimeFriday" handleValueChange={handleInputChange}/>
         </View>
 
         <View style={styles.buttonContainer}>
@@ -666,11 +590,11 @@ const dynamicStyle = {
           <View style={styles.containerContinue}>
             <View style={styles.element1}>
               <TouchableOpacity
-                style={[styles.button, dynamicStyle]}
+                style={[styles.button, { backgroundColor: "#2196F3" }]}
                 onPress={toggleForm}
               >
                 <Text
-                  style={[styles.textStyle, dynamicStyle]}
+                  style={[styles.textStyle, { backgroundColor: "#2196F3" }]}
                 >
                   {btnText}
                 </Text>
@@ -695,7 +619,7 @@ const dynamicStyle = {
 
       </View>
     </ScrollView>
-    <StickyFooter title="" profile={gotoprofile} cars={gotocars} screen="children"/>
+    <StickyFooter title="" profile={gotoprofile} cars={gototocars}/>
   </>
   );
 }
@@ -705,7 +629,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 10,
-    width: 210
   },
   studentInfoContainer: {
     flexDirection: "row",
@@ -718,33 +641,26 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     marginBottom: 5,
-    width: 210,
   },
   studentPhone: {
     fontSize: 14,
     color: "#555",
     marginBottom: 5,
-    width: 210,
   },
   studentID: {
     fontSize: 14,
     marginBottom: 5,
-    width: 210,
-    padding: 5,
   },
   studentGrade: {
     fontSize: 14,
     marginBottom: 5,
-    width: 100,
-    padding: 5,
   },
   studentFeedback: {
     fontSize: 14,
-    width: 210,
   },
   studentPicture: {
-    width: 80,
-    height: 90,
+    width: 100,
+    height: 100,
     backgroundColor: "#ccc",
   },
   students: {
@@ -821,6 +737,8 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     borderWidth: 2, 
     borderColor: '#2196F3', 
+    padding: 10, margin: 5, 
+    borderRadius: 5
   },
   cardImageContainer: {
     marginRight: 10,

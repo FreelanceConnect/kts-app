@@ -16,16 +16,18 @@ import Modal from "../components/MyModal";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import StickyFooter from '../components/StickyFooter';
+import Dropdown from '../components/Dropdown';
 
-function DriverScreen({ route }) {
-    const { parent_id, parentName, parentQuarter, parentZone} = route.params;
+function StudentForm({ route }) {
+  const { parent_id, parentName, parentQuarter, parentZone} = route.params;
   const navigation = useNavigation();
   const apiName = "ktsAPI";
   const [showForm, setShowForm] = useState(true);
+  const [shownext, setShowNext] = useState(false);
   const [btnText, setBtnText] = useState("Add Another Child");
   const [isLoading, setIsLoading] = useState(false);
+  const [isAddingChild, setIsAddingChild] = useState(false);
   const [students, setStudents] = useState([]);
-  const [selectedTime, setSelectedTime] = useState(new Date());
   const [isTimePickerVisible, setTimePickerVisibility] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -38,8 +40,37 @@ function DriverScreen({ route }) {
       transportPlanError: "",
       classError: "",
       schoolError: "",
+      schoolOffTime: "",
     },
   });
+
+  const transportPlanData = [
+    { label: 'Both Ways', value: '1' },
+    { label: 'House to School', value: '2' },
+    { label: 'School to House', value: '3' },
+  ];
+
+  const SchoolData = [
+    { label: 'Canadian School', value: '1' },
+    { label: 'Paypirus Logpom', value: '2' },
+  ];
+
+  const schoolOffTimeData = [
+    { label: '1:30PM', value: '1' },
+    { label: '2PM', value: '2' },
+    { label: '2:30PM', value: '2' },
+  ];
+
+    const gotoprofile = () => {
+      navigation.goBack();
+    };
+
+    // Go back one screen
+    const gototocars = () => {
+      navigation.navigate('DriverInfo', {parent_id: parent_id} ) // or navigation.pop();
+    };
+
+
 
   const handleInputChange = (key, value) => {
     setFormData({ ...formData, [key]: value });
@@ -51,24 +82,11 @@ function DriverScreen({ route }) {
     return `${timestamp}-${randomNum}`;
   };
 
-  const showTimePicker = () => {
-    setTimePickerVisibility(true);
-  };
 
-  const hideTimePicker = () => {
-    setTimePickerVisibility(false);
-  };
-
-  const handleTimeChange = (event, time) => {
-    if (time !== undefined) {
-      setSelectedTime(time);
-    }
-    hideTimePicker();
-  };
-
+  // Validate and submit data
   const handleAddStudent = (later) => {
     let isValid = true;
-    const { name, transportPlan, class: studentClass, school } = formData;
+    const { name, transportPlan, class: studentClass, school, schoolOffTime } = formData;
     const errors = {};
 
     if (name.trim() === "") {
@@ -77,7 +95,7 @@ function DriverScreen({ route }) {
     }
 
     if (transportPlan.trim() === "") {
-      errors.transportPlanError = "Transport Plan is required";
+      errors.transportPlanError = "Please select a transport plan";
       isValid = false;
     }
 
@@ -87,12 +105,17 @@ function DriverScreen({ route }) {
     }
 
     if (school.trim() === "") {
-      errors.schoolError = "School is required";
+      errors.schoolError = "Please select a school";
       isValid = false;
     }
 
+    if (schoolOffTime.trim() === "") {
+      errors.schoolOffTimeError = "Please select school closing time";
+      isValid = false;
+    }
+    // Validate form Data
     if (isValid) {
-      setIsLoading(true);
+     setIsAddingChild(true);
       const student_id = generateUniqueId();
       const path = `/students`;
       const myInit = {
@@ -104,7 +127,6 @@ function DriverScreen({ route }) {
           transportPlan: transportPlan,
           school: school,
           class: studentClass,
-          schoolOffTime: selectedTime,
           address: {
             quarter: parentQuarter,
             zone: parentZone,
@@ -135,7 +157,7 @@ function DriverScreen({ route }) {
           },
           pickTime: "",
           dropOffTime: "",
-          schoolFinishTime: "",
+          schoolOffTime: schoolOffTime,
         },
         headers: {}, // OPTIONAL
       };
@@ -149,7 +171,8 @@ function DriverScreen({ route }) {
             AsyncStorage.setItem("studentsData", JSON.stringify(studentsObject))
               .then(() => {
                 console.log("User data saved successfully");
-                setIsLoading(false);
+                setIsAddingChild(false);
+                setShowNext(true);
               })
               .catch((error) => {
                 console.log("Error saving user data:", error);
@@ -182,7 +205,7 @@ function DriverScreen({ route }) {
   };
   const updateButtonText = () => {
     if (showForm) {
-      setBtnText("Add Another Student");
+      setBtnText("Add Another Child");
     } else {
       setBtnText("Hide Form");
     }
@@ -198,7 +221,6 @@ function DriverScreen({ route }) {
 
     const fetchInfoFromAPI = () => {
       setIsLoading(true);
-      setShowForm(false);
       const apiName = "ktsAPI";
       const path = `/students`;
       const myInit = {
@@ -213,6 +235,12 @@ function DriverScreen({ route }) {
           const data = response.data;
           setIsLoading(false);
           const students = data.map((student) => {
+            const myparent_id = student.parent_id;
+            if (parent_id===myparent_id) {
+              setShowForm(false);
+              setShowNext(true);
+            }
+
             return {
               student_id: student.student_id,
               student: student.student,
@@ -221,7 +249,7 @@ function DriverScreen({ route }) {
               transportPlan: student.transportPlan,
               school: student.school,
               class: student.class,
-              schoolOffTime: selectedTime,
+              schoolOffTime: student.schoolOffTime,
               address: {
                 quarter: student.parentQuarter,
                 zone: student.parentZone,
@@ -252,11 +280,11 @@ function DriverScreen({ route }) {
               },
               pickTime: student.pickTime,
               dropOffTime: student.dropOffTime,
-              schoolFinishTime: student.schoolFinishTime,
             };
+          
           });
           setStudents(students);
-          setShowForm(false);
+
         })
         .catch((error) => {
           console.log(error.response);
@@ -270,7 +298,6 @@ function DriverScreen({ route }) {
         if (studentData && studentData.length !== 0) {
           const parsedData = JSON.parse(studentData);
           const updatedStudents = parsedData.updatedStudents;
-          // console.log(updatedStudents[0].class);
           const students = updatedStudents.map((student) => ({
             student_id: student.student_id,
             student: student.student,
@@ -279,7 +306,7 @@ function DriverScreen({ route }) {
             transportPlan: student.transportPlan,
             school: student.school,
             class: student.class,
-            schoolOffTime: selectedTime,
+            schoolOffTime: student.schoolOffTime,
             address: {
               quarter: student.parentQuarter,
               zone: student.parentZone,
@@ -310,7 +337,6 @@ function DriverScreen({ route }) {
             },
             pickTime: student.pickTime,
             dropOffTime: student.dropOffTime,
-            schoolFinishTime: student.schoolFinishTime,
           }));
 
           setShowForm(false);
@@ -335,7 +361,7 @@ function DriverScreen({ route }) {
 
     // fetchStudentData();
     fetchInfoFromAPI();
-    // deleteDataFromAsyncStorage("parentData");
+    // deleteDataFromAsyncStorage("KTS-P-671515042");
     // deleteDataFromAsyncStorage("studentsData");
   }, []);
 
@@ -349,141 +375,150 @@ function DriverScreen({ route }) {
             source={require("../assets/KTSLogo.png")}
           />
         </View>
-        {isLoading ? (
-          <ActivityIndicator size="small" color="#2196F3" />
-        ) : (
-          students.map((student, index) => {
-            if (student.parent_id === parent_id) {
-              const studentTime=student.schoolOffTime.toLocaleTimeString().split(':').slice(0, 2).join(':');
-              return (
-                <View key={index}>
-                  <View style={styles.cardContainer}>
-                    <>
-                      <Text style={styles.infoLabel}>
-                        Student: {student.student}
-                      </Text>
-                      <View style={styles.studentInfoContainer}>
-                        <View style={styles.studentDetails}>
-                          <Text style={styles.studentPhone}>
-                            Transport Plan: {student.transportPlan}
-                          </Text>
-                          <Text style={styles.studentID}>
-                            School: {student.school}
-                          </Text>
-                          <Text style={styles.studentGrade}>
-                            Class: {student.class}
-                          </Text>
-                          <Text style={styles.studentFeedback}>End Time: {studentTime}</Text>
-                          <View style={styles.Modalcontainer} key={index}>
-                            <Modal
-                              name={student.student}
-                              TransportPlan={student.transportPlan}
-                              Class={student.class}
-                              School={student.school}
-                              EndTime= {studentTime}
-                            />
-                          </View>
-                        </View>
-                        <View style={styles.studentPicture}></View>
-                      </View>
-                    </>
-                  </View>
-                </View>
-              );
-            }
-          })
-        )}
-        {showForm && (
-          <>
-            <Text style={styles.label}>Name</Text>
-            {formData.errors.nameError && (
-              <Text style={styles.error}>{formData.errors.nameError}</Text>
-            )}
-            <TextInput
-              style={styles.input}
-              value={formData.name}
-              onChangeText={(text) => handleInputChange("name", text)}
-              placeholder="Name"
-            />
+{isLoading ? (
+  <ActivityIndicator size="large" color="#2196F3" />
+) : (
+  <>
+    {students.map((student, index) => {
+      console.log("here is school finish timest", student.schoolOffTime);
+      if (student.parent_id === parent_id) {
+        const studentTime = student.schoolOffTime;
+        if (student.school === '1') {
+          schoolName = "Canadian School";
+        } else if (student.school === '2') {
+          schoolName = "Paypirus Logpom";
+        } else {
+          schoolName = student.school;
+        }
 
-            <Text style={styles.label}>Transport Plan</Text>
-            {formData.errors.transportPlanError && (
-              <Text style={styles.error}>
-                {formData.errors.transportPlanError}
+        if (student.transportPlan === '1') {
+          transportPlan = 'Both Ways';
+        } else if (student.transportPlan === '2') {
+          transportPlan = 'House to School';
+        } else if (student.transportPlan === '3') {
+          transportPlan = 'School to House';
+        } else {
+          transportPlan = 'Not Specified';
+        }
+
+       if (student.schoolOffTime === '1') {
+          schoolClosingTime = '1:30PM';
+        } else if (student.schoolOffTime === '2') {
+          schoolClosingTime = '2PM';
+        } else if (student.schoolOffTime === '3') {
+          schoolClosingTime = '2:30PM';
+        } else {
+          schoolClosingTime = 'Not Specified';
+        }
+        return (
+          <View key={index}>
+            <View style={styles.cardContainer}>
+              <>
+                <Text style={styles.infoLabel}>
+                  Student: {student.student}
+                </Text>
+                <View style={styles.studentInfoContainer}>
+                  <View style={styles.studentDetails}>
+                    <Text style={styles.studentPhone}>
+                      Transport Plan: {transportPlan}
+                    </Text>
+                    <Text style={styles.studentID}>
+                      School: {schoolName}
+                    </Text>
+                    <Text style={styles.studentGrade}>
+                      Class: {student.class}
+                    </Text>
+                    <Text style={styles.studentFeedback}>
+                      School closing time: {schoolClosingTime}
+                    </Text>
+                    <View style={styles.Modalcontainer} key={index}>
+                      <Modal
+                        name={student.student}
+                        TransportPlan={transportPlan}
+                        Class={student.class}
+                        School={schoolName}
+                        EndTime={schoolClosingTime}
+                        transportPlanData={transportPlanData}
+                        SchoolData={SchoolData}
+                        schoolOffTimeData={schoolOffTimeData}
+                        handleInputChange={handleInputChange}
+
+                      />
+                    </View>
+                  </View>
+                  <View style={styles.studentPicture}></View>
+                </View>
+              </>
+            </View>
+          </View>
+        );
+      }
+    })}
+    {showForm && (
+      <>
+        <Text style={styles.label}>Name of child</Text>
+        {formData.errors.nameError && (
+          <Text style={styles.error}>{formData.errors.nameError}</Text>
+        )}
+        <TextInput
+          style={styles.input}
+          value={formData.name}
+          onChangeText={(text) => handleInputChange("name", text)}
+          placeholder="Name"
+        />
+
+        <Text style={styles.label}>Class</Text>
+        {formData.errors.classError && (
+          <Text style={styles.error}>{formData.errors.classError}</Text>
+        )}
+        <TextInput
+          style={styles.input}
+          value={formData.class}
+          onChangeText={(text) => handleInputChange("class", text)}
+          placeholder="Class"
+        />
+
+        <Text style={styles.label}>Transport Plan</Text>
+        {formData.errors.transportPlanError && (
+          <Text style={styles.error}>
+            {formData.errors.transportPlanError}
+          </Text>
+        )}
+        <Dropdown data= {transportPlanData} label="transportPlan" handleValueChange={handleInputChange}/>
+
+
+        <Text style={styles.label}>School</Text>
+        {formData.errors.schoolError && (
+          <Text style={styles.error}>{formData.errors.schoolError}</Text>
+        )}
+        <Dropdown data= {SchoolData} label="school" handleValueChange={handleInputChange}/>
+
+        <View>
+         <Text style={styles.label}>School Closing Time</Text>
+        {formData.errors.schoolOffTimeError && (
+          <Text style={styles.error}>{formData.errors.schoolOffTimeError}</Text>
+        )}
+         <Dropdown data= {schoolOffTimeData} label="schoolOffTime" handleValueChange={handleInputChange}/>
+        </View>
+
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={[styles.button, { backgroundColor: "#2196F3" }]}
+            onPress={handleAddStudent}
+            disabled={isAddingChild} // Disable the button while adding child
+          >
+            {isAddingChild ? (
+              <ActivityIndicator color="#ffffff" /> // Show loading indicator while adding child
+            ) : (
+              <Text style={[styles.textStyle, { backgroundColor: "#2196F3" }]}>
+                Add Child
               </Text>
             )}
-            <TextInput
-              style={styles.input}
-              value={formData.transportPlan}
-              onChangeText={(text) => handleInputChange("transportPlan", text)}
-              placeholder="EX: Aller et Retour"
-            />
-
-            <Text style={styles.label}>Class</Text>
-            {formData.errors.classError && (
-              <Text style={styles.error}>{formData.errors.classError}</Text>
-            )}
-            <TextInput
-              style={styles.input}
-              value={formData.class}
-              onChangeText={(text) => handleInputChange("class", text)}
-              placeholder="Class"
-            />
-
-            <Text style={styles.label}>School</Text>
-            {formData.errors.schoolError && (
-              <Text style={styles.error}>{formData.errors.schoolError}</Text>
-            )}
-            <TextInput
-              style={styles.input}
-              value={formData.school}
-              onChangeText={(text) => handleInputChange("school", text)}
-              placeholder="School"
-            />
-
-            <View>
-              <Button
-                title="Select School Finish Time"
-                onPress={showTimePicker}
-              />
-              <TextInput
-                style={styles.input}
-                onChangeText={(text) =>
-                  handleInputChange("schoolOffTime", text)
-                }
-                value={selectedTime.toLocaleTimeString()}
-                placeholder="Selected Time"
-              />
-              {isTimePickerVisible && (
-                <DateTimePicker
-                  value={selectedTime}
-                  mode="time"
-                  display={Platform.OS === "ios" ? "spinner" : "default"}
-                  onChange={handleTimeChange}
-                />
-              )}
-            </View>
-
-            <View style={styles.buttonContainer}>
-              {isLoading ? (
-                <ActivityIndicator size="small" color="#2196F3" />
-              ) : (
-                <TouchableOpacity
-                  style={[styles.button, { backgroundColor: "#2196F3" }]}
-                  onPress={handleAddStudent}
-                >
-                  <Text
-                    style={[styles.textStyle, { backgroundColor: "#2196F3" }]}
-                  >
-                    Add Student
-                  </Text>
-                </TouchableOpacity>
-              )}
-            </View>
-          </>
-        )}
-
-        {students.length ? (
+          </TouchableOpacity>
+        </View>
+      </>
+    )}
+            {shownext ? (
           <View style={styles.containerContinue}>
             <View style={styles.element1}>
               <TouchableOpacity
@@ -511,9 +546,12 @@ function DriverScreen({ route }) {
             </View>
           </View>
         ) : null}
-      </View>
+  </>
+)}
 
+      </View>
     </ScrollView>
+    <StickyFooter title="" profile={gotoprofile} cars={gototocars}/>
   </>
   );
 }
@@ -594,13 +632,15 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     backgroundColor: "#fff",
+    marginBottom: 60,
   },
   input: {
     height: 40,
     borderColor: "gray",
     borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 8,
     marginBottom: 10,
-    paddingHorizontal: 10,
   },
   imageContainer: {
     display: "flex",
@@ -661,4 +701,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default DriverScreen;
+export default StudentForm;

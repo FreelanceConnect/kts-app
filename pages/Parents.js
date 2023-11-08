@@ -58,6 +58,15 @@ const handleChange = (field, value) => {
   }));
 };
 
+  const gotochildren = () => {
+      navigation.navigate('children', {parent_id: parent_id} )
+    };
+
+    // Go back one screen
+    const gotocars = () => {
+      navigation.navigate('DriverInfo', {parent_id: parent_id} ) // or navigation.pop();
+    };
+
    const handleSubmit = () => {
 
     let isValid = true;
@@ -306,7 +315,7 @@ const handleChange = (field, value) => {
               <ActivityIndicator color="#ffffff" /> // Show loading indicator while adding child
             ) : (
               <Text style={[styles.textStyle, { backgroundColor: "#2196F3" }]}>
-                Add Child
+                Submit
               </Text>
             )}
           </TouchableOpacity>
@@ -321,12 +330,13 @@ const handleChange = (field, value) => {
         
     </View>
     </ScrollView>
+        <StickyFooter title="" children={gotochildren} cars={gotocars} screen="parent"/>
     </>
   );
 }
 
 const style = StyleSheet.create({
-  container: { flex: 1, marginTop: 26,},
+  container: { flex: 1, marginTop: 26, marginBottom: 60,},
 });
 
 const styles = StyleSheet.create({

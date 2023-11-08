@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
+import { FontAwesome5 } from '@expo/vector-icons';
 import { View, Modal, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import Dropdown from './Dropdown';
 
-const MyModal = ({ name, TransportPlan, Class,School, EndTime, schoolOffTimeData, SchoolData, transportPlanData, handleInputChange }) => {
+const MyModal = ({ name, TransportPlan, Class,School, EndTime, schoolOffTimeData, SchoolData, transportPlanData, handleInputChange, isName, isTransportPlan, isClass, isSchool, isEndTime }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [text, setText] = useState(name);
   const [transportPlan, setTransportPlan] = useState(TransportPlan);
@@ -35,25 +36,33 @@ const MyModal = ({ name, TransportPlan, Class,School, EndTime, schoolOffTimeData
       >
         <View style={styles.centeredView}>
           <View style={styles.modalContainer}>
-            <TextInput
+           { isName && <TextInput
               style={[styles.input, { color: 'white', borderColor: 'white' }]}
               value={text}
               onChangeText={setText}
-              placeholder="Enter name"
+              placeholder="Enter Name"
               placeholderTextColor="white"
               editable={true}
-            />
+            /> }
+            { isClass &&
             <TextInput
               style={[styles.input, { color: 'white', borderColor: 'white' }]}
               value={Class}
               onChangeText={setSchool}
-              placeholder="Enter school"
+              placeholder="Enter Class"
               placeholderTextColor="white"
               editable={true}
             />
+             }
+            { isTransportPlan &&
             <Dropdown data= {transportPlanData} label="transportPlan" handleValueChange={handleInputChange} position="modal"/>
+          }
+          { isSchool &&
             <Dropdown data= {SchoolData} label="school" handleValueChange={handleInputChange} position="modal"/>
+          }
+          { isEndTime &&
             <Dropdown data= {schoolOffTimeData} label="schoolOffTime" handleValueChange={handleInputChange} position="modal"/>
+          }
             <TouchableOpacity
               style={[styles.button, { backgroundColor: '#2196F3' }]}
               onPress={handleUpdate}
@@ -71,10 +80,13 @@ const MyModal = ({ name, TransportPlan, Class,School, EndTime, schoolOffTimeData
         </View>
       </Modal>
       <TouchableOpacity
-        style={[styles.buttonModal, { backgroundColor: '#2196F3' }]}
-        onPress={() => setModalVisible(true)}
+        style={[styles.buttonModal]}
+        onPress={(e) => {
+          setModalVisible(true)
+        }
+      }
       >
-        <Text style={[styles.textStyle, { backgroundColor: '#2196F3' }]}>Update</Text>
+        <FontAwesome5 name="pencil-alt" size={20} color="#2196F3" />
       </TouchableOpacity>
     </View>
     </ScrollView>
@@ -89,7 +101,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 22,
   },
   modalContainer: {
     backgroundColor: '#404040',

@@ -4,7 +4,7 @@
   import AntDesign from '@expo/vector-icons/AntDesign';
 
 
-  const DropdownComponent = ({data, label, handleValueChange, position}) => {
+  const DropdownComponent = ({data, label, handleValueChange, position, otherSchool}) => {
     const [value, setValue] = useState(null);
     const [isFocus, setIsFocus] = useState(false);
 
@@ -19,8 +19,11 @@
       return null;
     };
       let containerStyle = {};
+      let condStyle = {};
        if (position === "modal") {
           containerStyle.backgroundColor = '#404040';
+          condStyle.borderColor = '#fff';
+          condStyle.color = 'white';
         } else if (position === 'right') {
           containerStyle.backgroundColor = 'blue';
         } else {
@@ -32,11 +35,11 @@
       <View style={[styles.container, containerStyle]}>
         {renderLabel()}
         <Dropdown
-          style={[styles.dropdown, isFocus && { borderColor: 'blue' }]}
+          style={[styles.dropdown, isFocus && { borderColor: 'blue' }, condStyle]}
           placeholderStyle={styles.placeholderStyle}
-          selectedTextStyle={styles.selectedTextStyle}
+          selectedTextStyle={[styles.selectedTextStyle, condStyle]}
           inputSearchStyle={styles.inputSearchStyle}
-          iconStyle={styles.iconStyle}
+          iconStyle={[styles.iconStyle, condStyle]}
           data={data}
           search
           maxHeight={300}
@@ -48,7 +51,6 @@
           onFocus={() => setIsFocus(true)}
           onBlur={() => setIsFocus(false)}
           onChange = {(text) => {
-            console.log(label);
             setValue(text.value);
             setIsFocus(false);
             handleValueChange(label, text.value)

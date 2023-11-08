@@ -22,13 +22,12 @@ const DriverInfoScreen = ({route}) => {
   };
 
     const gotoprofile = () => {
-      navigation.goBack();
-      navigation.goBack();
+      navigation.navigate('Welcome to KTS' ); 
     };
 
     // Go back one screen
     const gotoChidren = () => {
-      navigation.goBack();
+      navigation.navigate('children', {parent_id: parent_id} )
     };
 
   useEffect(() => {
@@ -197,7 +196,7 @@ const DriverInfoScreen = ({route}) => {
       )}
     </View>
   </ScrollView>
-    <StickyFooter title="" profile={gotoprofile} children={gotoChidren}/>
+    <StickyFooter title="" profile={gotoprofile} children={gotoChidren} screen="driver"/>
   </>
 
   );
