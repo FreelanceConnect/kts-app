@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "393435650621",
+    "project_id": "kts-app-2a06e",
+    "storage_bucket": "kts-app-2a06e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:393435650621:android:d84e1a0810b88542aa6854",
+        "android_client_info": {
+          "package_name": "com.thespy237.kts"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCWCV12LDda7Ix7amVVJR7ddcB8zuS97SM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

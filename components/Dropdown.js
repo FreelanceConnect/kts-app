@@ -4,8 +4,8 @@
   import AntDesign from '@expo/vector-icons/AntDesign';
 
 
-  const DropdownComponent = ({data, label, handleValueChange, position, otherSchool}) => {
-    const [value, setValue] = useState(null);
+  const DropdownComponent = ({data, label, handleValueChange, position, otherSchool, myValue}) => {
+    const [value, setValue] = useState(myValue);
     const [isFocus, setIsFocus] = useState(false);
 
     const renderLabel = () => {

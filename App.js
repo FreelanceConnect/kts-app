@@ -1,3 +1,4 @@
+import { useState, useEffect, useRef } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
@@ -16,6 +17,7 @@ import DriverScreen from './pages/DriverScreen';
 
 
 export default function App() {
+
   const Stack= createNativeStackNavigator()
   return (
   <AppProvider>

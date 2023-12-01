@@ -9,6 +9,11 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
+
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+
+import MyAppLogo from '../components/Logo';
+
 import React, { useState, useEffect } from "react";
 import { Amplify, API } from "aws-amplify";
 import { useNavigation } from "@react-navigation/native";
@@ -30,7 +35,7 @@ function StudentForm({ route }) {
   const [isAddingChild, setIsAddingChild] = useState(false);
   const [students, setStudents] = useState([]);
   const [isTimePickerVisible, setTimePickerVisibility] = useState(false);
-  const [showStudents, setShowStudents] = useState(true);
+  const [modalVisible, setModalVisible] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     transportPlan: "",
@@ -90,6 +95,7 @@ function StudentForm({ route }) {
     { label: '5:00PM', value: '11' },
     { label: '5:30PM', value: '12' },
     { label: '6:00PM', value: '13' },
+    { label: 'Week-end', value: '14' },
   ];
 
     const gotoprofile = () => {
@@ -263,7 +269,6 @@ function StudentForm({ route }) {
 
   const toggleForm = () => {
     setShowForm((prevState) => !prevState);
-    setShowStudents((prevState) => !prevState);
     updateButtonText();
   };
 
@@ -292,6 +297,13 @@ function StudentForm({ route }) {
               setShowNext(true);
             }
 
+           const currentTime = new Date().getHours(); // Get the current hour
+            if (currentTime < 12) {
+              student.driver = student.driverMorning; // Assign driverMorning if it's before noon
+            } else {
+              student.driver = student.driverEvening; // Assign driverEvening if it's noon or later
+            }
+
             return {
               student_id: student.student_id,
               student: student.student,
@@ -301,6 +313,8 @@ function StudentForm({ route }) {
               school: student.school,
               class: student.class,
               schoolOffTime: student.schoolOffTime,
+              schoolOffTimeWednesday: student.schoolOffTimeWednesday,
+              schoolOffTimeFriday: student.schoolOffTimeFriday,
               address: {
                 quarter: student.parentQuarter,
                 zone: student.parentZone,
@@ -358,6 +372,8 @@ function StudentForm({ route }) {
             school: student.school,
             class: student.class,
             schoolOffTime: student.schoolOffTime,
+            schoolOffTimeWednesday: student.schoolOffTimeWednesday,
+            schoolOffTimeFriday: student.schoolOffTimeFriday,
             address: {
               quarter: student.parentQuarter,
               zone: student.parentZone,
@@ -416,6 +432,10 @@ function StudentForm({ route }) {
     // deleteDataFromAsyncStorage("studentsData");
   }, []);
 
+  const openModal = () => {
+    setModalVisible(true);
+  };
+
 const dynamicStyle = {
   backgroundColor: btnText === "Add Another Child" ? "#2196F3" : "#ff1a1a",
 };
@@ -424,32 +444,26 @@ const dynamicStyle = {
     <>
     <ScrollView>
       <View style={styles.container}>
-        <View style={styles.imageContainer}>
-          <Image
-            style={styles.image}
-            source={require("../assets/KTSLogo.png")}
-          />
-        </View>
+      <MyAppLogo />
 {isLoading ? (
   <ActivityIndicator size="large" color="#2196F3" />
 ) : (
   <>
     {students.map((student, index) => {
-      if (student.parent_id === parent_id && showStudents) {
+      if (student.parent_id === parent_id && !showForm) {
         const studentTime = student.schoolOffTime;
-        console.log("Wednesday", student.schoolOffTimeWednesday);
-        console.log("friday", student.schoolOffTimeFriday);
         const currentDate = new Date();
         const dayOfWeek = currentDate.getDay();
 
-        console.log("days of week", dayOfWeek);
         let ComputedSchoolOffTime = student.schoolOffTime;
         if (dayOfWeek===3) {
-          console.log("time todays",student.schoolOffTimeFriday)
-          // ComputedSchoolOffTime = student.schoolOffTimeWednesday;
+          ComputedSchoolOffTime = student.schoolOffTimeWednesday;
         }
         if (dayOfWeek===5) {
           ComputedSchoolOffTime = student.schoolOffTimeFriday;
+        }
+        if (dayOfWeek===6 || dayOfWeek=== 0) {
+          ComputedSchoolOffTime = '14';
         }
 
 
@@ -462,12 +476,15 @@ const dynamicStyle = {
         return (
           <View key={index}>
             <View style={styles.cardContainer}>
+                <TouchableOpacity>
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', borderWidth: 1, borderColor: '#2196F3', padding: 10, margin: 5, borderRadius: 5, }}>
                       <Text style={styles.infoLabel}>
-                        Student Name: {'\n'}{student.student}
+                        <Text style={{ fontWeight: 'bold' }}>Name:</Text> {student.student}
                       </Text>
                       <View style={{ marginLeft: -10 }}>
                         <Modal
+                          modalVisible={modalVisible}
+                          setModalVisible={setModalVisible}
                           name={student.student}
                           TransportPlan={transportPlan}
                           Class={student.class}
@@ -479,39 +496,29 @@ const dynamicStyle = {
                           handleInputChange={handleInputChange}
                           isName={true}
                         />
-                      </View>
-                    </View>
-                <View style={styles.studentInfoContainer}>
-                  <View style={styles.studentDetails}>
 
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', borderWidth: 0.3, borderColor: '#000', padding: 10, margin: 5, borderRadius: 5 }}>
-                    <Text style={styles.studentGrade}>
-                      Class: {'\n'}{student.class}
-                    </Text>
-                      <View style={{ marginLeft: -10 }}>
-                        <Modal
-                          name={student.student}
-                          TransportPlan={transportPlan}
-                          Class={student.class}
-                          School={schoolName}
-                          EndTime={schoolClosingTime}
-                          transportPlanData={transportPlanData}
-                          SchoolData={SchoolData}
-                          schoolOffTimeData={schoolOffTimeData}
-                          handleInputChange={handleInputChange}
-                          isClass={true}
-                        />
                       </View>
                     </View>
-                  </View>
-                  <View style={styles.studentPicture}></View>
-                </View>
-                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', borderWidth: 0.3, borderColor: '#000', padding: 10, margin: 5, borderRadius: 5 }}>
-                    <Text style={styles.studentPhone}>
-                      Transport Plan: {'\n'}{transportPlan}
+                  </TouchableOpacity>
+                <View style={styles.studentInfoContainer}>
+                 <TouchableOpacity>
+
+                    <View style={{flexDirection: 'row', justifyContent: 'space-between', borderWidth: 0.3, borderColor: '#000', padding: 10, margin: 5, borderRadius: 5 }}>
+                   <Text style={styles.studentPhone}>
+                      <Text style={{ fontWeight: 'bold', }}>Transport Plan: </Text>
+                      {transportPlan}{'\n'}
+                      <Text style={{ fontWeight: 'bold', }}>Status: </Text>
+                      Pending{'\n'}
+                      <Text style={styles.infoText}><Text style={{ fontWeight: 'bold', }}>Pick-UP Time: </Text> {student.pickTime ? student.pickTime : 'Waiting for admin'}</Text>
+                    <Text style={styles.studentGrade}>{'\n'}
+                      <Text style={{ fontWeight: 'bold', }}>Class: </Text>{student.class}
                     </Text>
-                    <View>
+
+                    </Text>
+                      <View style={{ marginLeft: 10 }}>
                         <Modal
+                          modalVisible={modalVisible}
+                          setModalVisible={setModalVisible}
                           name={student.student}
                           TransportPlan={transportPlan}
                           Class={student.class}
@@ -522,17 +529,31 @@ const dynamicStyle = {
                           schoolOffTimeData={schoolOffTimeData}
                           handleInputChange={handleInputChange}
                           isTransportPlan={true}
+                          isClass={true}
                         />
+                      </View>
                     </View>
-                    </View>
-                    <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between', borderWidth: 0.3, borderColor: '#2196F3', padding: 10, margin: 5, borderRadius: 5 }}>
-                    <View>
+                  </TouchableOpacity>
+                <TouchableOpacity>
+                  <View>
+                   <MaterialCommunityIcons name="account-box" size={70} color="#2196F3" /> 
+                  </View>
+                  </TouchableOpacity>
+                </View>
+                <TouchableOpacity>
+                <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between', borderWidth: 0.3, borderColor: '#2196F3', padding: 10, margin: 5, borderRadius: 5 }}>
+                  <View style={styles.schoolClass}>
                     <Text style={styles.studentID}>
-                      School: {'\n'}{schoolName}
+                      School: {schoolName}
                     </Text>
-                    </View>
+                      <Text style={styles.studentID}>
+                        School closing time: {schoolClosingTime}
+                      </Text>
+                  </View>
                       <View>
                         <Modal
+                          modalVisible={modalVisible}
+                          setModalVisible={setModalVisible}
                           name={student.student}
                           TransportPlan={transportPlan}
                           Class={student.class}
@@ -543,29 +564,38 @@ const dynamicStyle = {
                           schoolOffTimeData={schoolOffTimeData}
                           handleInputChange={handleInputChange}
                           isSchool={true}
-                        />
-                      </View>
-                    </View>
-
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', borderWidth: 0.3, borderColor: '#2196F3', padding: 10, margin: 5, borderRadius: 5 }}>
-                      <Text style={styles.studentFeedback}>
-                        School closing time: {'\n'}{schoolClosingTime}
-                      </Text>
-                      <View style={{ marginLeft: -10 }}>
-                        <Modal
-                          name={student.student}
-                          TransportPlan={transportPlan}
-                          Class={student.class}
-                          School={schoolName}
-                          EndTime={schoolClosingTime}
-                          transportPlanData={transportPlanData}
-                          SchoolData={SchoolData}
-                          schoolOffTimeData={schoolOffTimeData}
-                          handleInputChange={handleInputChange}
                           isEndTime={true}
                         />
                       </View>
                     </View>
+                    </TouchableOpacity>
+
+                      <View>
+                  <View>
+
+                    <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between', borderWidth: 0.3, borderColor: '#000', padding: 10, margin: 5, borderRadius: 5 }}>
+                        {(student.driver.name==="") ? (
+                          <View>
+                          <Text style={styles.waitingText}>Please Wait for the admin to assign drivers to this child</Text>
+                          </View>
+                        ) : (
+                          <>
+                            <View>
+                              <Text style={styles.driverName}>Name: {student.driver.name}</Text>
+                              <Text style={styles.driverPhone}>Phone: {student.driver.phoneNumber}</Text>
+                              <Text style={styles.driverCar}>Car: {student.driver.carImmatriculation}</Text>
+                              <Text style={styles.driverRating}>Rating: {student.driver.rating} stars</Text>
+                              <Text style={styles.driverFeedback}>Feedback: {student.driver.feedback}</Text>
+                            </View>
+                            <View style={styles.driverPicture}>
+                               <Image source={{ uri: student.driver.picture }} style={{ width: 100, height: 120, marginTop: 10, marginTop: -2 }} resizeMode="contain" />
+                            </View>
+                          </>
+                        )}
+                    </View>
+                  </View>
+                </View>
+
             </View>
           </View>
         );
@@ -701,46 +731,62 @@ const dynamicStyle = {
 }
 
 const styles = StyleSheet.create({
+
+    driverPicture: {
+    marginTop: -5,
+    width: 100,
+    height: 100,
+    borderRadius: 75,
+    overflow: 'hidden',
+  },
+  picture: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+    marginTop: -150,
+
+  },
   infoLabel: {
     fontSize: 18,
-    fontWeight: "bold",
     marginBottom: 10,
-    width: 210
+    width: 240
   },
   studentInfoContainer: {
+    flex: 1,
     flexDirection: "row",
   },
   studentDetails: {
     flex: 1,
-    marginRight: 20,
+    marginRight: 0,
   },
   studentName: {
     fontSize: 16,
     fontWeight: "bold",
     marginBottom: 5,
-    width: 210,
   },
   studentPhone: {
     fontSize: 14,
     color: "#555",
     marginBottom: 5,
-    width: 210,
+    width: 155,
   },
   studentID: {
     fontSize: 14,
     marginBottom: 5,
-    width: 210,
     padding: 5,
   },
   studentGrade: {
     fontSize: 14,
     marginBottom: 5,
-    width: 100,
     padding: 5,
   },
   studentFeedback: {
     fontSize: 14,
-    width: 210,
+  },
+ waitingText: {
+    fontStyle: 'italic',
+    color: '#2196F3'
   },
   studentPicture: {
     width: 80,
@@ -794,7 +840,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     marginBottom: 10,
   },
-  imageContainer: {
+  schoolClass: {
+    width: 220,
+  },
+  imageContainer: { 
     display: "flex",
     justifyContent: "center",
     alignItems: "center",

@@ -1,6 +1,10 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import { Button, StyleSheet, Text, View, TextInput, Image, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import * as Device from 'expo-device';
+import * as Notifications from 'expo-notifications';
+import Constants from 'expo-constants';
+import Dropdown from '../components/Dropdown';
 
 import { useAppContext } from '../src/AppContext';
 
@@ -17,7 +21,109 @@ import {
   useTheme,
 } from '@aws-amplify/ui-react-native';
 
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: true,
+  }),
+});
+
+async function sendPushNotification(expoPushToken) {
+  const message = {
+    to: expoPushToken,
+    sound: 'default',
+    title: 'Original Title',
+    body: 'And here is the body!',
+    data: { someData: 'goes here' },
+  };
+
+  await fetch('https://exp.host/--/api/v2/push/send', {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Accept-encoding': 'gzip, deflate',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(message),
+  });
+}
+
+  const ZoneData = [
+    { label: 'Bonamoussadi, Kotto,Mbangue,Sable, Denver,Makepe,Lendi', value: '1' },
+    { label: 'Rond-Point, Bonantone, Bessengue,Akwa-Nord, Deido, Bepanda,Ecole Publique, Ndogbong,Carrefour Agip,Benedict, Site Cicam,Ange Raphael, Bepanda', value: '2' },
+    { label: 'Cite des Palmiers, Beedi, Hopital General,PK8,PK9,PK10', value: '3' },
+    { label: 'Logbessou, Logpom,PK11,PK12,PK13,PK14,PK15,PK16,PK17', value: '4' },
+    { label: 'Akwa,Bali,Bonapriso,Bonanjo, Bata Congo,Mboppi, Ndokoti,St.Michel ,Aeroport', value: '5' },
+    { label: 'Bonaberi , Mabanda , Ndobo,Bonassama,Bekoko', value: '6' },
+    { label: 'Japoma,Nyalla, Village', value: '7' },
+  ];
+
+async function registerForPushNotificationsAsync() {
+  let token;
+
+  if (Platform.OS === 'android') {
+    Notifications.setNotificationChannelAsync('default', {
+      name: 'default',
+      importance: Notifications.AndroidImportance.MAX,
+      vibrationPattern: [0, 250, 250, 250],
+      lightColor: '#FF231F7C',
+    });
+  }
+
+  if (Device.isDevice) {
+    const { status: existingStatus } = await Notifications.getPermissionsAsync();
+    let finalStatus = existingStatus;
+    if (existingStatus !== 'granted') {
+      const { status } = await Notifications.requestPermissionsAsync();
+      finalStatus = status;
+    }
+    if (finalStatus !== 'granted') {
+      alert('Failed to get push token for push notification!');
+      return;
+    }
+    token = await Notifications.getExpoPushTokenAsync({
+      projectId: Constants.expoConfig.extra.eas.projectId,
+    });
+    console.log(token);
+  } else {
+    alert('Must use physical device for Push Notifications');
+  }
+
+  return token.data;
+}
+
+
+
 function Parents() {
+
+  const [expoPushToken, setExpoPushToken] = useState('');
+  const [notification, setNotification] = useState(false);
+  const notificationListener = useRef();
+  const responseListener = useRef();
+
+  useEffect(() => {
+    registerForPushNotificationsAsync().then(token => setExpoPushToken(token));
+
+    notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
+      setNotification(notification);
+    });
+
+    responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
+      console.log(response);
+    });
+
+    return () => {
+      Notifications.removeNotificationSubscription(notificationListener.current);
+      Notifications.removeNotificationSubscription(responseListener.current);
+    };
+  }, []);
+
+
+
+
+
   const navigation = useNavigation();
   const {
     tokens: { colors },
@@ -100,6 +206,7 @@ const handleChange = (field, value) => {
       body: {
         parent_id: parent_id,
         numberOfKids: 0,
+        ExponentPushToken: expoPushToken,
         address: {
           quarter: quarter,
           zone: zone,
@@ -170,7 +277,6 @@ const handleChange = (field, value) => {
           .then(() => {
             console.log('User data saved successfully');
             setShowOtherBtn(true);
-            setIsLoading(false);
             navigation.navigate('children', {parentName: formData.name, parent_id: userId, 
             parentZone: formData.zone, parentQuarter: formData.quarter} );
           })
@@ -226,8 +332,8 @@ const handleChange = (field, value) => {
         const driverID = `KTS-D-${remainingPart}`;
         setPhone(user.attributes.phone_number);
         setParentId(userID);
-        console.log("here is ID", userID);
-        fetchDataFromStorage(userID);
+        // fetchDataFromStorage(userID);
+        fetchInfoFromAPI(userID);
       } catch (error) {
         console.log('Error fetching user data:', error);
       }
@@ -249,10 +355,7 @@ const handleChange = (field, value) => {
   <>
     <ScrollView>
     <View style={styles.container}>
-
-    <View style={styles.imageContainer}>
-      <Image style={styles.image} source={require("../assets/KTSLogo.png")} />
-    </View>
+    <MyAppLogo />
       {isLoading ? (
             <ActivityIndicator size="small" color="#2196F3" />
           ) : (
@@ -275,12 +378,7 @@ const handleChange = (field, value) => {
         />
         <Text style={styles.label}>Zone</Text>
         {formData.errors.zone && <Text style={styles.error}>{formData.errors.zone}</Text>}
-        <TextInput
-          style={styles.input}
-          onChangeText={(value) => handleChange('zone', value)}
-          value={formData.zone}
-          placeholder="Ex: Logpom"
-        />
+        <Dropdown data= {ZoneData} label="zone" handleValueChange={handleChange} myValue={formData.zone}/>
         <Text style={styles.label}>Quarter</Text>
         {formData.errors.quarter && <Text style={styles.error}>{formData.errors.quarter}</Text>}
         <TextInput

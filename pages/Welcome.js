@@ -12,6 +12,7 @@ import {
 } from '@aws-amplify/ui-react-native';
 
 import Parents from './Parents'
+import TestPush from './TestPush'
 import MyAppLogo from '../components/Logo';
 
 function SignOutButton() {e
@@ -25,6 +26,9 @@ function App() {
   const [parentId, setParentId] = useState();
   const [isLoading, setIsLoading] = useState(true);
   const navigation = useNavigation();
+
+
+
 
   const { data, setData } = useAppContext();
 
@@ -42,7 +46,6 @@ function App() {
         CheckIfDriver(driverID);
         setPhone(user.attributes.phone_number);
         setParentId(userID);
-        setParentId("4545454");
         setIsLoading(false);
       } catch (error) {
         console.log('Error fetching user data:', error);
@@ -72,6 +75,22 @@ function App() {
       });
     
   }, []);
+
+  const retrieveUserID = async () => {
+  try {
+    const value = await AsyncStorage.getItem(parent_id);
+    if (value !== null) {
+      // Value exists, do something with it
+      console.log(value);
+    } else {
+      // Value does not exist
+      console.log('Value does not exist');
+    }
+  } catch (error) {
+    // Error retrieving data
+    console.log(error);
+  }
+};
 
       const CheckIfDriver = async({driverID})=> {
           const apiName = 'ktsAPI';
@@ -116,6 +135,7 @@ function App() {
         )}
         Header={MyAppLogo}
       >
+
       <Parents userId={parentId} phone={phone} />
       </Authenticator>
     </Authenticator.Provider>

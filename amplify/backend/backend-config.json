@@ -134,6 +134,24 @@
       "service": "Lambda"
     }
   },
+  "geo": {
+    "mapa9873ab7": {
+      "accessType": "AuthorizedUsers",
+      "dependsOn": [
+        {
+          "attributes": [
+            "UserPoolId"
+          ],
+          "category": "auth",
+          "resourceName": "ktsauth"
+        }
+      ],
+      "isDefault": true,
+      "mapStyle": "VectorEsriStreets",
+      "providerPlugin": "awscloudformation",
+      "service": "Map"
+    }
+  },
   "parameters": {
     "AMPLIFY_function_driversFunction_deploymentBucketName": {
       "usedBy": [
