@@ -12,10 +12,10 @@ import {
   useTheme,
 } from '@aws-amplify/ui-react-native';
 
-import User from './User';
+import Parents from './Parents'
 import MyAppLogo from '../components/Logo';
 
-function App() {
+function User() {
   const [phone, setPhone] = useState('');
   const [selectedLanguage, setSelectedLanguage] = useState();
   const [parentId, setParentId] = useState();
@@ -23,10 +23,6 @@ function App() {
   const [isDriver, setIsDriver] = useState(false);
   const navigation = useNavigation();
 
-
-
-
-  const { data, setData } = useAppContext();
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -124,18 +120,12 @@ function App() {
     );
   }
 
-  return (
-    <Authenticator.Provider>
-      <Authenticator
-        Container={(props) => (
-          <Authenticator.Container {...props} />
-        )}
-        Header={MyAppLogo}
-      >
+return (
 
-      <User />
-      </Authenticator>
-    </Authenticator.Provider>
+
+   <View >
+     { isDriver ? <DriverScreen userId={parentId} phone={phone} /> : <Parents userId={parentId} phone={phone} /> }
+    </View >
   );
 }
 
@@ -147,4 +137,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default App;
+export default User;

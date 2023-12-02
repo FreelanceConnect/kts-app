@@ -1,614 +1,457 @@
-import {
-  View,
-  Text,
-  TextInput,
-  Button,
-  StyleSheet,
-  Image,
-  ScrollView,
-  TouchableOpacity,
-  ActivityIndicator,
-} from "react-native";
-import React, { useState, useEffect } from "react";
-import { Amplify, API } from "aws-amplify";
-import { useNavigation } from "@react-navigation/native";
-import Modal from "../components/MyModal";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import DateTimePicker from "@react-native-community/datetimepicker";
-import StickyFooter from '../components/StickyFooter';
+import React, {useState, useEffect, useRef} from 'react';
+import { Button, StyleSheet, Text, View, TextInput, Image, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import * as Device from 'expo-device';
+import * as Notifications from 'expo-notifications';
+import Constants from 'expo-constants';
 import Dropdown from '../components/Dropdown';
 
-function StudentForm({ route }) {
-  const { parent_id, parentName, parentQuarter, parentZone} = route.params;
-  const navigation = useNavigation();
-  const apiName = "ktsAPI";
-  const [showForm, setShowForm] = useState(true);
-  const [shownext, setShowNext] = useState(false);
-  const [btnText, setBtnText] = useState("Add Another Child");
-  const [isLoading, setIsLoading] = useState(false);
-  const [isAddingChild, setIsAddingChild] = useState(false);
-  const [students, setStudents] = useState([]);
-  const [isTimePickerVisible, setTimePickerVisibility] = useState(false);
-  const [formData, setFormData] = useState({
-    name: "",
-    transportPlan: "",
-    class: "",
-    school: "",
-    schoolOffTime: "",
-    errors: {
-      nameError: "",
-      transportPlanError: "",
-      classError: "",
-      schoolError: "",
-      schoolOffTime: "",
+import { useAppContext } from '../src/AppContext';
+
+import { Amplify, API, Auth } from 'aws-amplify';
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import MyAppLogo from '../components/Logo';
+import SignOutButton from '../components/SignOutBtn';
+import StickyFooter from '../components/StickyFooter';
+import {  
+  Authenticator,
+  useAuthenticator,
+  useTheme,
+} from '@aws-amplify/ui-react-native';
+
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: true,
+  }),
+});
+
+async function sendPushNotification(expoPushToken) {
+  const message = {
+    to: expoPushToken,
+    sound: 'default',
+    title: 'Original Title',
+    body: 'And here is the body!',
+    data: { someData: 'goes here' },
+  };
+
+  await fetch('https://exp.host/--/api/v2/push/send', {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Accept-encoding': 'gzip, deflate',
+      'Content-Type': 'application/json',
     },
+    body: JSON.stringify(message),
+  });
+}
+
+  const ZoneData = [
+    { label: 'Bonamoussadi, Kotto,Mbangue,Sable, Denver,Makepe,Lendi', value: 'Zone 1' },
+    { label: 'Rond-Point, Bonantone, Bessengue,Akwa-Nord, Deido, Bepanda,Ecole Publique, Ndogbong,Carrefour Agip,Benedict, Site Cicam,Ange Raphael, Bepanda', value: 'Zone 2' },
+    { label: 'Cite des Palmiers, Beedi, Hopital General,PK8,PK9,PK10', value: 'Zone 3' },
+    { label: 'Logbessou, Logpom,PK11,PK12,PK13,PK14,PK15,PK16,PK17', value: '4' },
+    { label: 'Akwa,Bali,Bonapriso,Bonanjo, Bata Congo,Mboppi, Ndokoti,St.Michel ,Aeroport', value: 'Zone 5' },
+    { label: 'Bonaberi , Mabanda , Ndobo,Bonassama,Bekoko', value: 'Zone 6' },
+    { label: 'Japoma,Nyalla, Village', value: 'Zone 7' },
+  ];
+
+async function registerForPushNotificationsAsync() {
+  let token;
+
+  if (Platform.OS === 'android') {
+    Notifications.setNotificationChannelAsync('default', {
+      name: 'default',
+      importance: Notifications.AndroidImportance.MAX,
+      vibrationPattern: [0, 250, 250, 250],
+      lightColor: '#FF231F7C',
+    });
+  }
+
+  if (Device.isDevice) {
+    const { status: existingStatus } = await Notifications.getPermissionsAsync();
+    let finalStatus = existingStatus;
+    if (existingStatus !== 'granted') {
+      const { status } = await Notifications.requestPermissionsAsync();
+      finalStatus = status;
+    }
+    if (finalStatus !== 'granted') {
+      alert('Failed to get push token for push notification!');
+      return;
+    }
+    token = await Notifications.getExpoPushTokenAsync({
+      projectId: Constants.expoConfig.extra.eas.projectId,
+    });
+    console.log(token);
+  } else {
+    alert('Must use physical device for Push Notifications');
+  }
+
+  return token.data;
+}
+
+
+
+function DriverSCreen({driverID}) {
+
+  const [expoPushToken, setExpoPushToken] = useState('');
+  const [notification, setNotification] = useState(false);
+  const notificationListener = useRef();
+  const responseListener = useRef();
+
+  useEffect(() => {
+    registerForPushNotificationsAsync().then(token => setExpoPushToken(token));
+
+    notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
+      setNotification(notification);
+    });
+
+    responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
+      console.log(response);
+    });
+
+    return () => {
+      Notifications.removeNotificationSubscription(notificationListener.current);
+      Notifications.removeNotificationSubscription(responseListener.current);
+    };
+  }, []);
+
+
+
+
+
+  const navigation = useNavigation();
+  const {
+    tokens: { colors },
+  } = useTheme();
+  const apiName = 'ktsAPI'; // replace this with your api name.
+  const [selectedLanguage, setSelectedLanguage] = useState();
+  const [isLoading, setIsLoading] = useState(false);
+  const { data, setData } = useAppContext();
+
+  const [showForm, setShowForm] = useState(false);
+  const [showOtherBtn, setShowOtherBtn] = useState(false);
+  const [phone, setPhone] = useState('');
+  const [isAddingParent, setIsAddingParent] = useState(false);
+  const [parent_id, setParentId] = useState();
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    quarter: '',
+    zone: '',
+    phone: phone,
+    parent_id: parent_id,
+    errors: {
+    name: '',
+    email: '',
+    quarter: '',
+    zone: '',
+  },
   });
 
-  const transportPlanData = [
-    { label: 'Both Ways', value: '1' },
-    { label: 'House to School', value: '2' },
-    { label: 'School to House', value: '3' },
-  ];
+const handleChange = (field, value) => {
+  setFormData((prevState) => ({
+    ...prevState,
+    [field]: value,
+    errors: {
+      ...prevState.errors,
+      [field]: '', // Clear the corresponding error state
+    },
+  }));
+};
 
-  const SchoolData = [
-    { label: 'Canadian School', value: '1' },
-    { label: 'Paypirus Logpom', value: '2' },
-  ];
-
-  const schoolOffTimeData = [
-    { label: '1:30PM', value: '1' },
-    { label: '2PM', value: '2' },
-    { label: '2:30PM', value: '2' },
-  ];
-
-    const gotoprofile = () => {
-      navigation.goBack();
+  const gotochildren = () => {
+      navigation.navigate('children', {parent_id: parent_id} )
     };
 
     // Go back one screen
-    const gototocars = () => {
+    const gotocars = () => {
       navigation.navigate('DriverInfo', {parent_id: parent_id} ) // or navigation.pop();
     };
 
+   const handleSubmit = () => {
 
-
-  const handleInputChange = (key, value) => {
-    setFormData({ ...formData, [key]: value });
-  };
-
-  const generateUniqueId = () => {
-    const timestamp = Date.now();
-    const randomNum = Math.random().toString(36).substring(2);
-    return `${timestamp}-${randomNum}`;
-  };
-
-
-  // Validate and submit data
-  const handleAddStudent = (later) => {
     let isValid = true;
-    const { name, transportPlan, class: studentClass, school, schoolOffTime } = formData;
     const errors = {};
 
-    if (name.trim() === "") {
-      errors.nameError = "Name is required";
-      isValid = false;
+      // Validate name field
+    if (formData.name.trim() === '') {
+        isValid = false;
+        errors.name = 'Name is required';
     }
+    if (formData.quarter.trim() === '') {
+        isValid = false;
+        errors.quarter = 'Quarter is required';
+    }
+   if (formData.zone.trim() === '') {
+        isValid = false;
+        errors.zone = 'Zone is required';
+    }
+    // Update the state with validation errors
+    setFormData((prevState) => ({
+      ...prevState,
+      errors,
+    }));
+    
 
-    if (transportPlan.trim() === "") {
-      errors.transportPlanError = "Please select a transport plan";
-      isValid = false;
-    }
-
-    if (studentClass.trim() === "") {
-      errors.classError = "Class is required";
-      isValid = false;
-    }
-
-    if (school.trim() === "") {
-      errors.schoolError = "Please select a school";
-      isValid = false;
-    }
-
-    if (schoolOffTime.trim() === "") {
-      errors.schoolOffTimeError = "Please select school closing time";
-      isValid = false;
-    }
-    // Validate form Data
     if (isValid) {
-     setIsAddingChild(true);
-      const student_id = generateUniqueId();
-      const path = `/students`;
-      const myInit = {
-        body: {
-          student_id: student_id,
-          student: name,
-          parent_id: parent_id,
-          parentName: parentName,
-          transportPlan: transportPlan,
-          school: school,
-          class: studentClass,
-          address: {
-            quarter: parentQuarter,
-            zone: parentZone,
-          },
-          driver: {
-            picture: "",
-            name: "",
-            phoneNumber: "",
-            carImmatriculation: "",
-            rating: "",
-            feedback: "",
-          },
-          driverMorning: {
-            picture: "",
-            name: "",
-            phoneNumber: "",
-            carImmatriculation: "",
-            rating: "",
-            feedback: "",
-          },
-          driverEvening: {
-            picture: "",
-            name: "",
-            phoneNumber: "",
-            carImmatriculation: "",
-            rating: "",
-            feedback: "",
-          },
-          pickTime: "",
-          dropOffTime: "",
-          schoolOffTime: schoolOffTime,
+    const apiName = 'ktsAPI'; // replace this with your api name.
+    const path = `/parents`;
+    const {name, email, phone, car} = formData;
+    const myInit = {
+      body: {
+        parent_id: parent_id,
+        numberOfKids: 0,
+        ExponentPushToken: expoPushToken,
+        address: {
+          quarter: quarter,
+          zone: zone,
         },
-        headers: {}, // OPTIONAL
-      };
+        children: {},
+        phone: phone,
+        AO: 0,
+        TA: 0,
+        AP: 0,
+        CustomerName: name,
+        email: email,
+      },
+      headers: {} // OPTIONAL
+    };
+    setIsAddingParent(true);
+    API.post(apiName, path, myInit)
+      .then((response) => {
+        // Add your code here
 
-      API.post(apiName, path, myInit)
-        .then((response) => {
-          const newStudent = myInit.body;
-          setStudents((prevStudents) => {
-            const updatedStudents = [...prevStudents, newStudent];
-            const studentsObject = { updatedStudents };
-            AsyncStorage.setItem("studentsData", JSON.stringify(studentsObject))
-              .then(() => {
-                console.log("User data saved successfully");
-                setIsAddingChild(false);
-                setShowNext(true);
-              })
-              .catch((error) => {
-                console.log("Error saving user data:", error);
-                setIsLoading(false);
-              });
-            return updatedStudents;
+          AsyncStorage.setItem(parent_id, JSON.stringify(myInit.body))
+          .then(() => {
+            console.log('User data saved successfully');
+            setShowOtherBtn(true);
+            setIsAddingParent(false);
+          navigation.navigate('children', {parentName: formData.name, parent_id: parent_id, 
+            parentZone: formData.zone, parentQuarter: formData.quarter} );
+          })
+          .catch((error) => {
+             setIsAddingParent(false);
+            console.log('Error saving user data:', error);
           });
-          toggleForm();
-          setFormData({
-            name: "",
-            transportPlan: "",
-            class: "",
-            school: "",
-            errors: {
-              nameError: "",
-              transportPlanError: "",
-              classError: "",
-              schoolError: "",
-            },
-          });
-          // Add your code here
-        })
-        .catch((error) => {
-          console.log(error);
-          setIsLoading(false);
-        });
-    } else {
-      setFormData({ ...formData, errors });
-    }
-  };
-  const updateButtonText = () => {
-    if (showForm) {
-      setBtnText("Add Another Child");
-    } else {
-      setBtnText("Hide Form");
+      })
+      .catch((error) => {
+        setIsAddingParent(false);
+        console.log(error.response);
+      });
+
     }
   };
 
-  const toggleForm = () => {
-    setShowForm((prevState) => !prevState);
-    updateButtonText();
-  };
-
-  // Fetch Parents data from async storage
   useEffect(() => {
-
-    const fetchInfoFromAPI = () => {
-      setIsLoading(true);
-      const apiName = "ktsAPI";
-      const path = `/students`;
-      const myInit = {
-        headers: {
-          // Allow POST method
-        },
-        response: true,
-      };
-      API.get(apiName, path, myInit)
-        .then((response) => {
-          // Add your code here
+         const fetchInfoFromAPI = (userId) => {
+          const apiName = 'ktsAPI';
+          const path = `/drivers/${driverID}`;
+          const myInit = {
+             headers: { 
+             // Allow POST method
+              },
+            response: true,
+          };
+          setIsLoading(true);
+          API.get(apiName, path, myInit)
+          .then((response) => {
           const data = response.data;
           setIsLoading(false);
-          const students = data.map((student) => {
-            const myparent_id = student.parent_id;
-            if (parent_id===myparent_id) {
-              setShowForm(false);
-              setShowNext(true);
-            }
+          // Check if user exist in our Dynamo DB
+          console.log("driverIDIDI", data);
+          console.log("driverID", driverID);
+          if (data.driver_id) {
 
-            return {
-              student_id: student.student_id,
-              student: student.student,
-              parent_id: student.parent_id,
-              parentName: student.parentName,
-              transportPlan: student.transportPlan,
-              school: student.school,
-              class: student.class,
-              schoolOffTime: student.schoolOffTime,
-              address: {
-                quarter: student.parentQuarter,
-                zone: student.parentZone,
-              },
-              driver: {
-                picture: student.driver.picture,
-                name: student.driver.name,
-                phoneNumber: student.driver.phoneNumber,
-                carImmatriculation: student.driver.carImmatriculation,
-                rating: student.driver.rating,
-                feedback: student.driver.feedback,
-              },
-              driverMorning: {
-                picture: student.driverMorning.picture,
-                name: student.driverMorning.name,
-                phoneNumber: student.driverMorning.phoneNumber,
-                carImmatriculation: student.driverMorning.carImmatriculation,
-                rating: student.driverMorning.rating,
-                feedback: student.driverMorning.feedback,
-              },
-              driverEvening: {
-                picture: student.driverEvening.picture,
-                name: student.driverEvening.name,
-                phoneNumber: student.driverEvening.phoneNumber,
-                carImmatriculation: student.driverEvening.carImmatriculation,
-                rating: student.driverEvening.rating,
-                feedback: student.driverEvening.feedback,
-              },
-              pickTime: student.pickTime,
-              dropOffTime: student.dropOffTime,
-            };
-          
-          });
-          setStudents(students);
-
-        })
-        .catch((error) => {
-          console.log(error.response);
-        });
-    };
-
-    // Fetch student data from Async Storage
-    const fetchStudentData = async () => {
-      try {
-        const studentData = await AsyncStorage.getItem("studentsData");
-        if (studentData && studentData.length !== 0) {
-          const parsedData = JSON.parse(studentData);
-          const updatedStudents = parsedData.updatedStudents;
-          const students = updatedStudents.map((student) => ({
-            student_id: student.student_id,
-            student: student.student,
-            parent_id: student.parent_id,
-            parentName: student.parentName,
-            transportPlan: student.transportPlan,
-            school: student.school,
-            class: student.class,
-            schoolOffTime: student.schoolOffTime,
-            address: {
-              quarter: student.parentQuarter,
-              zone: student.parentZone,
-            },
-            driver: {
-              picture: student.driver.picture,
-              name: student.driver.name,
-              phoneNumber: student.driver.phoneNumber,
-              carImmatriculation: student.driver.carImmatriculation,
-              rating: student.driver.rating,
-              feedback: student.driver.feedback,
-            },
-            driverMorning: {
-              picture: student.driverMorning.picture,
-              name: student.driverMorning.name,
-              phoneNumber: student.driverMorning.phoneNumber,
-              carImmatriculation: student.driverMorning.carImmatriculation,
-              rating: student.driverMorning.rating,
-              feedback: student.driverMorning.feedback,
-            },
-            driverEvening: {
-              picture: student.driverEvening.picture,
-              name: student.driverEvening.name,
-              phoneNumber: student.driverEvening.phoneNumber,
-              carImmatriculation: student.driverEvening.carImmatriculation,
-              rating: student.driverEvening.rating,
-              feedback: student.driverEvening.feedback,
-            },
-            pickTime: student.pickTime,
-            dropOffTime: student.dropOffTime,
+            setFormData((prevFormData) => ({
+            ...prevFormData,
+            name: data.driverName,
+            email: data.email,
+            phone: data.phone,
+            car: data.car,
           }));
 
-          setShowForm(false);
-          setStudents(students);
-            navigation.navigate('DriverInfo', {parent_id: parent_id} );
-        } else {
-          console.log("No student data yet");
+          AsyncStorage.setItem(userId, JSON.stringify(data))
+          .then(() => {
+            console.log('User data saved successfully');
+            setShowOtherBtn(true);
+            navigation.navigate('children', {parentName: formData.name, parent_id: userId, 
+            parentZone: formData.zone, parentQuarter: formData.quarter} );
+          })
+          .catch((error) => {
+             setIsLoading(false);
+            console.log('Error saving user data:', error);
+          });
+          }
+
+          })
+          .catch((error) => {
+            console.log(error.response);
+          });
+      }
+
+            // check User data from our Local storage
+
+    const fetchDataFromStorage = async (parentData) => {
+      try {
+        const parentdata = await AsyncStorage.getItem(parentData);
+        if (parentdata !== null) {
+        const data= JSON.parse(parentdata);
+        setFormData((prevFormData) => ({
+            ...prevFormData,
+            name: data.CustomerName,
+            email: data.email,
+            quarter: data.address.quarter,
+            zone: data.address.zone,
+        }));
+          setShowOtherBtn(true);
+          navigation.navigate('children', {parentName: formData.name, parent_id: parentData, 
+            parentZone: formData.zone, parentQuarter: formData.quarter} );
+        }
+        else {
+          console.log('no user data yet');
+          //get the data from API if no data from our Localstorage
+          fetchInfoFromAPI(parentData);
         }
       } catch (error) {
-        console.log("Error retrieving data:", error);
+        console.log('Error retrieving data:', error);
       }
     };
 
-    const deleteDataFromAsyncStorage = async (key) => {
+
+    const fetchUserData = async () => {
       try {
-        await AsyncStorage.removeItem(key);
-        console.log("Data successfully deleted from async storage.");
+        const user = await Auth.currentAuthenticatedUser();
+        setPhone(user.attributes.phone_number);
+        const cleanedNumber = user.attributes.phone_number.replace(/\D/g, '');
+        const firstPart = cleanedNumber.substring(0, 3);
+        const remainingPart = cleanedNumber.substring(3);
+        const userID = `KTS-P-${remainingPart}`;
+        const driverID = `KTS-D-${remainingPart}`;
+        setPhone(user.attributes.phone_number);
+        setParentId(userID);
+        // fetchDataFromStorage(userID);
+        fetchInfoFromAPI(driverID);
       } catch (error) {
-        console.log("Error deleting data from async storage:", error);
+        console.log('Error fetching user data:', error);
       }
     };
+     const fetchData = async () => {
+        try {
+          await fetchUserData();
+        } catch (error) {
+          console.log('Error fetching data:', error);
+        }
+      };
 
-    // fetchStudentData();
-    fetchInfoFromAPI();
-    // deleteDataFromAsyncStorage("KTS-P-671515042");
-    // deleteDataFromAsyncStorage("studentsData");
+      fetchData();
+
+    // fetchInfoFromAPI();
   }, []);
 
   return (
-    <>
-    <ScrollView>
-      <View style={styles.container}>
-        <View style={styles.imageContainer}>
-          <Image
-            style={styles.image}
-            source={require("../assets/KTSLogo.png")}
-          />
-        </View>
-{isLoading ? (
-  <ActivityIndicator size="large" color="#2196F3" />
-) : (
   <>
-    {students.map((student, index) => {
-      console.log("here is school finish timest", student.schoolOffTime);
-      if (student.parent_id === parent_id) {
-        const studentTime = student.schoolOffTime;
-        if (student.school === '1') {
-          schoolName = "Canadian School";
-        } else if (student.school === '2') {
-          schoolName = "Paypirus Logpom";
-        } else {
-          schoolName = student.school;
-        }
-
-        if (student.transportPlan === '1') {
-          transportPlan = 'Both Ways';
-        } else if (student.transportPlan === '2') {
-          transportPlan = 'House to School';
-        } else if (student.transportPlan === '3') {
-          transportPlan = 'School to House';
-        } else {
-          transportPlan = 'Not Specified';
-        }
-
-       if (student.schoolOffTime === '1') {
-          schoolClosingTime = '1:30PM';
-        } else if (student.schoolOffTime === '2') {
-          schoolClosingTime = '2PM';
-        } else if (student.schoolOffTime === '3') {
-          schoolClosingTime = '2:30PM';
-        } else {
-          schoolClosingTime = 'Not Specified';
-        }
-        return (
-          <View key={index}>
-            <View style={styles.cardContainer}>
-              <>
-                <Text style={styles.infoLabel}>
-                  Student: {student.student}
-                </Text>
-                <View style={styles.studentInfoContainer}>
-                  <View style={styles.studentDetails}>
-                    <Text style={styles.studentPhone}>
-                      Transport Plan: {transportPlan}
-                    </Text>
-                    <Text style={styles.studentID}>
-                      School: {schoolName}
-                    </Text>
-                    <Text style={styles.studentGrade}>
-                      Class: {student.class}
-                    </Text>
-                    <Text style={styles.studentFeedback}>
-                      School closing time: {schoolClosingTime}
-                    </Text>
-                    <View style={styles.Modalcontainer} key={index}>
-                      <Modal
-                        name={student.student}
-                        TransportPlan={transportPlan}
-                        Class={student.class}
-                        School={schoolName}
-                        EndTime={schoolClosingTime}
-                        transportPlanData={transportPlanData}
-                        SchoolData={SchoolData}
-                        schoolOffTimeData={schoolOffTimeData}
-                        handleInputChange={handleInputChange}
-
-                      />
-                    </View>
-                  </View>
-                  <View style={styles.studentPicture}></View>
-                </View>
-              </>
-            </View>
-          </View>
-        );
-      }
-    })}
-    {showForm && (
+    <ScrollView>
+    <View style={styles.container}>
+    <MyAppLogo />
+      {isLoading ? (
+            <ActivityIndicator size="small" color="#2196F3" />
+          ) : (
       <>
-        <Text style={styles.label}>Name of child</Text>
-        {formData.errors.nameError && (
-          <Text style={styles.error}>{formData.errors.nameError}</Text>
-        )}
+        <Text style={styles.textField}>Your Informations</Text>
+        <Text style={styles.label}>Name</Text>
+        {formData.errors.name && <Text style={styles.error}>{formData.errors.name}</Text>}
         <TextInput
           style={styles.input}
+          onChangeText={(value) => handleChange('name', value)}
           value={formData.name}
-          onChangeText={(text) => handleInputChange("name", text)}
-          placeholder="Name"
+          placeholder="Enter Your name"
+          editable={false}
         />
-
-        <Text style={styles.label}>Class</Text>
-        {formData.errors.classError && (
-          <Text style={styles.error}>{formData.errors.classError}</Text>
-        )}
+        <Text style={styles.label}>Email</Text>
         <TextInput
           style={styles.input}
-          value={formData.class}
-          onChangeText={(text) => handleInputChange("class", text)}
-          placeholder="Class"
+          onChangeText={(value) => handleChange('email', value)}
+          value={formData.email}
+          placeholder="Enter Your Email"
+          editable={false}
+        />
+        <Text style={styles.label}>Phone</Text>
+        <TextInput
+          style={styles.input}
+          onChangeText={(value) => handleChange('email', value)}
+          value={formData.email}
+          placeholder="Phone"
+          editable={false}
+        />
+        <Text style={styles.label}>Car</Text>
+        {formData.errors.quarter && <Text style={styles.error}>{formData.errors.quarter}</Text>}
+        <TextInput
+          style={styles.input}
+          onChangeText={(value) => handleChange('quarter', value)}
+          value={formData.quarter}
+          placeholder="Ex: Andem, derrière pharmacie"
+          editable={false}
         />
 
-        <Text style={styles.label}>Transport Plan</Text>
-        {formData.errors.transportPlanError && (
-          <Text style={styles.error}>
-            {formData.errors.transportPlanError}
-          </Text>
-        )}
-        <Dropdown data= {transportPlanData} label="transportPlan" handleValueChange={handleInputChange}/>
-
-
-        <Text style={styles.label}>School</Text>
-        {formData.errors.schoolError && (
-          <Text style={styles.error}>{formData.errors.schoolError}</Text>
-        )}
-        <Dropdown data= {SchoolData} label="school" handleValueChange={handleInputChange}/>
-
-        <View>
-         <Text style={styles.label}>School Closing Time</Text>
-        {formData.errors.schoolOffTimeError && (
-          <Text style={styles.error}>{formData.errors.schoolOffTimeError}</Text>
-        )}
-         <Dropdown data= {schoolOffTimeData} label="schoolOffTime" handleValueChange={handleInputChange}/>
+      {showOtherBtn ? (
+        <View style={styles.containerContinue}>
+          <View style={styles.element1}>
+            <TouchableOpacity style={[styles.button, { backgroundColor: '#2196F3' }]}>
+              <Text style={[styles.textStyle, { backgroundColor: '#2196F3' }]} >Update</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.element2}>
+            <TouchableOpacity style={[styles.button, { backgroundColor: '#008000' }]} onPress={() => navigation.navigate('children', {parentName: formData.name, parent_id: parent_id, 
+            parentZone: formData.zone, parentQuarter: formData.quarter})}>
+              <Text style={[styles.textStyle, { backgroundColor: '#008000' }]} >NEXT</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-
+      ) : (
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             style={[styles.button, { backgroundColor: "#2196F3" }]}
-            onPress={handleAddStudent}
-            disabled={isAddingChild} // Disable the button while adding child
+            onPress={handleSubmit}
+            disabled={isAddingParent} // Disable the button while adding child
           >
-            {isAddingChild ? (
+            {isAddingParent ? (
               <ActivityIndicator color="#ffffff" /> // Show loading indicator while adding child
             ) : (
               <Text style={[styles.textStyle, { backgroundColor: "#2196F3" }]}>
-                Add Child
+                Submit
               </Text>
             )}
           </TouchableOpacity>
         </View>
-      </>
-    )}
-            {shownext ? (
-          <View style={styles.containerContinue}>
-            <View style={styles.element1}>
-              <TouchableOpacity
-                style={[styles.button, { backgroundColor: "#2196F3" }]}
-                onPress={toggleForm}
-              >
-                <Text
-                  style={[styles.textStyle, { backgroundColor: "#2196F3" }]}
-                >
-                  {btnText}
-                </Text>
-              </TouchableOpacity>
-            </View>
-            <View style={styles.element2}>
-              <TouchableOpacity
-                style={[styles.button, { backgroundColor: "#008000" }]}
-                onPress={() => navigation.navigate('DriverInfo', {parent_id: parent_id} )}
-              >
-                <Text
-                  style={[styles.textStyle, { backgroundColor: "#008000" }]}
-                >
-                  NEXT
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        ) : null}
-  </>
-)}
+      )}
 
-      </View>
+        <View style={style.container}>
+          <SignOutButton />
+        </View>
+   </>
+   )}
+        
+    </View>
     </ScrollView>
-    <StickyFooter title="" profile={gotoprofile} cars={gototocars}/>
-  </>
+        <StickyFooter title="" children={gotochildren} cars={gotocars} screen="parent"/>
+    </>
   );
 }
 
+const style = StyleSheet.create({
+  container: { flex: 1, marginTop: 26, marginBottom: 60,},
+});
+
 const styles = StyleSheet.create({
-  infoLabel: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 10,
+   containerContinue: {
+    flexDirection: 'row',
   },
-  studentInfoContainer: {
-    flexDirection: "row",
-  },
-  studentDetails: {
-    flex: 1,
-    marginRight: 20,
-  },
-  studentName: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 5,
-  },
-  studentPhone: {
-    fontSize: 14,
-    color: "#555",
-    marginBottom: 5,
-  },
-  studentID: {
-    fontSize: 14,
-    marginBottom: 5,
-  },
-  studentGrade: {
-    fontSize: 14,
-    marginBottom: 5,
-  },
-  studentFeedback: {
-    fontSize: 14,
-  },
-  studentPicture: {
-    width: 100,
-    height: 100,
-    backgroundColor: "#ccc",
-  },
-  students: {
-    fontWeight: "bold",
-    fontSize: "25",
-    textAlign: "center",
-  },
-  textStyle: {
-    color: "white",
-    fontWeight: "bold",
-    textAlign: "center",
-  },
-  containerContinue: {
-    flexDirection: "row",
-  },
-  element1: {
+    element1: {
     flex: 3,
     marginRight: 4,
     // Additional styling for Element 1
@@ -618,87 +461,65 @@ const styles = StyleSheet.create({
     marginLefrt: 4,
     // Additional styling for Element 2
   },
+  textStyle: {
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
   buttonContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 8,
-  },
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: "#fff",
-    marginBottom: 60,
-  },
-  input: {
-    height: 40,
-    borderColor: "gray",
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    marginBottom: 10,
-  },
-  imageContainer: {
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  image: {
-    width: 150,
-    height: 150,
-  },
-  error: {
-    color: "red",
-    fontWeight: "bold",
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   button: {
     borderRadius: 5,
     padding: 10,
     elevation: 2,
     marginVertical: 10,
-    width: "100%",
+    width: '100%',
   },
-  cardContainer: {
-    backgroundColor: "#f5f5f5",
-    borderRadius: 5,
-    padding: 10,
-    marginBottom: 10,
-  },
-  cardImageContainer: {
-    marginRight: 10,
-  },
-  cardImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-  },
-  detailsContainer: {
-    flex: 1,
-  },
-  name: {
+    textField: {
     fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 5,
+    marginBottom: 16,
+    textAlign: 'center',
+    fontWeight: 'bold',
   },
-  transportPlan: {
-    fontSize: 16,
-    marginBottom: 2,
-    fontWeight: "bold",
+  container: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: '#fff',
   },
-  class: {
+  input: {
+    height: 40,
+    borderColor: '#ccc',
+    borderRadius: 2,
+    borderWidth: 2,
+    marginBottom: 10,
+    paddingHorizontal: 10,
+    backgroundColor: '#f2f2f2',
+    color: '#888',
+    padding: 10,
+    borderRadius: 4,
     fontSize: 16,
-    marginBottom: 2,
-    fontWeight: "bold",
   },
-  school: {
+  imageContainer:{
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems:'center'
+    },
+    image:{
+    width:150,
+    height:150
+    },
+    label: {
     fontSize: 16,
-    marginBottom: 2,
-    fontWeight: "bold",
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  error: {
+    color: 'red',
+    fontWeight: 'bold',
   },
 });
 
-export default StudentForm;
+export default DriverSCreen;
