@@ -51,13 +51,13 @@ async function sendPushNotification(expoPushToken) {
 }
 
   const ZoneData = [
-    { label: 'Bonamoussadi, Kotto,Mbangue,Sable, Denver,Makepe,Lendi', value: '1' },
-    { label: 'Rond-Point, Bonantone, Bessengue,Akwa-Nord, Deido, Bepanda,Ecole Publique, Ndogbong,Carrefour Agip,Benedict, Site Cicam,Ange Raphael, Bepanda', value: '2' },
-    { label: 'Cite des Palmiers, Beedi, Hopital General,PK8,PK9,PK10', value: '3' },
+    { label: 'Bonamoussadi, Kotto,Mbangue,Sable, Denver,Makepe,Lendi', value: 'Zone 1' },
+    { label: 'Rond-Point, Bonantone, Bessengue,Akwa-Nord, Deido, Bepanda,Ecole Publique, Ndogbong,Carrefour Agip,Benedict, Site Cicam,Ange Raphael, Bepanda', value: 'Zone 2' },
+    { label: 'Cite des Palmiers, Beedi, Hopital General,PK8,PK9,PK10', value: 'Zone 3' },
     { label: 'Logbessou, Logpom,PK11,PK12,PK13,PK14,PK15,PK16,PK17', value: '4' },
-    { label: 'Akwa,Bali,Bonapriso,Bonanjo, Bata Congo,Mboppi, Ndokoti,St.Michel ,Aeroport', value: '5' },
-    { label: 'Bonaberi , Mabanda , Ndobo,Bonassama,Bekoko', value: '6' },
-    { label: 'Japoma,Nyalla, Village', value: '7' },
+    { label: 'Akwa,Bali,Bonapriso,Bonanjo, Bata Congo,Mboppi, Ndokoti,St.Michel ,Aeroport', value: 'Zone 5' },
+    { label: 'Bonaberi , Mabanda , Ndobo,Bonassama,Bekoko', value: 'Zone 6' },
+    { label: 'Japoma,Nyalla, Village', value: 'Zone 7' },
   ];
 
 async function registerForPushNotificationsAsync() {
@@ -264,6 +264,7 @@ const handleChange = (field, value) => {
           setIsLoading(false);
           // Check if user exist in our Dynamo DB
           if (data.parent_id) {
+            console.log("here is our zone", data.address.zone)
 
             setFormData((prevFormData) => ({
             ...prevFormData,
@@ -332,8 +333,8 @@ const handleChange = (field, value) => {
         const driverID = `KTS-D-${remainingPart}`;
         setPhone(user.attributes.phone_number);
         setParentId(userID);
-        // fetchDataFromStorage(userID);
-        fetchInfoFromAPI(userID);
+        fetchDataFromStorage(userID);
+        // fetchInfoFromAPI(userID);
       } catch (error) {
         console.log('Error fetching user data:', error);
       }
