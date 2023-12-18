@@ -96,7 +96,7 @@ async function registerForPushNotificationsAsync() {
 
 
 
-function DriverSCreen({driverID}) {
+function Parents({parent_id}) {
 
   const [expoPushToken, setExpoPushToken] = useState('');
   const [notification, setNotification] = useState(false);
@@ -132,12 +132,12 @@ function DriverSCreen({driverID}) {
   const [selectedLanguage, setSelectedLanguage] = useState();
   const [isLoading, setIsLoading] = useState(false);
   const { data, setData } = useAppContext();
+  const [quarterZone, setQuarterZone] = useState();
 
   const [showForm, setShowForm] = useState(false);
   const [showOtherBtn, setShowOtherBtn] = useState(false);
   const [phone, setPhone] = useState('');
   const [isAddingParent, setIsAddingParent] = useState(false);
-  const [parent_id, setParentId] = useState();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -201,7 +201,7 @@ const handleChange = (field, value) => {
     if (isValid) {
     const apiName = 'ktsAPI'; // replace this with your api name.
     const path = `/parents`;
-    const {name, email, phone, car} = formData;
+    const {name, email, quarter, zone} = formData;
     const myInit = {
       body: {
         parent_id: parent_id,
@@ -250,7 +250,7 @@ const handleChange = (field, value) => {
   useEffect(() => {
          const fetchInfoFromAPI = (userId) => {
           const apiName = 'ktsAPI';
-          const path = `/drivers/${driverID}`;
+          const path = `/parents/${userId}`;
           const myInit = {
              headers: { 
              // Allow POST method
@@ -263,16 +263,15 @@ const handleChange = (field, value) => {
           const data = response.data;
           setIsLoading(false);
           // Check if user exist in our Dynamo DB
-          console.log("driverIDIDI", data);
-          console.log("driverID", driverID);
-          if (data.driver_id) {
+          if (data.parent_id) {
+            console.log("here is our zone", data.address.zone)
 
             setFormData((prevFormData) => ({
             ...prevFormData,
-            name: data.driverName,
+            name: data.CustomerName,
             email: data.email,
-            phone: data.phone,
-            car: data.car,
+            quarter: data.address.quarter,
+            zone: data.address.zone,
           }));
 
           AsyncStorage.setItem(userId, JSON.stringify(data))
@@ -322,27 +321,9 @@ const handleChange = (field, value) => {
       }
     };
 
-
-    const fetchUserData = async () => {
-      try {
-        const user = await Auth.currentAuthenticatedUser();
-        setPhone(user.attributes.phone_number);
-        const cleanedNumber = user.attributes.phone_number.replace(/\D/g, '');
-        const firstPart = cleanedNumber.substring(0, 3);
-        const remainingPart = cleanedNumber.substring(3);
-        const userID = `KTS-P-${remainingPart}`;
-        const driverID = `KTS-D-${remainingPart}`;
-        setPhone(user.attributes.phone_number);
-        setParentId(userID);
-        // fetchDataFromStorage(userID);
-        fetchInfoFromAPI(driverID);
-      } catch (error) {
-        console.log('Error fetching user data:', error);
-      }
-    };
      const fetchData = async () => {
         try {
-          await fetchUserData();
+          await fetchInfoFromAPI(parent_id);
         } catch (error) {
           console.log('Error fetching data:', error);
         }
@@ -362,7 +343,7 @@ const handleChange = (field, value) => {
             <ActivityIndicator size="small" color="#2196F3" />
           ) : (
       <>
-        <Text style={styles.textField}>Your Informations</Text>
+        <Text style={styles.textField}>Please enter your information here</Text>
         <Text style={styles.label}>Name</Text>
         {formData.errors.name && <Text style={styles.error}>{formData.errors.name}</Text>}
         <TextInput
@@ -370,7 +351,6 @@ const handleChange = (field, value) => {
           onChangeText={(value) => handleChange('name', value)}
           value={formData.name}
           placeholder="Enter Your name"
-          editable={false}
         />
         <Text style={styles.label}>Email</Text>
         <TextInput
@@ -378,24 +358,17 @@ const handleChange = (field, value) => {
           onChangeText={(value) => handleChange('email', value)}
           value={formData.email}
           placeholder="Enter Your Email"
-          editable={false}
         />
-        <Text style={styles.label}>Phone</Text>
-        <TextInput
-          style={styles.input}
-          onChangeText={(value) => handleChange('email', value)}
-          value={formData.email}
-          placeholder="Phone"
-          editable={false}
-        />
-        <Text style={styles.label}>Car</Text>
+        <Text style={styles.label}>Zone</Text>
+        {formData.errors.zone && <Text style={styles.error}>{formData.errors.zone}</Text>}
+        <Dropdown data= {ZoneData} label="zone" handleValueChange={handleChange} myValue={formData.zone}/>
+        <Text style={styles.label}> Quater:{quarterZone} </Text>
         {formData.errors.quarter && <Text style={styles.error}>{formData.errors.quarter}</Text>}
         <TextInput
           style={styles.input}
           onChangeText={(value) => handleChange('quarter', value)}
           value={formData.quarter}
           placeholder="Ex: Andem, derrière pharmacie"
-          editable={false}
         />
 
       {showOtherBtn ? (
@@ -448,6 +421,9 @@ const style = StyleSheet.create({
 });
 
 const styles = StyleSheet.create({
+    boldText: {
+    fontWeight: 'bold',
+  },
    containerContinue: {
     flexDirection: 'row',
   },
@@ -496,11 +472,6 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     marginBottom: 10,
     paddingHorizontal: 10,
-    backgroundColor: '#f2f2f2',
-    color: '#888',
-    padding: 10,
-    borderRadius: 4,
-    fontSize: 16,
   },
   imageContainer:{
     display: 'flex',
@@ -522,4 +493,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default DriverSCreen;
+export default Parents;

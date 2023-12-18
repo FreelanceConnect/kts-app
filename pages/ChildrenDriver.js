@@ -14,7 +14,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 import MyAppLogo from '../components/Logo';
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { Amplify, API } from "aws-amplify";
 import { useNavigation } from "@react-navigation/native";
 import Modal from "../components/MyModal";
@@ -22,10 +22,10 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import StickyFooter from '../components/StickyFooter';
 import Dropdown from '../components/Dropdown';
-import * as Notifications from 'expo-notifications';
+import FilterComponent from '../components/Filter';
 
 function StudentForm({ route }) {
-  const { parent_id, parentName, parentQuarter, parentZone} = route.params;
+  const { driver_id, parentName, parentQuarter, parentZone} = route.params;
   const navigation = useNavigation();
   const apiName = "ktsAPI";
   const [showForm, setShowForm] = useState(true);
@@ -55,6 +55,14 @@ function StudentForm({ route }) {
       schoolOffTimeFriday: "",
     },
   });
+
+  const [activeFilter, setActiveFilter] = useState('All');
+  const filters = ['All', 'Assigned to You', 'Others'];
+
+  const handleFilterSelect = (filter) => {
+    setActiveFilter(filter);
+    // Perform filtering logic based on the selected filter
+  };
 
   const transportPlanData = [
     { label: 'Both Ways', value: '1' },
@@ -105,7 +113,7 @@ function StudentForm({ route }) {
 
     // Go back one screen
     const gotocars = () => {
-      navigation.navigate('DriverInfo', {parent_id: parent_id} ) // or navigation.pop();
+      navigation.navigate('Your Messages', {driver_id: driver_id} ) // or navigation.pop();
     };
      
 
@@ -114,42 +122,6 @@ function StudentForm({ route }) {
       setShowOtherSchool(true);
     } 
   }, [formData]);
-
-    const handleNotificationOnChidren = (notification) => {
-     console.log(notification.request.content.data);
-     const id = notification.request.content.data.id.S;
-     const modified = notification.request.content.data.modified;
-     const modifiedValue = notification.request.content.data.modifiedValue.S;
-     console.log("modified field", modified);
-     console.log("modified value", modifiedValue);
-         setStudents((prevStudents) =>
-      prevStudents.map((student) =>
-        student.student_id === id ? { ...student, [modified]: modifiedValue } : student
-      )
-    );
-
-    }
-
-  const [notification, setNotification] = useState(false);
-  const notificationListener = useRef();
-  const responseListener = useRef();
-
-  useEffect(() => {
-
-    notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
-      setNotification(notification);
-      handleNotificationOnChidren(notification)
-    });
-
-    responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
-      console.log(response);
-    });
-
-    return () => {
-      Notifications.removeNotificationSubscription(notificationListener.current);
-      Notifications.removeNotificationSubscription(responseListener.current);
-    };
-  }, []);
 
 
   const handleInputChange = (key, value) => {
@@ -328,11 +300,6 @@ function StudentForm({ route }) {
           const data = response.data;
           setIsLoading(false);
           const students = data.map((student) => {
-            const myparent_id = student.parent_id;
-            if (parent_id===myparent_id) {
-              setShowForm(false);
-              setShowNext(true);
-            }
 
            const currentTime = new Date().getHours(); // Get the current hour
             if (currentTime < 12) {
@@ -386,6 +353,7 @@ function StudentForm({ route }) {
           
           });
           setStudents(students);
+          setFilteredData(students);
 
         })
         .catch((error) => {
@@ -477,17 +445,56 @@ const dynamicStyle = {
   backgroundColor: btnText === "Add Another Child" ? "#2196F3" : "#ff1a1a",
 };
 
+
+  //Search by name logics
+  const [searchText, setSearchText] = useState('');
+  const [filteredData, setFilteredData] = useState([]);
+
+  const handleSearch = (text) => {
+    setSearchText(text);
+  };
+
+  useEffect(() => {
+    const filtered = students.filter((item) =>
+      item.student.toLowerCase().includes(searchText.toLowerCase())
+     );
+    setFilteredData(filtered);
+    console.log("filtering");
+  }, [searchText]);
+
+  const handleKeyPress = (event) => {
+  const { nativeEvent } = event;
+
+  if (nativeEvent.key === 'Backspace') {
+    const updatedText = searchText.slice(0, -1);
+    setSearchText(updatedText);
+    console.log("here is searchtext",updatedText);
+  }
+};
+  //End Search by name logics
+
   return (
     <>
     <ScrollView>
       <View style={styles.container}>
-      <MyAppLogo />
 {isLoading ? (
   <ActivityIndicator size="large" color="#2196F3" />
 ) : (
   <>
-    {students.map((student, index) => {
-      if (student.parent_id === parent_id && !showForm) {
+     <View>
+      <FilterComponent
+        filters={filters}
+        activeFilter={activeFilter}
+        onSelectFilter={handleFilterSelect}
+      />
+       <TextInput
+        style={styles.inputSearch}
+        placeholder="Search by name"
+        onChangeText={handleSearch}
+        onKeyPress={handleKeyPress}
+       />
+    </View>
+    {filteredData.map((student, index) => {
         const studentTime = student.schoolOffTime;
         const currentDate = new Date();
         const dayOfWeek = currentDate.getDay();
@@ -511,7 +518,7 @@ const dynamicStyle = {
 
         const schoolClosingTime = schoolOffTimeData.find(item => item.value === ComputedSchoolOffTime)?.label || 'Not Specified';
         return (
-          <View key={student.student_id}>
+          <View key={index}>
             <View style={styles.cardContainer}>
                 <TouchableOpacity>
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', borderWidth: 1, borderColor: '#2196F3', padding: 10, margin: 5, borderRadius: 5, }}>
@@ -519,20 +526,6 @@ const dynamicStyle = {
                         <Text style={{ fontWeight: 'bold' }}>Name:</Text> {student.student}
                       </Text>
                       <View style={{ marginLeft: -10 }}>
-                        <Modal
-                          modalVisible={modalVisible}
-                          setModalVisible={setModalVisible}
-                          name={student.student}
-                          TransportPlan={transportPlan}
-                          Class={student.class}
-                          School={schoolName}
-                          EndTime={schoolClosingTime}
-                          transportPlanData={transportPlanData}
-                          SchoolData={SchoolData}
-                          schoolOffTimeData={schoolOffTimeData}
-                          handleInputChange={handleInputChange}
-                          isName={true}
-                        />
 
                       </View>
                     </View>
@@ -553,21 +546,6 @@ const dynamicStyle = {
 
                     </Text>
                       <View style={{ marginLeft: 10 }}>
-                        <Modal
-                          modalVisible={modalVisible}
-                          setModalVisible={setModalVisible}
-                          name={student.student}
-                          TransportPlan={transportPlan}
-                          Class={student.class}
-                          School={schoolName}
-                          EndTime={schoolClosingTime}
-                          transportPlanData={transportPlanData}
-                          SchoolData={SchoolData}
-                          schoolOffTimeData={schoolOffTimeData}
-                          handleInputChange={handleInputChange}
-                          isTransportPlan={true}
-                          isClass={true}
-                        />
                       </View>
                     </View>
                   </TouchableOpacity>
@@ -588,175 +566,19 @@ const dynamicStyle = {
                       </Text>
                   </View>
                       <View>
-                        <Modal
-                          modalVisible={modalVisible}
-                          setModalVisible={setModalVisible}
-                          name={student.student}
-                          TransportPlan={transportPlan}
-                          Class={student.class}
-                          School={schoolName}
-                          EndTime={schoolClosingTime}
-                          transportPlanData={transportPlanData}
-                          SchoolData={SchoolData}
-                          schoolOffTimeData={schoolOffTimeData}
-                          handleInputChange={handleInputChange}
-                          isSchool={true}
-                          isEndTime={true}
-                        />
                       </View>
                     </View>
                     </TouchableOpacity>
 
                       <View>
                   <View>
-
-                    <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between', borderWidth: 0.3, borderColor: '#000', padding: 10, margin: 5, borderRadius: 5 }}>
-                        {(student.driver.name==="") ? (
-                          <View>
-                          <Text style={styles.waitingText}>Please Wait for the admin to assign drivers to this child</Text>
-                          </View>
-                        ) : (
-                          <>
-                            <View>
-                              <Text style={styles.driverName}>Name: {student.driver.name}</Text>
-                              <Text style={styles.driverPhone}>Phone: {student.driver.phoneNumber}</Text>
-                              <Text style={styles.driverCar}>Car: {student.driver.carImmatriculation}</Text>
-                              <Text style={styles.driverRating}>Rating: {student.driver.rating} stars</Text>
-                              <Text style={styles.driverFeedback}>Feedback: {student.driver.feedback}</Text>
-                            </View>
-                            <View style={styles.driverPicture}>
-                               <Image source={{ uri: student.driver.picture }} style={{ width: 100, height: 120, marginTop: 10, marginTop: -2 }} resizeMode="contain" />
-                            </View>
-                          </>
-                        )}
-                    </View>
                   </View>
                 </View>
 
             </View>
           </View>
         );
-      }
     })}
-    {showForm && (
-      <>
-        <Text style={styles.label}>Name of child</Text>
-        {formData.errors.nameError && (
-          <Text style={styles.error}>{formData.errors.nameError}</Text>
-        )}
-        <TextInput
-          style={styles.input}
-          value={formData.name}
-          onChangeText={(text) => handleInputChange("name", text)}
-          placeholder="Name"
-        />
-
-        <Text style={styles.label}>Class</Text>
-        {formData.errors.classError && (
-          <Text style={styles.error}>{formData.errors.classError}</Text>
-        )}
-        <TextInput
-          style={styles.input}
-          value={formData.class}
-          onChangeText={(text) => handleInputChange("class", text)}
-          placeholder="Class"
-        />
-
-        <Text style={styles.label}>Transport Plan</Text>
-        {formData.errors.transportPlanError && (
-          <Text style={styles.error}>
-            {formData.errors.transportPlanError}
-          </Text>
-        )}
-        <Dropdown data= {transportPlanData} label="transportPlan" handleValueChange={handleInputChange}/>
-
-
-        <Text style={styles.label}>School</Text>
-        {formData.errors.schoolError && (
-          <Text style={styles.error}>{formData.errors.schoolError}</Text>
-        )}
-        <Dropdown data= {SchoolData} label="school" handleValueChange={handleInputChange}/>
-      { otherSchool && 
-      (<>
-      <Text style={styles.label}>If other, Enter the School</Text>
-      <TextInput
-          style={styles.input}
-          value={formData.school}
-          onChangeText={(text) => handleInputChange("school", text)}
-          placeholder="Ex: Canadian School"
-        />
-        </>
-        ) }
-
-        <View>
-         <Text style={styles.label}>School Closing Time (Regular Days)</Text>
-        {formData.errors.schoolOffTimeError && (
-          <Text style={styles.error}>{formData.errors.schoolOffTimeError}</Text>
-        )}
-         <Dropdown data= {schoolOffTimeData} label="schoolOffTime" handleValueChange={handleInputChange}/>
-        </View>
-
-        <View>
-         <Text style={styles.label}>School Closing Time (Wednesday)</Text>
-        {formData.errors.schoolOffTimeErrorWednesday && (
-          <Text style={styles.error}>{formData.errors.schoolOffTimeErrorWednesday}</Text>
-        )}
-         <Dropdown data= {schoolOffTimeData} label="schoolOffTimeWednesday" handleValueChange={handleInputChange}/>
-        </View>
-
-        <View>
-         <Text style={styles.label}>School Closing Time (Friday)</Text>
-        {formData.errors.schoolOffTimeErrorFriday && (
-          <Text style={styles.error}>{formData.errors.schoolOffTimeErrorFriday}</Text>
-        )}
-         <Dropdown data= {schoolOffTimeData} label="schoolOffTimeFriday" handleValueChange={handleInputChange}/>
-        </View>
-
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={[styles.button, { backgroundColor: "#2196F3" }]}
-            onPress={handleAddStudent}
-            disabled={isAddingChild} // Disable the button while adding child
-          >
-            {isAddingChild ? (
-              <ActivityIndicator color="#ffffff" /> // Show loading indicator while adding child
-            ) : (
-              <Text style={[styles.textStyle, { backgroundColor: "#2196F3" }]}>
-                Add Child
-              </Text>
-            )}
-          </TouchableOpacity>
-        </View>
-      </>
-    )}
-            {shownext ? (
-          <View style={styles.containerContinue}>
-            <View style={styles.element1}>
-              <TouchableOpacity
-                style={[styles.button, dynamicStyle]}
-                onPress={toggleForm}
-              >
-                <Text
-                  style={[styles.textStyle, dynamicStyle]}
-                >
-                  {btnText}
-                </Text>
-              </TouchableOpacity>
-            </View>
-            <View style={styles.element2}>
-              <TouchableOpacity
-                style={[styles.button, { backgroundColor: "#008000" }]}
-                onPress={() => navigation.navigate('DriverInfo', {parent_id: parent_id} )}
-              >
-                <Text
-                  style={[styles.textStyle, { backgroundColor: "#008000" }]}
-                >
-                  NEXT
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        ) : null}
   </>
 )}
 
@@ -768,8 +590,17 @@ const dynamicStyle = {
 }
 
 const styles = StyleSheet.create({
+    inputSearch: {
+    height: 40,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    marginBottom: 16,
+    marginTop: 16,
+  },
 
-  driverPicture: {
+    driverPicture: {
     marginTop: -5,
     width: 100,
     height: 100,

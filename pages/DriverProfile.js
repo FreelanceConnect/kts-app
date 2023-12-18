@@ -1,5 +1,5 @@
 import React, {useState, useEffect, useRef} from 'react';
-import { Button, StyleSheet, Text, View, TextInput, Image, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { Button, StyleSheet, Text, View, TextInput, Image, ScrollView, TouchableOpacity, ActivityIndicator, Dimensions } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
@@ -50,15 +50,6 @@ async function sendPushNotification(expoPushToken) {
   });
 }
 
-  const ZoneData = [
-    { label: 'Bonamoussadi, Kotto,Mbangue,Sable, Denver,Makepe,Lendi', value: 'Zone 1' },
-    { label: 'Rond-Point, Bonantone, Bessengue,Akwa-Nord, Deido, Bepanda,Ecole Publique, Ndogbong,Carrefour Agip,Benedict, Site Cicam,Ange Raphael, Bepanda', value: 'Zone 2' },
-    { label: 'Cite des Palmiers, Beedi, Hopital General,PK8,PK9,PK10', value: 'Zone 3' },
-    { label: 'Logbessou, Logpom,PK11,PK12,PK13,PK14,PK15,PK16,PK17', value: '4' },
-    { label: 'Akwa,Bali,Bonapriso,Bonanjo, Bata Congo,Mboppi, Ndokoti,St.Michel ,Aeroport', value: 'Zone 5' },
-    { label: 'Bonaberi , Mabanda , Ndobo,Bonassama,Bekoko', value: 'Zone 6' },
-    { label: 'Japoma,Nyalla, Village', value: 'Zone 7' },
-  ];
 
 async function registerForPushNotificationsAsync() {
   let token;
@@ -96,8 +87,7 @@ async function registerForPushNotificationsAsync() {
 
 
 
-function Parents() {
-
+function DriverSCreen({driverID}) {
   const [expoPushToken, setExpoPushToken] = useState('');
   const [notification, setNotification] = useState(false);
   const notificationListener = useRef();
@@ -141,8 +131,9 @@ function Parents() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    quarter: '',
+    car: '',
     zone: '',
+    picture: '',
     phone: phone,
     parent_id: parent_id,
     errors: {
@@ -153,104 +144,19 @@ function Parents() {
   },
   });
 
-const handleChange = (field, value) => {
-  setFormData((prevState) => ({
-    ...prevState,
-    [field]: value,
-    errors: {
-      ...prevState.errors,
-      [field]: '', // Clear the corresponding error state
-    },
-  }));
-};
-
   const gotochildren = () => {
-      navigation.navigate('children', {parent_id: parent_id} )
+      navigation.navigate('Your Students', {driver_id: driverID} )
     };
 
     // Go back one screen
     const gotocars = () => {
-      navigation.navigate('DriverInfo', {parent_id: parent_id} ) // or navigation.pop();
+      navigation.navigate('Your Messages', {driver_id: driverID}) // or navigation.pop();
     };
-
-   const handleSubmit = () => {
-
-    let isValid = true;
-    const errors = {};
-
-      // Validate name field
-    if (formData.name.trim() === '') {
-        isValid = false;
-        errors.name = 'Name is required';
-    }
-    if (formData.quarter.trim() === '') {
-        isValid = false;
-        errors.quarter = 'Quarter is required';
-    }
-   if (formData.zone.trim() === '') {
-        isValid = false;
-        errors.zone = 'Zone is required';
-    }
-    // Update the state with validation errors
-    setFormData((prevState) => ({
-      ...prevState,
-      errors,
-    }));
-    
-
-    if (isValid) {
-    const apiName = 'ktsAPI'; // replace this with your api name.
-    const path = `/parents`;
-    const {name, email, quarter, zone} = formData;
-    const myInit = {
-      body: {
-        parent_id: parent_id,
-        numberOfKids: 0,
-        ExponentPushToken: expoPushToken,
-        address: {
-          quarter: quarter,
-          zone: zone,
-        },
-        children: {},
-        phone: phone,
-        AO: 0,
-        TA: 0,
-        AP: 0,
-        CustomerName: name,
-        email: email,
-      },
-      headers: {} // OPTIONAL
-    };
-    setIsAddingParent(true);
-    API.post(apiName, path, myInit)
-      .then((response) => {
-        // Add your code here
-
-          AsyncStorage.setItem(parent_id, JSON.stringify(myInit.body))
-          .then(() => {
-            console.log('User data saved successfully');
-            setShowOtherBtn(true);
-            setIsAddingParent(false);
-          navigation.navigate('children', {parentName: formData.name, parent_id: parent_id, 
-            parentZone: formData.zone, parentQuarter: formData.quarter} );
-          })
-          .catch((error) => {
-             setIsAddingParent(false);
-            console.log('Error saving user data:', error);
-          });
-      })
-      .catch((error) => {
-        setIsAddingParent(false);
-        console.log(error.response);
-      });
-
-    }
-  };
 
   useEffect(() => {
-         const fetchInfoFromAPI = (userId) => {
+         const fetchInfoFromAPI = () => {
           const apiName = 'ktsAPI';
-          const path = `/parents/${userId}`;
+          const path = `/drivers/${driverID}`;
           const myInit = {
              headers: { 
              // Allow POST method
@@ -263,15 +169,15 @@ const handleChange = (field, value) => {
           const data = response.data;
           setIsLoading(false);
           // Check if user exist in our Dynamo DB
-          if (data.parent_id) {
-            console.log("here is our zone", data.address.zone)
+          if (data.driver_id) {
 
             setFormData((prevFormData) => ({
             ...prevFormData,
-            name: data.CustomerName,
+            name: data.driverName,
             email: data.email,
-            quarter: data.address.quarter,
-            zone: data.address.zone,
+            phone: data.phone,
+            car: data.car,
+            picture: data.picture,
           }));
 
           AsyncStorage.setItem(userId, JSON.stringify(data))
@@ -321,105 +227,45 @@ const handleChange = (field, value) => {
       }
     };
 
-
-    const fetchUserData = async () => {
-      try {
-        const user = await Auth.currentAuthenticatedUser();
-        setPhone(user.attributes.phone_number);
-        const cleanedNumber = user.attributes.phone_number.replace(/\D/g, '');
-        const firstPart = cleanedNumber.substring(0, 3);
-        const remainingPart = cleanedNumber.substring(3);
-        const userID = `KTS-P-${remainingPart}`;
-        const driverID = `KTS-D-${remainingPart}`;
-        setPhone(user.attributes.phone_number);
-        setParentId(userID);
-        fetchDataFromStorage(userID);
-        // fetchInfoFromAPI(userID);
-      } catch (error) {
-        console.log('Error fetching user data:', error);
-      }
-    };
      const fetchData = async () => {
         try {
-          await fetchUserData();
+          await fetchInfoFromAPI();
         } catch (error) {
           console.log('Error fetching data:', error);
         }
       };
 
       fetchData();
-
-    // fetchInfoFromAPI();
   }, []);
+  const windowHeight = Dimensions.get('window').height;
 
   return (
   <>
     <ScrollView>
-    <View style={styles.container}>
+    <View style={[styles.container, { minHeight: windowHeight }]}>
     <MyAppLogo />
       {isLoading ? (
             <ActivityIndicator size="small" color="#2196F3" />
           ) : (
       <>
-        <Text style={styles.textField}>Please enter your information here</Text>
-        <Text style={styles.label}>Name</Text>
-        {formData.errors.name && <Text style={styles.error}>{formData.errors.name}</Text>}
-        <TextInput
-          style={styles.input}
-          onChangeText={(value) => handleChange('name', value)}
-          value={formData.name}
-          placeholder="Enter Your name"
-        />
-        <Text style={styles.label}>Email</Text>
-        <TextInput
-          style={styles.input}
-          onChangeText={(value) => handleChange('email', value)}
-          value={formData.email}
-          placeholder="Enter Your Email"
-        />
-        <Text style={styles.label}>Zone</Text>
-        {formData.errors.zone && <Text style={styles.error}>{formData.errors.zone}</Text>}
-        <Dropdown data= {ZoneData} label="zone" handleValueChange={handleChange} myValue={formData.zone}/>
-        <Text style={styles.label}>Quarter</Text>
-        {formData.errors.quarter && <Text style={styles.error}>{formData.errors.quarter}</Text>}
-        <TextInput
-          style={styles.input}
-          onChangeText={(value) => handleChange('quarter', value)}
-          value={formData.quarter}
-          placeholder="Ex: Andem, derrière pharmacie"
-        />
-
-      {showOtherBtn ? (
-        <View style={styles.containerContinue}>
-          <View style={styles.element1}>
-            <TouchableOpacity style={[styles.button, { backgroundColor: '#2196F3' }]}>
-              <Text style={[styles.textStyle, { backgroundColor: '#2196F3' }]} >Update</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.element2}>
-            <TouchableOpacity style={[styles.button, { backgroundColor: '#008000' }]} onPress={() => navigation.navigate('children', {parentName: formData.name, parent_id: parent_id, 
-            parentZone: formData.zone, parentQuarter: formData.quarter})}>
-              <Text style={[styles.textStyle, { backgroundColor: '#008000' }]} >NEXT</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      ) : (
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={[styles.button, { backgroundColor: "#2196F3" }]}
-            onPress={handleSubmit}
-            disabled={isAddingParent} // Disable the button while adding child
-          >
-            {isAddingParent ? (
-              <ActivityIndicator color="#ffffff" /> // Show loading indicator while adding child
-            ) : (
-              <Text style={[styles.textStyle, { backgroundColor: "#2196F3" }]}>
-                Submit
-              </Text>
-            )}
-          </TouchableOpacity>
-        </View>
-      )}
+          <>
+           <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between', borderWidth: 0.3, borderColor: '#000', padding: 10, margin: 5, borderRadius: 5 }}>
+             <View>
+                    <Text style={styles.driverName}><Text style={styles.boldText}>Name:</Text> {formData.name} </Text>
+                    <Text style={styles.driverPhone}><Text style={styles.boldText}>Phone:</Text> {formData.phone} </Text>
+                    <Text style={styles.driverCar}><Text style={styles.boldText}>Car:</Text> {formData.car}</Text>
+                   <Text style={styles.driverFeedback}>
+                    <Text style={styles.boldText}>Rating:</Text> 5 stars
+                  </Text>
+                  <Text style={styles.driverFeedback}>
+                    <Text style={styles.boldText}>Feedback:</Text> Great driver
+                  </Text>
+                  </View>
+                  <View style={styles.driverPicture}>
+                    <Image source={{ uri: formData.picture }} style={{ width: 100, height: 120, marginTop: 10, marginTop: -2 }} resizeMode="contain" />
+                  </View>
+                </View>
+                </>
 
         <View style={style.container}>
           <SignOutButton />
@@ -439,6 +285,24 @@ const style = StyleSheet.create({
 });
 
 const styles = StyleSheet.create({
+    boldText: {
+    fontWeight: 'bold',
+  },
+      driverPicture: {
+    marginTop: -5,
+    width: 100,
+    height: 100,
+    borderRadius: 75,
+    overflow: 'hidden',
+  },
+  picture: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+    marginTop: -150,
+
+  },
    containerContinue: {
     flexDirection: 'row',
   },
@@ -487,6 +351,11 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     marginBottom: 10,
     paddingHorizontal: 10,
+    backgroundColor: '#f2f2f2',
+    color: '#888',
+    padding: 10,
+    borderRadius: 4,
+    fontSize: 16,
   },
   imageContainer:{
     display: 'flex',
@@ -508,4 +377,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Parents;
+export default DriverSCreen;

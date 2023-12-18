@@ -47,7 +47,7 @@ const StickyFooter = ({ title, profile, children, cars, screen }) => {
       <TouchableOpacity onPress={cars}>
       <View style={[{ alignItems: 'center' }, driverFooterStyle]}>
        <MaterialCommunityIcons name="bus-school" size={25} color="black" />
-        <Text style={{ marginTop: 5 }}>Cars</Text>
+        <Text style={{ marginTop: 5 }}>Messages</Text>
       </View>
       </TouchableOpacity>
     </View>

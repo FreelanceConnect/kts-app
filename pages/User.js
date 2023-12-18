@@ -5,14 +5,14 @@ import { Amplify, API, Auth } from 'aws-amplify';
 import { Picker } from '@react-native-picker/picker';
 import { useAppContext } from '../src/AppContext';
 import { useNavigation } from "@react-navigation/native";
-import DriverScreen from './DriverScreen';
+import DriverProfile from './DriverProfile';
 import {
   Authenticator,
   useAuthenticator,
   useTheme,
 } from '@aws-amplify/ui-react-native';
 
-import Parents from './Parents'
+import ParentsProfile from './ParentsProfile'
 import MyAppLogo from '../components/Logo';
 
 function User() {
@@ -21,6 +21,7 @@ function User() {
   const [parentId, setParentId] = useState();
   const [isLoading, setIsLoading] = useState(true);
   const [isDriver, setIsDriver] = useState(false);
+  const  [driverID, setDriverID]= useState();
   const navigation = useNavigation();
 
 
@@ -36,37 +37,17 @@ function User() {
         const driverID = `KTS-D-${remainingPart}`;
         setPhone(user.attributes.phone_number);
         setParentId(parenId);
+        setDriverID(driverID);
 
          
         await CheckIfDriver(driverID);
-
-        setIsLoading(false);
       } catch (error) {
         console.log('Error fetching user data:', error);
         setIsLoading(false);
       }
     };
-    const checkAuth = () => {
-      return new Promise(async (resolve, reject) => {
-        try {
-          const user = await Auth.currentAuthenticatedUser();
-          resolve(user);
-        } catch (error) {
-          reject(error);
-        }
-      });
-    };
 
-    checkAuth()
-      .then((user) => {
-        // Handle successful authentication
-        fetchUserData();
-      })
-      .catch((error) => {
-        // Handle authentication error
-        setIsLoading(false)
-        // console.error('Authentication error:', error);
-      });
+    fetchUserData();
     
   }, []);
 
@@ -98,13 +79,19 @@ function User() {
           API.get(apiName, path, myInit)
           .then((response) => {
           const data = response.data;
+          console.log(data);
           // Check if user exist in our Dynamo DB
           if (data.driver_id) {
             setIsDriver(true);
+            setIsLoading(false);
+          }
+          else {
+             setIsLoading(false);
           }
           })
           .catch((error) => {
             console.log(error.response);
+          setIsLoading(false);
           });
       }
 
@@ -112,20 +99,18 @@ function User() {
     tokens: { colors },
   } = useTheme();
 
-  if (isLoading) {
-    return (
-      <View style={[styles.container, { justifyContent: 'center' }]}>
-        <ActivityIndicator size="large" color="#2196F3" />
-      </View>
-    );
-  }
+
 
 return (
 
-
+  isLoading ? 
+      <View style={[styles.container, { justifyContent: 'center' }]}>
+        <ActivityIndicator size="large" color="#2196F3" />
+      </View> :
    <View >
-     { isDriver ? <DriverScreen userId={parentId} phone={phone} /> : <Parents userId={parentId} phone={phone} /> }
+     { isDriver ? <DriverProfile driverID={driverID} phone={phone} /> : <ParentsProfile parent_id={parentId} phone={phone} /> }
     </View >
+
   );
 }
 

@@ -5,7 +5,6 @@ import { Amplify, API, Auth } from 'aws-amplify';
 import { Picker } from '@react-native-picker/picker';
 import { useAppContext } from '../src/AppContext';
 import { useNavigation } from "@react-navigation/native";
-import DriverScreen from './DriverScreen';
 import {
   Authenticator,
   useAuthenticator,
@@ -16,113 +15,10 @@ import User from './User';
 import MyAppLogo from '../components/Logo';
 
 function App() {
-  const [phone, setPhone] = useState('');
-  const [selectedLanguage, setSelectedLanguage] = useState();
-  const [parentId, setParentId] = useState();
-  const [isLoading, setIsLoading] = useState(true);
-  const [isDriver, setIsDriver] = useState(false);
-  const navigation = useNavigation();
-
-
-
-
-  const { data, setData } = useAppContext();
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const user = await Auth.currentAuthenticatedUser();
-        setPhone(user.attributes.phone_number);
-        const cleanedNumber = user.attributes.phone_number.replace(/\D/g, '');
-        const firstPart = cleanedNumber.substring(0, 3);
-        const remainingPart = cleanedNumber.substring(3);
-        const parenId = `KTS-P-${remainingPart}`;
-        const driverID = `KTS-D-${remainingPart}`;
-        setPhone(user.attributes.phone_number);
-        setParentId(parenId);
-
-         
-        await CheckIfDriver(driverID);
-
-        setIsLoading(false);
-      } catch (error) {
-        console.log('Error fetching user data:', error);
-        setIsLoading(false);
-      }
-    };
-    const checkAuth = () => {
-      return new Promise(async (resolve, reject) => {
-        try {
-          const user = await Auth.currentAuthenticatedUser();
-          resolve(user);
-        } catch (error) {
-          reject(error);
-        }
-      });
-    };
-
-    checkAuth()
-      .then((user) => {
-        // Handle successful authentication
-        fetchUserData();
-      })
-      .catch((error) => {
-        // Handle authentication error
-        setIsLoading(false)
-        // console.error('Authentication error:', error);
-      });
-    
-  }, []);
-
-    const retrieveUserID = async () => {
-    try {
-      const value = await AsyncStorage.getItem(parent_id);
-      if (value !== null) {
-        // Value exists, do something with it
-        console.log(value);
-      } else {
-        // Value does not exist
-        console.log('Value does not exist');
-      }
-    } catch (error) {
-      // Error retrieving data
-      console.log(error);
-    }
-  };
-
-      const CheckIfDriver = async(driverID)=> {
-          const apiName = 'ktsAPI';
-          const path = `/drivers/${driverID}`;
-          const myInit = {
-             headers: { 
-             // Allow POST method
-              },
-            response: true,
-          };
-          API.get(apiName, path, myInit)
-          .then((response) => {
-          const data = response.data;
-          // Check if user exist in our Dynamo DB
-          if (data.driver_id) {
-            setIsDriver(true);
-          }
-          })
-          .catch((error) => {
-            console.log(error.response);
-          });
-      }
 
   const {
     tokens: { colors },
   } = useTheme();
-
-  if (isLoading) {
-    return (
-      <View style={[styles.container, { justifyContent: 'center' }]}>
-        <ActivityIndicator size="large" color="#2196F3" />
-      </View>
-    );
-  }
 
   return (
     <Authenticator.Provider>
