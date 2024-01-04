@@ -8,6 +8,7 @@ import {
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
+  AppState,
 } from "react-native";
 
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -25,8 +26,9 @@ import Dropdown from '../components/Dropdown';
 import * as Notifications from 'expo-notifications';
 
 function StudentForm({ route }) {
-  const { parent_id, parentName, parentQuarter, parentZone} = route.params;
+  const { parent_id, parentName, parentQuarter, parentZone, ParentPushToken} = route.params;
   const navigation = useNavigation();
+  const fallbackSource = require("../assets/placeholder.png")
   const apiName = "ktsAPI";
   const [showForm, setShowForm] = useState(true);
   const [shownext, setShowNext] = useState(false);
@@ -99,6 +101,7 @@ function StudentForm({ route }) {
     { label: 'Week-end', value: '14' },
   ];
 
+
     const gotoprofile = () => {
        navigation.navigate('Welcome to KTS' );
     };
@@ -117,11 +120,13 @@ function StudentForm({ route }) {
 
     const handleNotificationOnChidren = (notification) => {
      console.log(notification.request.content.data);
+
      const id = notification.request.content.data.id.S;
      const modified = notification.request.content.data.modified;
      const modifiedValue = notification.request.content.data.modifiedValue.S;
      console.log("modified field", modified);
      console.log("modified value", modifiedValue);
+     console.log("here is notifcation", notification);
          setStudents((prevStudents) =>
       prevStudents.map((student) =>
         student.student_id === id ? { ...student, [modified]: modifiedValue } : student
@@ -148,6 +153,28 @@ function StudentForm({ route }) {
     return () => {
       Notifications.removeNotificationSubscription(notificationListener.current);
       Notifications.removeNotificationSubscription(responseListener.current);
+    };
+  }, []);
+  const appState = useRef(AppState.currentState);
+  const [appStateVisible, setAppStateVisible] = useState(appState.current);
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', nextAppState => {
+      if (
+        appState.current.match(/inactive|background/) &&
+        nextAppState === 'active'
+      ) {
+        console.log(notification);
+        console.log('App has come to the foreground!');
+      }
+
+      appState.current = nextAppState;
+      setAppStateVisible(appState.current);
+      console.log('AppState', appState.current);
+    });
+
+    return () => {
+      subscription.remove();
     };
   }, []);
 
@@ -218,6 +245,7 @@ function StudentForm({ route }) {
           transportPlan: transportPlan,
           school: school,
           class: studentClass,
+          ParentPushToken: ParentPushToken,
           address: {
             quarter: parentQuarter,
             zone: parentZone,
@@ -481,12 +509,16 @@ const dynamicStyle = {
     <>
     <ScrollView>
       <View style={styles.container}>
+          <View style={styles.container}>
+      <Text>Current state is: {appStateVisible}</Text>
+    </View>
       <MyAppLogo />
 {isLoading ? (
   <ActivityIndicator size="large" color="#2196F3" />
 ) : (
   <>
     {students.map((student, index) => {
+      const imarUrl = student.driver.picture;
       if (student.parent_id === parent_id && !showForm) {
         const studentTime = student.schoolOffTime;
         const currentDate = new Date();
@@ -625,7 +657,8 @@ const dynamicStyle = {
                               <Text style={styles.driverFeedback}>Feedback: {student.driver.feedback}</Text>
                             </View>
                             <View style={styles.driverPicture}>
-                               <Image source={{ uri: student.driver.picture }} style={{ width: 100, height: 120, marginTop: 10, marginTop: -2 }} resizeMode="contain" />
+                            source={imageUrl ? { uri: imageUrl } : fallbackSource}
+                               <Image source= {imageUrl ? { uri: imageUrl } : fallbackSource} style={{ width: 100, height: 120, marginTop: 10, marginTop: -2 }} resizeMode="contain" />
                             </View>
                           </>
                         )}

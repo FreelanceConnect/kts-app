@@ -103,6 +103,7 @@ function Parents({parent_id}) {
   const notificationListener = useRef();
   const responseListener = useRef();
 
+
   useEffect(() => {
     registerForPushNotificationsAsync().then(token => setExpoPushToken(token));
 
@@ -165,7 +166,7 @@ const handleChange = (field, value) => {
 };
 
   const gotochildren = () => {
-      navigation.navigate('children', {parent_id: parent_id} )
+      navigation.navigate('children', {parent_id: parent_id, ParentPushToken: expoPushToken} )
     };
 
     // Go back one screen
@@ -226,13 +227,22 @@ const handleChange = (field, value) => {
       .then((response) => {
         // Add your code here
 
+
+          AsyncStorage.setItem("parent_id", parent_id)
+          .then(() => {
+            console.log('Parent_id data saved successfully');
+          })
+          .catch((error) => {
+            console.log('Error saving user data:', error);
+          });
+
           AsyncStorage.setItem(parent_id, JSON.stringify(myInit.body))
           .then(() => {
             console.log('User data saved successfully');
             setShowOtherBtn(true);
             setIsAddingParent(false);
           navigation.navigate('children', {parentName: formData.name, parent_id: parent_id, 
-            parentZone: formData.zone, parentQuarter: formData.quarter} );
+            parentZone: formData.zone, parentQuarter: formData.quarter, ParentPushToken: expoPushToken} );
           })
           .catch((error) => {
              setIsAddingParent(false);
@@ -274,12 +284,22 @@ const handleChange = (field, value) => {
             zone: data.address.zone,
           }));
 
+          //Save parent ID in Async storage when we get the information from API
+
+         AsyncStorage.setItem("parent_id", parent_id)
+          .then(() => {
+            console.log('Parent_id data saved successfully');
+          })
+          .catch((error) => {
+            console.log('Error saving user data:', error);
+          });
+
           AsyncStorage.setItem(userId, JSON.stringify(data))
           .then(() => {
             console.log('User data saved successfully');
             setShowOtherBtn(true);
             navigation.navigate('children', {parentName: formData.name, parent_id: userId, 
-            parentZone: formData.zone, parentQuarter: formData.quarter} );
+            parentZone: formData.zone, parentQuarter: formData.quarter, ParentPushToken: expoPushToken} );
           })
           .catch((error) => {
              setIsLoading(false);
@@ -308,8 +328,15 @@ const handleChange = (field, value) => {
             zone: data.address.zone,
         }));
           setShowOtherBtn(true);
+          AsyncStorage.setItem(parent_id)
+          .then(() => {
+            console.log('Parent_id data saved successfully');
+          })
+          .catch((error) => {
+            console.log('Error saving user data:', error);
+          });
           navigation.navigate('children', {parentName: formData.name, parent_id: parentData, 
-            parentZone: formData.zone, parentQuarter: formData.quarter} );
+            parentZone: formData.zone, parentQuarter: formData.quarter, ParentPushToken: expoPushToken} );
         }
         else {
           console.log('no user data yet');
@@ -323,26 +350,25 @@ const handleChange = (field, value) => {
 
      const fetchData = async () => {
         try {
-          await fetchInfoFromAPI(parent_id);
+          await fetchDataFromStorage(parent_id);;
         } catch (error) {
           console.log('Error fetching data:', error);
         }
       };
 
       fetchData();
-
-    // fetchInfoFromAPI();
   }, []);
 
   return (
   <>
     <ScrollView>
     <View style={styles.container}>
-    <MyAppLogo />
+
       {isLoading ? (
-            <ActivityIndicator size="small" color="#2196F3" />
+          <MyAppLogo />
           ) : (
       <>
+      <MyAppLogo />
         <Text style={styles.textField}>Please enter your information here</Text>
         <Text style={styles.label}>Name</Text>
         {formData.errors.name && <Text style={styles.error}>{formData.errors.name}</Text>}
@@ -380,7 +406,7 @@ const handleChange = (field, value) => {
           </View>
           <View style={styles.element2}>
             <TouchableOpacity style={[styles.button, { backgroundColor: '#008000' }]} onPress={() => navigation.navigate('children', {parentName: formData.name, parent_id: parent_id, 
-            parentZone: formData.zone, parentQuarter: formData.quarter})}>
+            parentZone: formData.zone, parentQuarter: formData.quarter, ParentPushToken: expoPushToken})}>
               <Text style={[styles.textStyle, { backgroundColor: '#008000' }]} >NEXT</Text>
             </TouchableOpacity>
           </View>
@@ -411,7 +437,7 @@ const handleChange = (field, value) => {
         
     </View>
     </ScrollView>
-        <StickyFooter title="" children={gotochildren} cars={gotocars} screen="parent"/>
+        {!isLoading && <StickyFooter title="" children={gotochildren} cars={gotocars} screen="parent"/>}
     </>
   );
 }
